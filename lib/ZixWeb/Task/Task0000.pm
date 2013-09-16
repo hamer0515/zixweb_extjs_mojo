@@ -68,8 +68,10 @@ sub list {
 #
 sub detail {
     my $self = shift;
+
     my $data = [];
     my $detail = {};
+    
     #id
     my $id = $self->param('id');#参数1
 
