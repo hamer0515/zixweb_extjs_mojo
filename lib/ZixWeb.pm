@@ -177,7 +177,9 @@ sub set_route {
     $r->any("/yspz/itztz")->to(namespace => "ZixWeb::VoucherEntry::Specialbills", action => 'add');
     $r->get("/specialbills/$_")->to(namespace => "ZixWeb::VoucherEntry::Specialbills", action => $_, template => "voucherentry/specialbills/$_")      for (qw/input add check_c check_custproto/);
     $r->get("/cocert/$_")->to(namespace => "ZixWeb::CocertMgr::Cocert", action => $_, template => "cocertmgr/$_")      for (qw/cocert detail detail_pz operate examresult/);  
-    $r->get("/task/shtask")->to(namespace => "ZixWeb::CocertMgr::Cocert", action => 'cocert');
+    $r->any("/task0000/$_")->to(namespace => "ZixWeb::Task::Task0000", action => $_) for (qw/list detail pass deny/);
+    $r->any("/taskpzcx/$_")->to(namespace => "ZixWeb::Task::Taskpzcx", action => $_) for (qw/list detail pass deny/);
+    $r->any("/taskmy/$_")->to(namespace => "ZixWeb::Task::Taskmy", action => $_) for (qw/list detail pass deny/);
     $r->any("/zjdz/$_")->to(namespace => "ZixWeb::ReconciliationMgr::Reconciliation", action => $_, template => "reconciliationmgr/$_")     for (qw/bfj bfjcheck checkdone gzcx/);
     
     # BookMgr
