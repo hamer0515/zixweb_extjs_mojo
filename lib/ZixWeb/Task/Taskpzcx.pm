@@ -1,40 +1,107 @@
-package ZixWeb::SourceDocMgr::Detail;
+package ZixWeb::Task::Taskpzcx;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
 use JSON::XS;
 use boolean;
 use URI::Escape;
-use Data::Dump;
-
 use constant {
-  DEBUG  => $ENV{SOURCEDOC_DEBUG} || 0 ,
+  DEBUG  => $ENV{TASK_DEBUG} || 0 ,
 };
 
 BEGIN {
     require Data::Dump if DEBUG;
 }
-#
-#模块名称:动态生成yspz详细信息
-#
-#param: ys_type 原始凭证类型
-#       id 原始凭证id
-#
-#return :hash数据集
-#
 
-sub detail{
+#
+#模块名称:凭证撤销审核任务列表
+#
+sub list {
+    my $self = shift;
+    
+    my $page = $self->param('page');
+    my $limit = $self->param('limit');
+    
+    my $id = $self->param('id');
+    
+    my $params = {};
+    for (qw/c_user from to status/) {
+        my $p = $self->param($_);
+        $p = undef if $p eq '';
+        $params->{$_} = $p;
+    }
+    
+    my $p->{condition} = '';
+    if ( $id ) {
+        $p = $self->params( { 
+                id      => $id,
+                type    => 2
+                } );
+    }
+    else {
+        $p = $self->params(
+            {
+                ts_c    => [0, $params->{from} && $self->quote($params->{from}), $params->{to} && $self->quote($params->{to}) ],
+                status  => $params->{status},
+                c_user  => $params->{c_user} && $self->uids->{$params->{c_user}},
+                type    => 2
+            }
+        );
+    }
+    
+    my $sql =
+        "select id, content,ys_type, ys_id, c_user, ts_c, status as shstatus, rownumber() over(order by id desc) as rowid from verify $p->{condition}";
+    my $data = $self->page_data( $sql, $page, $limit );
+    
+    for my $d (@{$data->{data}}){
+        my $content = decode_json delete $d->{content};
+        $d->{cause} = $content->{cause} if $content->{cause};
+        $d->{cause} = $content->{revoke_cause} if $content->{revoke_cause};
+    }
+    $data->{success} = true;
+    
+    $self->render(json => $data);
+}
 
+#
+#模块名称:凭证撤销审核任务详细
+#
+sub detail {
     my $self = shift;
     my $data = [];
     my $detail = {};
+    my $verify = {};
     $detail->{properties} = [];
+    #id
+    my $id = $self->param('id');#参数1
     
     #ys_type
-    my $ys_type = $self->param('ys_type');#参数1
+    my $ys_type = $self->param('ys_type');#参数2
 
     #ys_id
-    my $ys_id = $self->param('ys_id');#参数2
+    my $ys_id = $self->param('ys_id');#参数3
+    
+    #审核详细信息
+    my $ex_sql =
+        "select id as shid, content, status as shstatus, v_user, v_ts,type as shtype, c_user, v_ts, ts_c from verify where id=$id";
+
+    my $ex = $self->select($ex_sql)->[0];
+    $ex->{content} = decode_json $self->my_decode($ex->{content});
+    $verify->{isverify} = true;
+    $verify->{title} = $ys_type.$self->ys_type->{$ys_type}."凭证撤销审核详细信息";
+    $verify->{revoke_cause} = $ex->{content}{revoke_cause};
+    $verify->{period} = $ex->{content}{period};
+    $verify->{shid} = $ex->{shid};
+    $verify->{shstatus} = $ex->{shstatus};
+    $verify->{shtype} = $ex->{shtype};
+    $verify->{c_user} = $ex->{c_user_name};
+    $verify->{ts_c} = $ex->{ts_c};
+    $verify->{v_user} = $ex->{v_user};
+    $verify->{v_ts} = $ex->{v_ts};
+    # 从我的任务菜单进入传入readonly参数
+    $verify->{rdonly} = $self->param('rdonly');
+    
+    push @$data, $verify;
     
     #该yspz非公共字段 {zyzj_acct=>"自有资金账户"}
     my $yspz_zd = $self->dict->{types}->{'yspz_'.$ys_type};
@@ -45,7 +112,7 @@ sub detail{
     
     #flag 是否撤销
     $detail->{period} = $ys_data->{period};
-    $detail->{title} = $ys_type.$self->ys_type->{$ys_type}."详细信息";
+    $detail->{title} = $ys_type.$self->ys_type->{$ys_type}."原始凭证详细信息";
     $detail->{isdetail} = true;
     $detail->{ys_id} = $ys_id;
     $detail->{ys_type} = $ys_type;
@@ -112,7 +179,7 @@ sub detail{
         my $jbook_name=$self->dict->{book}->{$pz->{jb_id}}->[0];
         # 组成借方科目的表头部分
         $property->{key} = '借方科目';
-        $property->{value} = $jbook_name;
+        $property->{value} = $self->dict->{book}->{$pz->{jb_id}}->[1];
         push @{$fl->{j_book}}, $property;
         
         my $jbook_data = $self->select("select * from book_$jbook_name where id=".$pz->{j_id});
@@ -150,7 +217,7 @@ sub detail{
         my $dbook_name    =$self->dict->{book}->{$pz->{db_id}}->[0];
         # 组成贷方科目的表头部分
         $property->{key} = '贷方科目';
-        $property->{value} = $dbook_name;
+        $property->{value} = $self->dict->{book}->{$pz->{db_id}}->[1];
         push @{$fl->{d_book}}, $property;
         my $dbook_data = $self->select("select * from book_$dbook_name where id=".$pz->{d_id});
         $dbook_data = $dbook_data->[0];
@@ -188,4 +255,50 @@ sub detail{
     }
     $self->render(json => $data);
 }
+
+#
+#模块名称: 凭证撤销审核任务审核通过
+#
+sub pass{
+    my $self = shift;#参数1
+    my $id = $self->param('id');#参数2
+    my $result = false;
+    my $res = 1;
+    $res = $self->ua->post(
+              $self->configure->{svc_url}, encode_json {
+                data => {
+                    id => $id,
+                },
+                svc  => "verify",
+                sys  => { oper_user => $self->session->{uid} },
+            })->res->json->{status};
+    if ($res == 0){
+        $result = true;
+    }
+    $self->render(json => {success => $result});
+}
+
+#
+#模块名称: 凭证撤销审核任务审核不通过
+#
+sub deny{
+    my $self = shift;#参数1
+    my $id = $self->param('id');#参数2
+    my $result = false;
+    my $res = 1;
+    $res = $self->ua->post(
+              $self->configure->{svc_url}, encode_json {
+                data => {
+                    id => $id,
+                },
+                svc  => "refuse_verify",
+                sys  => { oper_user => $self->session->{uid} },
+            })->res->json->{status};
+    if ($res == 0){
+        $result = true;
+    }
+    $self->render(json => {success => $result});
+}
+
+
 1;

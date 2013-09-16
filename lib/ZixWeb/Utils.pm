@@ -37,7 +37,6 @@ sub _nf {
         $num   = abs($num);
         $minus = -1;
     }
-    #$num /= 100;
     $num = sprintf "%.2f", $num;
     my ( $p1, $p2 ) = split '\.', $num;
 
@@ -335,14 +334,14 @@ sub _decode_ch {
         $row->{revoke_user_name} = $self->usernames->{$row->{revoke_user}} || $row->{revoke_user};
     }
     if ( $row->{creator} ) {
-        $row->{creatr_name} = $self->usernames->{$row->{creatr}} || $row->{creatr};
+        $row->{creator_name} = $self->usernames->{$row->{creator}} || $row->{creator};
     }
     if ( $row->{c_user} ) {
         $row->{c_user_name} = $self->usernames->{$row->{c_user}} || $row->{c_user};
     }
     
     # string cut off
-    $row->{ts_revoke} =~ s/\..*$// if $row->{ts_revoke};
+    $row->{ts_revoke}  =~ s/\..*$// if $row->{ts_revoke};
     $row->{ts_c}       =~ s/\..*$// if $row->{ts_c};
     $row->{ts_u}       =~ s/\..*$// if $row->{ts_u};
     $row->{rec_upd_ts} =~ s/\..*$// if $row->{rec_upd_ts};
@@ -442,6 +441,7 @@ sub _select {
     my $sql  = shift;
     #use Data::Dump;
     my $data;
+    warn $sql;
     $sql = $self->dbh->prepare($sql);
     $sql->execute;
     while ( my $row = $sql->fetchrow_hashref ) {
