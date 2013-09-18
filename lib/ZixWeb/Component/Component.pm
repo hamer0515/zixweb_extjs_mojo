@@ -1,4 +1,4 @@
-package ZixWeb::Basic::Base;
+package ZixWeb::Component::Component;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

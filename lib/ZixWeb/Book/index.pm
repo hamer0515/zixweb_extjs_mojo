@@ -1,4 +1,4 @@
-package ZixWeb::BookMgr::index;
+package ZixWeb::Book::index;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

@@ -96,7 +96,7 @@ sub detail {
     $verify->{shtype} = $ex->{shtype};
     $verify->{c_user} = $ex->{c_user_name};
     $verify->{ts_c} = $ex->{ts_c};
-    $verify->{v_user} = $ex->{v_user};
+    $verify->{v_user} = $ex->{v_user_name};
     $verify->{v_ts} = $ex->{v_ts};
     # 从我的任务菜单进入传入readonly参数
     $verify->{rdonly} = $self->param('rdonly');

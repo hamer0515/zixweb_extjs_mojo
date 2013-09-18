@@ -90,7 +90,7 @@ sub detail {
     $detail->{shtype} = $ex->{shtype};
     $detail->{c_user} = $ex->{c_user_name};
     $detail->{ts_c} = $ex->{ts_c};
-    $detail->{v_user} = $ex->{v_user};
+    $detail->{v_user} = $ex->{v_user_name};
     $detail->{v_ts} = $ex->{v_ts};
     # 从我的任务菜单进入传入readonly参数
     $detail->{rdonly} = $self->param('rdonly');

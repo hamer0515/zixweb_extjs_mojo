@@ -1,4 +1,4 @@
-package ZixWeb::VoucherEntry::Specialbills;
+package ZixWeb::Yspz::I0000;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
@@ -23,7 +23,7 @@ BEGIN {
 # 描述：
 #   特种调账单的录入结果
 #
-sub add {
+sub i0000 {
     my $self = shift;
     my $res;
     my $data =encode('utf8',$self->param('data'));

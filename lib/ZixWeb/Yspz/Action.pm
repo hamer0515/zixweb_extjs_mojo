@@ -1,4 +1,4 @@
-package ZixWeb::VoucherEntry::Action;
+package ZixWeb::Yspz::Action;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

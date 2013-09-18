@@ -1,4 +1,4 @@
-package ZixWeb::VoucherEntry::Job;
+package ZixWeb::Yspz::Job;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

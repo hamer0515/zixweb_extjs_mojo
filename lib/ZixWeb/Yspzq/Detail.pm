@@ -1,4 +1,4 @@
-package ZixWeb::SourceDocMgr::Detail;
+package ZixWeb::Yspzq::Detail;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
@@ -45,7 +45,7 @@ sub detail{
     
     #flag 是否撤销
     $detail->{period} = $ys_data->{period};
-    $detail->{title} = $ys_type.$self->ys_type->{$ys_type}."详细信息";
+    $detail->{title} = $ys_type.$self->ys_type->{$ys_type}."原始凭证详细信息";
     $detail->{isdetail} = true;
     $detail->{ys_id} = $ys_id;
     $detail->{ys_type} = $ys_type;
@@ -112,7 +112,7 @@ sub detail{
         my $jbook_name=$self->dict->{book}->{$pz->{jb_id}}->[0];
         # 组成借方科目的表头部分
         $property->{key} = '借方科目';
-        $property->{value} = $jbook_name;
+        $property->{value} = $self->dict->{book}->{$pz->{jb_id}}->[1];
         push @{$fl->{j_book}}, $property;
         
         my $jbook_data = $self->select("select * from book_$jbook_name where id=".$pz->{j_id});
@@ -147,10 +147,10 @@ sub detail{
         $fl->{j_amt} = $self->nf($fl->{j_amt});
         #d_book
         $property = {};    
-        my $dbook_name    =$self->dict->{book}->{$pz->{db_id}}->[0];
+        my $dbook_name = $self->dict->{book}->{$pz->{db_id}}->[0];
         # 组成贷方科目的表头部分
         $property->{key} = '贷方科目';
-        $property->{value} = $dbook_name;
+        $property->{value} = $self->dict->{book}->{$pz->{db_id}}->[1];
         push @{$fl->{d_book}}, $property;
         my $dbook_data = $self->select("select * from book_$dbook_name where id=".$pz->{d_id});
         $dbook_data = $dbook_data->[0];

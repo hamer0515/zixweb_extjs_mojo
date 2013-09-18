@@ -1,4 +1,4 @@
-package ZixWeb::SourceDocMgr::Revoke;
+package ZixWeb::Yspz::Revoke;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

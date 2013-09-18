@@ -1,4 +1,4 @@
-package ZixWeb::SystemMgr::Login;
+package ZixWeb::Login::Login;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
@@ -39,6 +39,10 @@ sub login {
 sub menu {
     my $self  = shift;
     my $uid   = $self->session->{uid};
+    unless ($uid){
+        $self->render(json => { success => false });
+        return;
+    }
     my $rdata = $self->select(
 "select distinct route.route_name as text, route.route_value as url , route.parent_id, route.route_id 
 	from tbl_route_inf route

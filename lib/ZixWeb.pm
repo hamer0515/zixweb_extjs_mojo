@@ -168,31 +168,44 @@ sub set_route {
     my $self = shift;
     my $r = $self->routes;
     
-    # login controller
+    # 登录页面
     $r->any('/')->to(namespace => 'ZixWeb::SystemMgr::Login', action => 'show', template => 'login');
-    $r->any("/base/$_")->to(namespace => "ZixWeb::Basic::Base", action => $_)   for (qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype bi_dict c fp cust_proto/);
-    $r->any("/login/$_")->to(namespace => "ZixWeb::SystemMgr::Login", action => $_, template => "systemmgr/login/$_")   for (qw/menu passwordreset login logout/);
-    $r->any("/role/$_")->to(namespace => "ZixWeb::SystemMgr::Role", action => $_)      for (qw/list add check update delete/);
-    $r->any("/user/$_")->to(namespace => "ZixWeb::SystemMgr::User", action => $_)      for (qw/list add check update/);
-    $r->any("/yspz/itztz")->to(namespace => "ZixWeb::VoucherEntry::Specialbills", action => 'add');
-    $r->get("/specialbills/$_")->to(namespace => "ZixWeb::VoucherEntry::Specialbills", action => $_, template => "voucherentry/specialbills/$_")      for (qw/input add check_c check_custproto/);
-    $r->get("/cocert/$_")->to(namespace => "ZixWeb::CocertMgr::Cocert", action => $_, template => "cocertmgr/$_")      for (qw/cocert detail detail_pz operate examresult/);  
-    $r->any("/task0000/$_")->to(namespace => "ZixWeb::Task::Task0000", action => $_) for (qw/list detail pass deny/);
-    $r->any("/taskpzcx/$_")->to(namespace => "ZixWeb::Task::Taskpzcx", action => $_) for (qw/list detail pass deny/);
-    $r->any("/taskmy/$_")->to(namespace => "ZixWeb::Task::Taskmy", action => $_) for (qw/list detail pass deny/);
-    $r->any("/zjdz/$_")->to(namespace => "ZixWeb::ReconciliationMgr::Reconciliation", action => $_, template => "reconciliationmgr/$_")     for (qw/bfj bfjcheck checkdone gzcx/);
     
-    # BookMgr
+    # 基础信息
+    $r->any("/base/$_")->to(namespace => "ZixWeb::Component::Component", action => $_)   for (qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype bi_dict c fp cust_proto/);
+    
+    # 登录路由
+    $r->any("/login/$_")->to(namespace => "ZixWeb::Login::Login", action => $_)   for (qw/menu passwordreset login logout/);
+    
+    # 角色管理
+    $r->any("/role/$_")->to(namespace => "ZixWeb::Role::Role", action => $_)      for (qw/list add check update delete/);
+    
+    # 用户管理
+    $r->any("/user/$_")->to(namespace => "ZixWeb::User::User", action => $_)      for (qw/list add check update/);
+    
+    # 特种调帐单录入审核
+    $r->any("/task0000/$_")->to(namespace => "ZixWeb::Task::Task0000", action => $_) for (qw/list detail pass deny/);
+    
+    # 凭证撤销审核
+    $r->any("/taskpzcx/$_")->to(namespace => "ZixWeb::Task::Taskpzcx", action => $_) for (qw/list detail pass deny/);
+    
+    # 我的任务
+    $r->any("/taskmy/$_")->to(namespace => "ZixWeb::Task::Taskmy", action => $_) for (qw/list detail pass deny/);
+    
+    # 资金对账
+    $r->any("/zjdz/$_")->to(namespace => "ZixWeb::Zjdz::Zjdz", action => $_)     for (qw/bfj bfjcheck checkdone bfjgzcx/);
+    
+    # 帐套查询
     for ( qw/all bfj zyzj/) {
-        $r->get("/book/$_")->to(namespace => "ZixWeb::BookMgr::index", action => $_);
+        $r->get("/book/$_")->to(namespace => "ZixWeb::Book::index", action => $_);
     }
     
     # 周期确认
     for ( qw/select index submit/ ) {
-        $r->get("/ack/$_")->to(namespace => "ZixWeb::Ack::ack", action => $_, template => "ack/$_");
+        $r->get("/ack/$_")->to(namespace => "ZixWeb::Ack::ack", action => $_);
     }
     
-    # hist book
+    # 科目历史  详细查询
     for ( qw/deposit_bfj bamt_yhys deposit_zyzj txamt_dgd 
             txamt_yhys bfee_yhys cfee_dqhf bsc bsc_zyzj 
             txamt_yhyf bamt_yhyf bfee_yhyf bfj_cust blc 
@@ -202,11 +215,11 @@ sub set_route {
             txamt_dqr_oys txamt_dqr_byf cost_bfee_zg
             lfee_psp income_in cost_in
 	    bfee_zqqr bfee_zqqr_zg/) { 
-        $r->get("/book/hist/$_")->to(namespace => "ZixWeb::BookMgr::Hist::$_", action => $_, template => "bookmgr/hist/$_");
-        $r->get("/book/detail/$_")->to(namespace => "ZixWeb::BookMgr::Book::$_", action => $_, template => "bookmgr/book/$_");
+        $r->get("/book/hist/$_")->to(namespace => "ZixWeb::Book::Hist::$_", action => $_);
+        $r->get("/book/detail/$_")->to(namespace => "ZixWeb::Book::Detail::$_", action => $_);
     }
 
-    
+    # 原始凭证查询
     for ( qw/y0000 y0001 y0002 y0003 y0004 y0005 
              y0006 y0007 y0008 y0009 y0010 y0011 
              y0012 y0013 y0014 y0015 y0016 y0017
@@ -218,32 +231,23 @@ sub set_route {
              y0048 y0049 y0050 y0051 y0052 y0053
              y0054
              detail/) { 
-        $r->any("/yspzq/$_")->to(namespace => "ZixWeb::SourceDocMgr::\u$_", action => $_);
-    }     
-    $r->any("/yspz/revoke")->to(namespace => "ZixWeb::SourceDocMgr::Revoke", action => 'revoke');
-    for (qw/i0001 i0006 i0008 i0009 i0013 i0014 i0015
-            i0018 i0028 i0029 i0054
+        $r->any("/yspzq/$_")->to(namespace => "ZixWeb::Yspzq::\u$_", action => $_);
+    }
+    
+    # 凭证撤销     
+    $r->any("/yspz/revoke")->to(namespace => "ZixWeb::Yspz::Revoke", action => 'revoke');
+    
+    # 凭证录入
+    for (qw/i0000 i0001 i0006 i0008 i0009 i0013
+            i0014 i0015 i0018 i0028 i0029 i0054
          /) {
-        $r->get("/yspzgl/$_")->to(namespace => "ZixWeb::VoucherEntry::\u$_", action => $_, template => "voucherentry/$_");
+        $r->any("/pzlr/$_")->to(namespace => "ZixWeb::Yspz::\u$_", action => $_);
     }
-    $r->get("/yspzgl/add")->to(namespace => 'ZixWeb::VoucherEntry::Action', action => 'add', template => 'voucherentry/add');
-    for (qw/tbsp adjust_tbsp add_task list_task commit_task/) {
-        $r->get("/management/$_")->to(namespace => "ZixWeb::MaintenanceMgr::TBSP", action => $_, template => "maintenancemgr/$_");
-    }
-    $r->any("/pzlr/mission")->to(namespace => "ZixWeb::VoucherEntry::Mission", action => 'mission');
-    $r->any("/pzlr/action")->to(namespace => "ZixWeb::VoucherEntry::Action", action => 'action');
-    $r->any("/pzlr/job")->to(namespace => "ZixWeb::VoucherEntry::Job", action => 'job');
-    for (qw/index input add delete edit submit/) {
-        $r->get("/bip/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Bip", action => $_, template => "basicinfomgr/bip/$_");
-        $r->get("/dictyspz/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Dictyspz", action => $_, template => "basicinfomgr/dictyspz/$_");
-        $r->get("/dimbi/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Dimbi", action => $_, template => "basicinfomgr/dimbi/$_");
-        $r->get("/dimp/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Dimp", action => $_, template => "basicinfomgr/dimp/$_");
-        $r->get("/acct/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Acct", action => $_, template => "basicinfomgr/acct/$_");
-        $r->get("/acctbfj/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Acctbfj", action => $_, template => "basicinfomgr/acctbfj/$_");
-        $r->get("/acctzyzj/$_")->to(namespace => "ZixWeb::BasicInfoMgr::Acctzyzj", action => $_, template => "basicinfomgr/acctzyzj/$_");
-    }
-    $r->get("/holi/index")->to(namespace => "ZixWeb::BasicInfoMgr::Holi", template => "basicinfomgr/holi/index");
-    $r->post("/holi/upload")->to(namespace => "ZixWeb::BasicInfoMgr::Holi", action => 'upload', template => "basicinfomgr/holi/upload");
+    
+    # 凭证导入
+    $r->any("/pzlr/mission")->to(namespace => "ZixWeb::Yspz::Mission", action => 'mission');
+    $r->any("/pzlr/action")->to(namespace => "ZixWeb::Yspz::Action", action => 'action');
+    $r->any("/pzlr/job")->to(namespace => "ZixWeb::Yspz::Job", action => 'job');
 }
 
 

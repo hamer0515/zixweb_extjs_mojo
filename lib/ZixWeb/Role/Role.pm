@@ -1,4 +1,4 @@
-package ZixWeb::SystemMgr::Role;
+package ZixWeb::Role::Role;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

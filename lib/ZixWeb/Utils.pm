@@ -13,21 +13,21 @@ sub _uf {
     my $flag   = 0;
     $number = 0.00 unless ( defined $number );
     $number =~ s/,//g;
-    if ( $number =~ /^\-/ ) {
-        $number =~ s/^\-//;
-        $flag = 1;
-    }
-
-    if ( $number !~ /\./ ) {
-        $number .= '.00';
-    }
-    $number =~ /(\d+)\.(\d+)/;
-    use integer;
-    my $result = $1 + $2;
-    if ($flag) {
-        $result *= -1;
-    }
-    return $result;
+    #if ( $number =~ /^\-/ ) {
+    #    $number =~ s/^\-//;
+    #    $flag = 1;
+    #}
+    #
+    #if ( $number !~ /\./ ) {
+    #    $number .= '.00';
+    #}
+    #$number =~ /(\d+)\.(\d+)/;
+    #use integer;
+    #my $result = $1 + $2;
+    #if ($flag) {
+    #    $result *= -1;
+    #}
+    return $number;
 }
 
 sub _nf {
@@ -336,12 +336,16 @@ sub _decode_ch {
     if ( $row->{creator} ) {
         $row->{creator_name} = $self->usernames->{$row->{creator}} || $row->{creator};
     }
+    if ( $row->{v_user} ) {
+        $row->{v_user_name} = $self->usernames->{$row->{v_user}} || $row->{v_user};
+    }
     if ( $row->{c_user} ) {
         $row->{c_user_name} = $self->usernames->{$row->{c_user}} || $row->{c_user};
     }
     
     # string cut off
     $row->{ts_revoke}  =~ s/\..*$// if $row->{ts_revoke};
+    $row->{v_ts}       =~ s/\..*$// if $row->{v_ts};
     $row->{ts_c}       =~ s/\..*$// if $row->{ts_c};
     $row->{ts_u}       =~ s/\..*$// if $row->{ts_u};
     $row->{rec_upd_ts} =~ s/\..*$// if $row->{rec_upd_ts};
@@ -441,7 +445,6 @@ sub _select {
     my $sql  = shift;
     #use Data::Dump;
     my $data;
-    warn $sql;
     $sql = $self->dbh->prepare($sql);
     $sql->execute;
     while ( my $row = $sql->fetchrow_hashref ) {
@@ -484,6 +487,7 @@ sub _params {
     if (exists $params->{status} && $params->{status}) {
            $condition .= " and status=".delete $params->{status};
     }
+    # 金额乘以100 由元转到分
     for (qw/j d/) {
         if (exists $params->{$_}){
             $params->{$_}[1] *= 100 if defined $params->{$_}[1];

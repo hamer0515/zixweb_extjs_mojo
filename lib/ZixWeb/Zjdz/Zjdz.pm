@@ -1,4 +1,4 @@
-package ZixWeb::ReconciliationMgr::Reconciliation;
+package ZixWeb::Zjdz::Zjdz;
 
 use Mojo::Base 'Mojolicious::Controller';
 use POSIX qw/mktime/;
@@ -391,11 +391,10 @@ sub checkdone {
             $c_j =$self->uf($self->param( $self->zjbd_type->{$_} . "_j" ) )|| 0;#参数4
             $c_d =$self->uf($self->param( $self->zjbd_type->{$_} . "_d" ) )|| 0;#参数5
         }
-        $data->{zjbd_type}->{$_}->{ch_j} = $c_j;
-        $data->{zjbd_type}->{$_}->{ch_d} = $c_d;
+        $data->{zjbd_type}->{$_}->{ch_j} = int($c_j * 100);
+        $data->{zjbd_type}->{$_}->{ch_d} = int($c_d * 100);
     }
     my $user = $self->session->{uid};
-
     my $res  = $self->ua->post(
         $self->configure->{svc_url}, encode_json {
             "svc"  => 'zjdz',
@@ -517,7 +516,7 @@ sub zjdz {
     return $data;
 }
 
-sub gzcx {
+sub bfjgzcx {
     my $self = shift;
     my $data;
     my $dt       = DateTime->now( time_zone => 'local' );
@@ -573,17 +572,12 @@ sub gzcx {
     $data->{total_sum} =
       $self->cal_total( $data->{data}, [@dates], $data->{sum_week},
         $data->{sum_total}, $acct_zjbd_types );
-    $data->{total_sum}->{week}->{lc} =
-      $self->nf( $self->uf( $data->{total_sum}->{total}->{lc} ) -
-          $self->uf( $data->{total_sum}->{week}->{lc} ) );
-    $data->{total_sum}->{week}->{sc} =
-      $self->nf( $self->uf( $data->{total_sum}->{total}->{sc} ) -
-          $self->uf( $data->{total_sum}->{week}->{sc} ) );
+    $data->{total_sum}->{week}->{lc} = $data->{total_sum}->{total}->{lc} - $data->{total_sum}->{week}->{lc};
+    $data->{total_sum}->{week}->{sc} = $data->{total_sum}->{total}->{sc} - $data->{total_sum}->{week}->{sc};
     $data->{heji}            = $heji;
     $data->{acct_zjbd_types} = $acct_zjbd_types;
     $data->{acct_rowspan}    = $acct_rowspan;
-
-    $self->stash( 'pd', $data );
+    $self->render( json => $data );
 }
 
 #
@@ -616,7 +610,7 @@ sub data_between {
             my $e_date    = $row->{e_date};
             my $amt       = $j_amt - $d_amt;
 
-            $data->{$acct}->{$zjbd_type}->{$e_date}->{sc} = $self->nf($amt);
+            $data->{$acct}->{$zjbd_type}->{$e_date}->{sc} = $amt;
             $data->{$acct}->{heji}->{$e_date}->{sc} += $amt;
         }
     }
@@ -639,21 +633,19 @@ sub data_between {
             my $zjbd_type = $row->{zjbd_type};
             my $e_date    = $row->{e_date};
             my $amt       = $d_amt - $j_amt;
-            $data->{$acct}->{$zjbd_type}->{$e_date}->{lc} = $self->nf($amt);
+            $data->{$acct}->{$zjbd_type}->{$e_date}->{lc} = $amt;
             $data->{$acct}->{heji}->{$e_date}->{lc} += $amt;
         }
     }
-    for my $acct ( keys %$data ) {
-        for my $e_date (@$dates) {
-            $data->{$acct}->{heji}->{$e_date}->{sc} =
-              $self->nf( $data->{$acct}->{heji}->{$e_date}->{sc} )
-              if $data->{$acct}->{heji}->{$e_date}->{sc};
-            $data->{$acct}->{heji}->{$e_date}->{lc} =
-              $self->nf( $data->{$acct}->{heji}->{$e_date}->{lc} )
-              if $data->{$acct}->{heji}->{$e_date}->{lc};
+    # 补齐没有数据的项
+    for my $acct (keys %$data){
+        for my $type (keys %{$data->{$acct}}){
+            for (@$dates){
+                $data->{$acct}{$type}{$_}{sc} ||= 0;
+                $data->{$acct}{$type}{$_}{lc} ||= 0;
+            }
         }
     }
-
     return $data;
 }
 
@@ -677,7 +669,7 @@ sub sum_by_zjbd_type {
             my $acct      = $row->{bfj_acct};
             my $amt       = $j_amt - $d_amt;
 
-            $data->{$acct}->{$zjbd_type}->{sc} = $self->nf($amt);
+            $data->{$acct}->{$zjbd_type}->{sc} = $amt;
             $data->{$acct}->{heji}->{sc} += $amt;
         }
     }
@@ -693,15 +685,16 @@ sub sum_by_zjbd_type {
             my $zjbd_type = $row->{zjbd_type};
             my $acct      = $row->{bfj_acct};
             my $amt       = $d_amt - $j_amt;
-            $data->{$acct}->{$zjbd_type}->{lc} = $self->nf($amt);
+            $data->{$acct}->{$zjbd_type}->{lc} = $amt;
             $data->{$acct}->{heji}->{lc} += $amt;
         }
     }
-    for my $acct ( keys %$data ) {
-        $data->{$acct}->{heji}->{lc} =
-          $self->nf( $data->{$acct}->{heji}->{lc} );
-        $data->{$acct}->{heji}->{sc} =
-          $self->nf( $data->{$acct}->{heji}->{sc} );
+    # 补齐没有数据的项
+    for my $acct (keys %$data){
+        for my $type (keys %{$data->{$acct}}){
+            $data->{$acct}{$type}{sc} ||= 0;
+            $data->{$acct}{$type}{lc} ||= 0;
+        }
     }
     return $data;
 }
@@ -725,30 +718,22 @@ sub cal_week {
             for ( @{$dates} ) {
                 if ( $data->{$acct}->{$zjbd_type}->{$_}->{lc} ) {
                     $lc +=
-                      $self->uf( $data->{$acct}->{$zjbd_type}->{$_}->{lc} );
+                      $data->{$acct}->{$zjbd_type}->{$_}->{lc};
                     $total_lc +=
-                      $self->uf( $data->{$acct}->{$zjbd_type}->{$_}->{lc} );
+                      $data->{$acct}->{$zjbd_type}->{$_}->{lc};
                 }
                 if ( $data->{$acct}->{$zjbd_type}->{$_}->{sc} ) {
                     $sc +=
-                      $self->uf( $data->{$acct}->{$zjbd_type}->{$_}->{sc} );
+                      $data->{$acct}->{$zjbd_type}->{$_}->{sc};
                     $total_sc +=
-                      $self->uf( $data->{$acct}->{$zjbd_type}->{$_}->{sc} );
+                      $data->{$acct}->{$zjbd_type}->{$_}->{sc};
                 }
             }
-            $week_sum->{$acct}->{$zjbd_type}->{sc} =
-              $self->nf(
-                $self->uf( $sum_total->{$acct}->{$zjbd_type}->{sc} ) - $sc );
-            $week_sum->{$acct}->{$zjbd_type}->{lc} =
-              $self->nf(
-                $self->uf( $sum_total->{$acct}->{$zjbd_type}->{lc} ) - $lc );
+            $week_sum->{$acct}->{$zjbd_type}->{sc} = $sum_total->{$acct}->{$zjbd_type}->{sc} - $sc;
+            $week_sum->{$acct}->{$zjbd_type}->{lc} = $sum_total->{$acct}->{$zjbd_type}->{lc} - $lc;
         }
-        $week_sum->{$acct}->{heji}->{sc} =
-          $self->nf(
-            $self->uf( $sum_total->{$acct}->{heji}->{sc} ) - $total_sc );
-        $week_sum->{$acct}->{heji}->{lc} =
-          $self->nf(
-            $self->uf( $sum_total->{$acct}->{heji}->{lc} ) - $total_lc );
+        $week_sum->{$acct}->{heji}->{sc} = $sum_total->{$acct}->{heji}->{sc} - $total_sc;
+        $week_sum->{$acct}->{heji}->{lc} = $sum_total->{$acct}->{heji}->{lc} - $total_lc;
     }
     return $week_sum;
 }
@@ -772,16 +757,14 @@ sub cal_total {
         for my $zjbd_type ( @{ $acct_zjbd_type->{$acct} } ) {
             if ( $sum_total->{$acct}->{$zjbd_type}->{sc} ) {
                 $total_sum->{total}->{sc} +=
-                  $self->uf( $sum_total->{$acct}->{$zjbd_type}->{sc} );
+                  $sum_total->{$acct}->{$zjbd_type}->{sc};
             }
             if ( $sum_total->{$acct}->{$zjbd_type}->{lc} ) {
                 $total_sum->{total}->{lc} +=
-                  $self->uf( $sum_total->{$acct}->{$zjbd_type}->{lc} );
+                  $sum_total->{$acct}->{$zjbd_type}->{lc};
             }
         }
     }
-    $total_sum->{total}->{sc} = $self->nf( $total_sum->{total}->{sc} );
-    $total_sum->{total}->{lc} = $self->nf( $total_sum->{total}->{lc} );
 
     #total_by_week
     $total_sum->{week}->{sc} = 0;
@@ -807,11 +790,7 @@ sub cal_total {
                 }
             }
         }
-        $total_sum->{$date}->{sc} = $self->nf( $total_sum->{$date}->{sc} );
-        $total_sum->{$date}->{lc} = $self->nf( $total_sum->{$date}->{lc} );
     }
-    $total_sum->{week}->{sc} = $self->nf( $total_sum->{week}->{sc} );
-    $total_sum->{week}->{lc} = $self->nf( $total_sum->{week}->{lc} );
     return $total_sum;
 }
 
