@@ -91,13 +91,16 @@ sub action {
                 }
             })->res->json;
         if ($action eq 'get_log') {
+            unless($res){
+                $self->render(json => {success : false});
+                return;
+            }
             my $r = "";
             $r .= "$res->{errmsg} <br/>" if $res->{errmsg};
             $r .= join "<br/>", @{$res->{ret}};
             $self->render(json => { text => $self->my_decode($r) });
             return;
         } 
-        $result->{success} = true;
     } else {
         $res = $self->ua->post(
             $self->configure->{mgr_url}, encode_json {

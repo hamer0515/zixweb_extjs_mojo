@@ -300,7 +300,7 @@ sub bfjcheck {
 #  status    => 0,
 #  zjbd_date => "'2013-03-25'",
 #}
-sub checkdone {
+sub bfjcheckdone {
     my $self = shift;
     my $data;
     my $r = {};#响应对账结果
@@ -527,14 +527,8 @@ sub bfjgzcx {
         my $cur_date = $self->next_n_date( $i, $end_date );
         push @dates, $cur_date;
     }
-
-    #Get the data of the week
-    $data->{data} = $self->data_between( $end_date, $beg_date, \@dates );
-    $data->{dates} = [@dates];
-
-    $data->{sum_total} = $self->sum_by_zjbd_type;
-
-    # query the acct and zjbd_type
+    
+    # 查询有挂帐的帐号和资金变动类型
     my $records = $self->select(
         " select bfj_acct, zjbd_type, (sum(d) - sum(j)) total
                             from book_blc
@@ -556,6 +550,15 @@ sub bfjgzcx {
           );
     }
     $data->{accts} = [@accts];
+    
+    # 计算七天前每天的挂帐
+    $data->{data} = $self->data_between( $end_date, $beg_date, \@dates, $acct_zjbd_types );
+
+    $data->{dates} = [@dates];
+    
+    # 计算按资金变动类型和帐号汇总的挂帐
+    $data->{sum_total} = $self->sum_by_zjbd_type;
+
     my $heji;
 
     my $acct_rowspan;
@@ -564,7 +567,8 @@ sub bfjgzcx {
         my @zjbd_types = keys %{ $data->{sum_total}->{$_} };
         $acct_rowspan->{$_} = ( @{ $acct_zjbd_types->{$_} } + 1 ) * 2;
     }
-
+    
+    # 计算七天前的挂帐情况
     $data->{sum_week} =
       $self->cal_week( $data->{data}, [@dates], $data->{sum_total} );
 
@@ -589,6 +593,7 @@ sub data_between {
     my $date_beg = shift;
     my $date_end = shift;
     my $dates    = shift;
+    my $acct_zjbd_types    = shift;
     my $data;
 
     # short currency
@@ -637,14 +642,18 @@ sub data_between {
             $data->{$acct}->{heji}->{$e_date}->{lc} += $amt;
         }
     }
-    # 补齐没有数据的项
-    for my $acct (keys %$data){
-        for my $type (keys %{$data->{$acct}}){
+    
+    for my $acct (keys %$acct_zjbd_types){
+        for my $zjbd_type(@{$acct_zjbd_types->{$acct}}){
             for (@$dates){
-                $data->{$acct}{$type}{$_}{sc} ||= 0;
-                $data->{$acct}{$type}{$_}{lc} ||= 0;
+                $data->{$acct}{$zjbd_type}{$_}{sc} ||= 0;
+                $data->{$acct}{$zjbd_type}{$_}{lc} ||= 0;
             }
         }
+        for (@$dates){
+                $data->{$acct}{heji}{$_}{sc} ||= 0;
+                $data->{$acct}{heji}{$_}{lc} ||= 0;
+            }
     }
     return $data;
 }
@@ -709,10 +718,11 @@ sub cal_week {
     my $dates     = shift;
     my $sum_total = shift;
     my $week_sum;
-    for my $acct ( keys %{$data} ) {
+    for my $acct ( keys %{$sum_total} ) {
         my $total_sc = 0;
         my $total_lc = 0;
-        for my $zjbd_type ( keys %{ $data->{$acct} } ) {
+        for my $zjbd_type ( keys %{ $sum_total->{$acct} } ) {
+            next if $zjbd_type eq 'heji';
             my $lc = 0;
             my $sc = 0;
             for ( @{$dates} ) {
@@ -735,6 +745,7 @@ sub cal_week {
         $week_sum->{$acct}->{heji}->{sc} = $sum_total->{$acct}->{heji}->{sc} - $total_sc;
         $week_sum->{$acct}->{heji}->{lc} = $sum_total->{$acct}->{heji}->{lc} - $total_lc;
     }
+    
     return $week_sum;
 }
 

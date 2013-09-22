@@ -6,6 +6,7 @@ use Digest::MD5;
 use JSON::XS;
 use DateTime;
 use boolean;
+use Encode qw/decode/;
 
 use constant {
   DEBUG  => $ENV{SYSTEM_DEBUG} || 0 ,
@@ -72,7 +73,7 @@ sub passwordreset {
     my $new_password = $self->param('newpassword');
     my $confirm_password = $self->param('confirmpassword');
     unless ($old_password && $new_password && $confirm_password) {
-        $self->render(json => {success => true});
+        $self->render(json => {success => false, msg => '密码不能为空'});
         return 1;
     }
     my $uid          = $self->session->{uid};
@@ -82,7 +83,7 @@ sub passwordreset {
     my $user_data = $self->dbh->selectall_arrayref($sql);
 
     unless ( scalar @$user_data ) {
-        $self->render( json => {success => false} );
+        $self->render( json => {success => false, msg =>  '旧密码不正确'} );
         return 1;
     }
     $self->dbh->begin_work;

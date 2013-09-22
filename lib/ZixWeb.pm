@@ -87,7 +87,7 @@ sub startup {
     $self->helper( acct_id      => sub { $self->memd->get('acct_id'); } );  
 
     # hook
-    #$self->hook( before_dispatch => \&before_dispatch );
+    $self->hook( before_dispatch => \&_before_dispatch );
 
     # Router
     $self->set_route;
@@ -99,30 +99,27 @@ sub startup {
     $dbh = undef;
 }
 
-sub before_dispatch {
+sub _before_dispatch {
     my $self = shift;
     
     my $path = $self->req->url->path;
-    return 1 if $path =~ /^\/login\/(login|logout)/;    # 登陆退出可以访问
     return 1 if $path =~ /^\/$/;                        # 登陆页面可以访问
-    return 1 if $path =~ /[js|jpg|gif|css|json]$/;        # 静态文件可以访问
-    return 1 if $path =~ /^\/fail.html$/;               # fail
-    return 1 if $path =~ /^\/login.html$/;              # login
+    return 1 if $path =~ /(js|jpg|gif|css|png)$/;        # 静态文件可以访问
+    return 1 if $path =~ /html$/;              # login
 
     my $sess = $self->session;
     # 没有登陆不让访问
-    
-    unless ( exists $sess->{uid} ) {
-        $self->redirect_to("/");
-        return;
-    }
-    
     return 1 if $path =~ /^\/login/;    # 可以访问主菜单
     return 1 if $path =~ /^\/base/;    # 可以访问主菜单
     
-    if ( $path =~ /\.html$/ ) {
-        return 1;
-    }    
+    #warn $path;
+    if ( $path =~ /^index.html$/ ) {
+        unless ( exists $sess->{uid} ) {
+            warn $path;
+            $self->redirect_to('/');
+            return;
+        }
+    }   
     my $uid = $sess->{uid};
     my $role = $self->users->{ $uid };
     for my $role( @$role ) {
@@ -132,7 +129,7 @@ sub before_dispatch {
             }
         }
     } 
-    $self->redirect_to("/denied.html");
+    $self->render( json => { success => 'forbidden' });
 }
 
 #
@@ -193,7 +190,7 @@ sub set_route {
     $r->any("/taskmy/$_")->to(namespace => "ZixWeb::Task::Taskmy", action => $_) for (qw/list detail pass deny/);
     
     # 资金对账
-    $r->any("/zjdz/$_")->to(namespace => "ZixWeb::Zjdz::Zjdz", action => $_)     for (qw/bfj bfjcheck checkdone bfjgzcx/);
+    $r->any("/zjdz/$_")->to(namespace => "ZixWeb::Zjdz::Zjdz", action => $_)     for (qw/bfj bfjcheck bfjcheckdone bfjgzcx/);
     
     # 帐套查询
     for ( qw/all bfj zyzj/) {
