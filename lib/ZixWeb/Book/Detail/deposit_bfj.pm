@@ -1,4 +1,4 @@
-package ZixWeb::BookMgr::Book::deposit_bfj;
+package ZixWeb::Book::Detail::deposit_bfj;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;

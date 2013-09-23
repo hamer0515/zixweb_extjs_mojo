@@ -194,12 +194,12 @@ sub set_route {
     
     # 帐套查询
     for ( qw/all bfj zyzj/) {
-        $r->get("/book/$_")->to(namespace => "ZixWeb::Book::index", action => $_);
+        $r->any("/book/$_")->to(namespace => "ZixWeb::Book::index", action => $_);
     }
     
     # 周期确认
-    for ( qw/select index submit/ ) {
-        $r->get("/ack/$_")->to(namespace => "ZixWeb::Ack::ack", action => $_);
+    for ( qw/query submit/ ) {
+        $r->any("/zqqr/$_")->to(namespace => "ZixWeb::Zqqr::$_", action => $_);
     }
     
     # 科目历史  详细查询
@@ -212,8 +212,8 @@ sub set_route {
             txamt_dqr_oys txamt_dqr_byf cost_bfee_zg
             lfee_psp income_in cost_in
 	    bfee_zqqr bfee_zqqr_zg/) { 
-        $r->get("/book/hist/$_")->to(namespace => "ZixWeb::Book::Hist::$_", action => $_);
-        $r->get("/book/detail/$_")->to(namespace => "ZixWeb::Book::Detail::$_", action => $_);
+        $r->any("/book/hist/$_")->to(namespace => "ZixWeb::Book::Hist::$_", action => $_);
+        $r->any("/book/detail/$_")->to(namespace => "ZixWeb::Book::Detail::$_", action => $_);
     }
 
     # 原始凭证查询
