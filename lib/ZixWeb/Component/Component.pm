@@ -36,7 +36,7 @@ sub routes{
     my $self = shift;
     my $id = $self->param('id');
     my $sql = "select distinct route_name as text, parent_id as parent_id, route_id
-	    from tbl_route_inf where status=1";
+	    from tbl_route_inf where status>=1";
     my $rdata = $self->select($sql);
     my $checked = {};
     if ($id) {
