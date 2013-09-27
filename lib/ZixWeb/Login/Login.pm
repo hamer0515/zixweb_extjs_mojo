@@ -103,7 +103,7 @@ sub logout {
     my $self = shift;
     delete $self->session->{uid};
     delete $self->session->{sid};
-    $self->redirect_to('/');
+    $self->render(json => { success => true });
 }
 
 1;

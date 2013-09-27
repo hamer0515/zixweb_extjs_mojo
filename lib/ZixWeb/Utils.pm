@@ -13,20 +13,6 @@ sub _uf {
     my $flag   = 0;
     $number = 0.00 unless ( defined $number );
     $number =~ s/,//g;
-    #if ( $number =~ /^\-/ ) {
-    #    $number =~ s/^\-//;
-    #    $flag = 1;
-    #}
-    #
-    #if ( $number !~ /\./ ) {
-    #    $number .= '.00';
-    #}
-    #$number =~ /(\d+)\.(\d+)/;
-    #use integer;
-    #my $result = $1 + $2;
-    #if ($flag) {
-    #    $result *= -1;
-    #}
     return $number;
 }
 
