@@ -190,6 +190,7 @@ sub pass{
                 svc  => "verify",
                 sys  => { oper_user => $self->session->{uid} },
             })->res->json->{status};
+            
     if ($res == 0){
         $result = true;
     }

@@ -106,4 +106,9 @@ sub logout {
     $self->render(json => { success => true });
 }
 
+sub show {
+    my $self = shift;
+    $self->render_static('index.html');
+}
+
 1;

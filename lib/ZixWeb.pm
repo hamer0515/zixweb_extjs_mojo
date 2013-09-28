@@ -25,7 +25,15 @@ sub startup {
         'debug' => 0,
         'compress_threshold' => 10_000,
     };
-    #$self->sessions(WWW::Session->new('zixweb', {}));
+    #my $logdir = "$ZIXWEB_HOME/log";
+    #unless (-e $logdir && -d $logdir){
+    #    `mkdir $logdir`;
+    #}
+    #my $logfile = "$ZIXWEB_HOME/log/zixweb.log";
+    #unless (-e $logfile){
+    #    `touch $logfile`;
+    #}
+    #my $log = Mojo::Log->new(path => "$ZIXWEB_HOME/log/zixweb.log", level => 'info');
     # hypnoload
     $self->config(hypnotoad => {
         listen => [ 'http://*:'.$config->{port} ] 
@@ -47,6 +55,7 @@ sub startup {
     # helper
     $self->helper( dbh          => sub { $dbh = &connect_db($self->configure) unless $dbh; return $dbh; } );
     $self->helper( memd         => sub { return $memd; } );
+    #$self->helper( log          => sub { return $log; } );
     $self->helper( configure    => sub { return $config; } );
     $self->helper( quote        => sub { return $self->dbh->quote( $_[1] ); } );
     $self->helper( dict         => sub { return $dict; } );
@@ -166,7 +175,7 @@ sub set_route {
     my $r = $self->routes;
     
     # 登录页面
-    $r->any('/')->to(namespace => 'ZixWeb::SystemMgr::Login', action => 'show', template => 'login');
+    $r->any('/')->to(namespace => 'ZixWeb::Login::Login', action => 'show');
     
     # 基础信息
     $r->any("/base/$_")->to(namespace => "ZixWeb::Component::Component", action => $_)   for (qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype bi_dict c fp cust_proto/);
@@ -187,7 +196,7 @@ sub set_route {
     $r->any("/taskpzcx/$_")->to(namespace => "ZixWeb::Task::Taskpzcx", action => $_) for (qw/list detail pass deny/);
     
     # 我的任务
-    $r->any("/taskmy/$_")->to(namespace => "ZixWeb::Task::Taskmy", action => $_) for (qw/list detail pass deny/);
+    $r->any("/taskmy/$_")->to(namespace => "ZixWeb::Task::Taskmy", action => $_) for (qw/list detail/);
     
     # 资金对账
     $r->any("/zjdz/$_")->to(namespace => "ZixWeb::Zjdz::Zjdz", action => $_)     for (qw/bfj bfjcheck bfjcheckdone bfjgzcx/);

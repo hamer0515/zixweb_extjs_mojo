@@ -2,7 +2,6 @@ package ZixWeb::Book::index;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
-use Encode qw/encode decode/;
 use JSON::XS;
 use boolean;
 
@@ -10,28 +9,6 @@ use constant {
     DEBUG  => $ENV{BOOK_DEBUG} || 0 ,
 };
 
-BEGIN {
-    require Data::Dump if DEBUG;
-}
-use Data::Dump;
-# result:
-#{
-#  1 => {
-#    1002 => {
-#      "01"   => {
-#                  d => "0.00",
-#                  j => "65,7963.28",
-#                  name => "\x{5907}\x{4ED8}\x{91D1}\x{5B58}\x{6B3E}-1002.01",
-#                  url => "deposit_bfj",
-#                },
-#      ...
-#      "d"    => "0.00",
-#      "j"    => "65,7963.28",
-#      "name" => "\x{94F6}\x{884C}\x{5B58}\x{6B3E}-1002",
-#    },
-#    ...
-#  total => ["\x{6C47}\x{603B}", "327,2959.52", "327,2959.52"],
-#}
 sub get_books {
     my $self  = shift;
     my $type  = shift;
@@ -109,8 +86,8 @@ sub all {
     my $self  = shift;
     my $data  = $self->get_books('all');
     
-    warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-
+    warn "package: ", __FILE__, "\ndata:",$self->dumper($data) if DEBUG;
+    
     $self->render(json => $data->{children});
 }
 
@@ -118,10 +95,10 @@ sub bfj {
     my $self  = shift;
     my $data  = $self->get_books('bfj');
     
-    warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
+    warn "package: ", __FILE__, "\ndata:", $self->dumper($data) if DEBUG;
     
     $data->{title} = '科目余额表-备付金帐套';
-    #$self->stash( sum_book => $data );
+    
     $self->render(json => $data->{children});
 }
 
@@ -129,10 +106,10 @@ sub zyzj {
     my $self  = shift;
     my $data  = $self->get_books('zyzj');
     
-    warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
+    warn "package: ", __FILE__, "\ndata:", $self->dumper($data) if DEBUG;
     
     $data->{title} = '科目余额表-自有资金帐套';
-    #$self->stash( sum_book => $data );
+    
     $self->render(json => $data->{children});
 }
 

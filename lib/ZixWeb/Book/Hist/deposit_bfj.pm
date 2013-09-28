@@ -9,10 +9,6 @@ use constant {
     DEBUG  => $ENV{BOOKHISTORY_DEBUG} || 0 ,
 };
 
-BEGIN {
-    require Data::Dump if DEBUG;
-}
-
 # result:
 #{
 #  bfj_acct      => undef,
@@ -91,7 +87,7 @@ sub deposit_bfj {
     my $data = $self->page_data( $sql, $page, $limit );
     $data->{success} = true;
     
-    warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
+    warn $self->dumper($data) if DEBUG;
     
     $self->render(json => $data);
 }
