@@ -1,9 +1,13 @@
-package ZixWeb::BookMgr::Hist::bfee_zqqr_zg;
+package ZixWeb::Book::Hist::bfee_zqqr_zg;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
+use boolean;
+use JSON::XS;
 
-use constant { DEBUG => $ENV{BOOKHISTORY_DEBUG} || 0, };
+use constant {
+    DEBUG  => $ENV{BOOKHISTORY_DEBUG} || 0 ,
+};
 
 BEGIN {
     require Data::Dump if DEBUG;
@@ -11,183 +15,93 @@ BEGIN {
 
 # result:
 #{
-#  bi => undef,
+#  bi      => undef,
 #  bi_dict => {
-#    1  => "\x{4E2D}\x{884C}\x{4EE3}\x{6536}\x{901A}\x{9053}              ",
-#    ...
-#  },
-#  book => "\x{6210}\x{672C}-\x{94F6}\x{884C}\x{624B}\x{7EED}\x{8D39}\x{652F}\x{51FA}",
-#  c => undef,
-#  count => 700,
-#  d_from => undef,
-#  d_to => undef,
-#  data => [
-#    {
-#      bi => "\x{4E2D}\x{884C}\x{4EE3}\x{6536}\x{901A}\x{9053}              ",
-#      c => 51.20121114018,
-#      d => 0,
-#      id => 1,
-#      j => "1.00",
-#      p => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#      period => "2013-03-25",
-#      rowid => 1,
-#      ys_id => 4,
-#      ys_type => "0002",
-#    },
-#    ...
-#  ],
-#  id => undef,
-#  index => 1,
-#  items => {
-#    bi => "\x{94F6}\x{884C}\x{63A5}\x{53E3}\x{7F16}\x{53F7}",
-#    c  => "\x{5BA2}\x{6237}id",
-#    p  => "\x{4EA7}\x{54C1}id",
-#  },
-#  j_from => undef,
-#  j_to => undef,
-#  next_page => 2,
-#  p => undef,
-#  p_dict => {
-#    1 => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#    ...
-#  },
-#  params => undef,
-#  period_from => undef,
-#  period_to => undef,
-#  prev_page => 1,
-#  total_page => 35,
-#  ys_id => undef,
-#  ys_type => undef,
-#  ys_type_dict => {
-#    "0000" => "\x{7279}\x{79CD}\x{8C03}\x{8D26}\x{5355}",
-#    ...
-#  },
+#                     1  => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                     ...
+#                   },
+#  book          => "\x{94F6}\x{884C}\x{5B58}\x{6B3E}-\x{5907}\x{4ED8}\x{91D1}\x{5B58}\x{6B3E}",
+#  count         => 2,
+#  d_from        => undef,
+#  d_to          => undef,
+#  data          => [
+#                     {
+#                       bi => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                       d => 0,
+#                       id => 2,
+#                       j => "65,8063.28",
+#                       period => "2013-03-25",
+#                       rowid => 1,
+#                       ys_id => 2,
+#                       ys_type => "0010",
+#                     },
+#                     ...
+#                   ],
+#  id            => undef,
+#  index         => 1,
+#  items         => { bi => "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id" },
+#  j_from        => undef,
+#  j_to          => undef,
+#  next_page     => 1,
+#  params        => undef,
+#  period_from   => undef,
+#  period_to     => undef,
+#  prev_page     => 1,
+#  total_page    => 1,
+#  ys_id         => undef,
+#  ys_type       => undef,
+#  ys_type_dict  => {
+#                     "0000" => "\x{7279}\x{79CD}\x{8C03}\x{8D26}\x{5355}",
+#                     ...
+#                   },
 #}
 sub bfee_zqqr_zg {
     my $self = shift;
-    my $tag  = $self->param('tag');
-    my $data = {};
-    my $book = 'bfee_zqqr_zg';
-    $data->{book} = $self->dict->{types}->{book}->{$book};
-    $self->init( $data, [ 'c', 'p', 'bi', 'fp', 'tx_date' ] );
+    
+    my $page = $self->param('page');
+    my $limit = $self->param('limit');
+    
+    my $id = $self->param('id');
+    my $params = {};
+    for (qw/ys_type ys_id j_from j_to d_from d_to period_from period_to tx_date_from tx_date_to bi c p fp/) {
+        my $p = $self->param($_);
+        undef $p if $p eq '';
+        $params->{$_} = $p;
+    }
     my $p->{condition} = '';
-    unless ($tag) {
-
-        if ( $data->{id} ) {
-            $p = $self->params( { id => $data->{id} } );
+    $p = $self->params(
+        {
+            id => $id,
+            bi => $params->{bi},
+            fp => $params->{fp},
+            p  => $params->{p},
+            c  => $params->{c},
+            ys_type  => $params->{ys_type}
+              && $self->quote( $params->{ys_type} ),
+            ys_id => $params->{ys_id},
+            j =>
+              [ 0, $params->{j_from}, $params->{j_to} ],
+            d =>
+              [ 0, $params->{d_from}, $params->{d_to} ],
+            period => [
+                $self->quote( $params->{period_from} ),
+                $self->quote( $params->{period_to} )
+            ],
+            tx_date => [
+                0,
+                $params->{tx_date_from} && $self->quote( $params->{tx_date_from} ),
+                $params->{tx_date_to} && $self->quote( $params->{tx_date_to} )
+            ],
         }
-        else {
-            $p = $self->params(
-                {
-                    p       => $data->{p},
-                    bi      => $data->{bi},
-                    fp      => $data->{fp},
-                    tx_date => [
-                        0,
-                        $data->{tx_date_from}
-                          && $self->quote( $data->{tx_date_from} ),
-                        'tx_date_from',
-                        $data->{tx_date_to}
-                          && $self->quote( $data->{tx_date_to} ),
-                        'tx_date_to'
-                    ],
-
-                    c => $data->{c} && $self->quote( $data->{c} ),
-                    ys_type => $data->{ys_type}
-                      && $self->quote( $data->{ys_type} ),
-                    ys_id => $data->{ys_id},
-                    j =>
-                      [ 0, $data->{j_from}, 'j_from', $data->{j_to}, 'j_to' ],
-                    d =>
-                      [ 0, $data->{d_from}, 'd_from', $data->{d_to}, 'd_to' ],
-                    period => [
-                        0,
-                        $self->quote( $data->{period_from} ),
-                        'period_from',
-                        $self->quote( $data->{period_to} ),
-                        'period_to'
-                    ]
-                }
-            );
-        }
-        my $sql =
-    "select id, c, p, bi,fp,tx_date, ys_id, ys_type, j, d, period, rownumber() over() as rowid from book_$book $p->{condition}";
-        my $pager = $self->page_data( $sql, $data->{index} );
-        for my $key ( keys %$pager ) {
-            $data->{$key} = $pager->{$key};
-        }
-        $data->{params} = $p->{params};
-        $data->{data}   = $pager->{data};
-    }
-    $data->{params} .= '&tag=1' if $tag;
-    $data->{bi_dict} = $self->bi;
-    $data->{'p_dict' } = $self->p;
-
+    );
+    my $sql =
+"select id, bi , p , c , fp, ys_id, ys_type, j, d, period, tx_date, rownumber() over(order by id desc) as rowid from book_bfee_zqqr_zg $p->{condition}";
+    my $data = $self->page_data( $sql, $page, $limit );
+    $data->{success} = true;
+    
     warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-
-    $self->stash( 'pd' => $data );
-}
-
-# input:
-#{
-#  book => "\x{6210}\x{672C}-\x{94F6}\x{884C}\x{624B}\x{7EED}\x{8D39}\x{652F}\x{51FA}",
-#}
-# result:
-#{
-#  bi => undef,
-#  bi_dict => {
-#    1  => "\x{4E2D}\x{884C}\x{4EE3}\x{6536}\x{901A}\x{9053}              ",
-#    ...
-#  },
-#  book => "\x{6210}\x{672C}-\x{94F6}\x{884C}\x{624B}\x{7EED}\x{8D39}\x{652F}\x{51FA}",
-#  c => undef,
-#  d_from => undef,
-#  d_to => undef,
-#  id => undef,
-#  index => 1,
-#  items => {
-#    bi => "\x{94F6}\x{884C}\x{63A5}\x{53E3}\x{7F16}\x{53F7}",
-#    c  => "\x{5BA2}\x{6237}id",
-#    p  => "\x{4EA7}\x{54C1}id",
-#  },
-#  j_from => undef,
-#  j_to => undef,
-#  p => undef,
-#  p_dict => {
-#    1 => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#    ...
-#  },
-#  period_from => undef,
-#  period_to => undef,
-#  ys_id => undef,
-#  ys_type => undef,
-#  ys_type_dict => {
-#    "0000" => "\x{7279}\x{79CD}\x{8C03}\x{8D26}\x{5355}",
-#    ...
-#  },
-#}
-sub init {
-    my $self = shift;
-    my $data = shift;
-
-    warn "package: ", __FILE__, "\ndata [before init]:", Data::Dump->dump($data)
-      if DEBUG;
-
-    my $dim = shift;
-    for (@$dim) {
-        $data->{$_} = $self->param($_);
-        $data->{ $_ . '_dict' } = $self->dict->{types}->{$_}
-          if $self->dict->{types}->{$_};
-        $data->{items}->{$_} = $self->dict->{dim}->{$_};
-    }
-    for (qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to/) {
-        $data->{$_} = $self->param($_);
-    }
-    $data->{'index'} = $self->param('index') || 1;
-    $data->{'ys_type_dict'} = $self->ys_type;
-
-    warn "package: ", __FILE__, "\ndata [after init]:", Data::Dump->dump($data)
-      if DEBUG;
+    
+    $self->render(json => $data);
 }
 
 1;

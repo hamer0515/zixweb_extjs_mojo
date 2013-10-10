@@ -1,9 +1,13 @@
-package ZixWeb::BookMgr::Book::cost_bfee_zg;
+package ZixWeb::Book::Detail::cost_bfee_zg;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
+use boolean;
+use JSON::XS;
 
-use constant { DEBUG => $ENV{BOOK_DEBUG} || 0, };
+use constant {
+    DEBUG  => $ENV{BOOK_DEBUG} || 0 ,
+};
 
 BEGIN {
     require Data::Dump if DEBUG;
@@ -11,155 +15,100 @@ BEGIN {
 
 # result:
 #{
-#  bi => undef,
-#  bi_dict => {
-#    1  => "\x{4E2D}\x{884C}\x{4EE3}\x{6536}\x{901A}\x{9053}              ",
-#    ...
-#  },
-#  c => undef,
-#  count => 8,
-#  data => [
-#    {
-#      bi => "\x{4E2D}\x{884C}\x{4EE3}\x{6536}\x{901A}\x{9053}              ",
-#      c => 51.20121114018,
-#      d => 0,
-#      j => "171.00",
-#      p => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#      period => "2013-03-25",
-#      rowid => 1,
-#    },
-#    ...
-#  ],
-#  fir => "c",
-#  fou => "period",
-#  header => [
-#    "\x{5BA2}\x{6237}id",
-#    ...
-#  ],
-#  index => 1,
-#  items => {
-#    bi => "\x{94F6}\x{884C}\x{63A5}\x{53E3}\x{7F16}\x{53F7}",
-#    c => "\x{5BA2}\x{6237}id",
-#    p => "\x{4EA7}\x{54C1}id",
-#    period => "\x{671F}\x{95F4}\x{65E5}\x{671F}",
-#  },
-#  next_page => 1,
-#  p => undef,
-#  p_dict => {
-#    1 => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#    ...
-#  },
-#  params => "&fir=c&sec=p&thi=bi&fou=period",
-#  period => undef,
-#  prev_page => 1,
-#  sec => "p",
-#  thi => "bi",
-#  total_page => 1,
+#  bfj_acct      => undef,
+#  bfj_acct_dict => {
+#                     1  => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                     ...
+#                   },
+#  count         => 2,
+#  data          => [
+#                     {
+#                       bfj_acct => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                       d => 0,
+#                       j => "65,8063.28",
+#                       period => "2013-03-25",
+#                       rowid => 1,
+#                     }, ...
+#                   ],
+#  fir           => "bfj_acct",
+#  header        => [
+#                     "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id",
+#                     ...
+#                   ],
+#  index         => 1,
+#  items         => {
+#                     bfj_acct => "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id",
+#                     period   => "\x{671F}\x{95F4}\x{65E5}\x{671F}",
+#                   },
+#  next_page     => 1,
+#  params        => "&fir=bfj_acct&sec=period",
+#  period        => undef,
+#  prev_page     => 1,
+#  sec           => "period",
+#  total_page    => 1,
 #}
+
 sub cost_bfee_zg {
     my $self = shift;
-    my $data;
-    $data->{index} = $self->param('index') || 1;
-    my $tag  = $self->param('tag');
     
-    #c
-    my $c = $self->param('c');
-    $data->{c} = $c;
-    $c = $self->quote($c) if $c;
-
-    #p
-    my $p = $self->param('p');
-    $data->{p} = $p;
-
-    #bi
+    my $page = $self->param('page');
+    my $limit = $self->param('limit');
+    # bi 
     my $bi = $self->param('bi');
-    $data->{bi} = $bi;
-
-    #fp
+    # c
+    my $c = $self->param('c');
+    # p 
+    my $p = $self->param('p');
+    # fp
     my $fp = $self->param('fp');
-    $data->{fp} = $fp;
-
-    #tx_date
-    my $tx_date = $self->param('tx_date');
-    $data->{tx_date} = $tx_date;
+    # tx_date
+    my $tx_date_from = $self->param('tx_date_from');
+    my $tx_date_to   = $self->param('tx_date_to');
 
     #period
-    $data->{period_from} = $self->param('period_from');
-    $data->{period_to} = $self->param('period_to');
+    my $period_from = $self->param('period_from');
+    my $period_to = $self->param('period_to');
 
-    my ( $fir, $sec, $thi, $fou, $fiv, $six );
+    my ( $fir, $sec, $thi, $fou, $fiv, $six);
     $fir = $self->param('fir');
     $sec = $self->param('sec');
     $thi = $self->param('thi');
     $fou = $self->param('fou');
     $fiv = $self->param('fiv');
     $six = $self->param('six');
-    unless ( $fir || $sec || $thi || $fou || $fiv || $six ) {
-        $fir = 'c';
-        $sec = 'p';
-        $thi = 'bi';
+    unless ( $fir || $sec || $thi || $fou || $fiv || $six) {
+        $fir = 'bi',
+        $sec = 'c';
+        $thi = 'p';
         $fou = 'fp';
-        $fiv = 'period';
-        $six = 'tx_date';
+        $fiv = 'tx_date';
+        $six = 'period';
     }
     my $fields = join ',', grep { $_ } ( $fir, $sec, $thi, $fou, $fiv, $six );
-    $data->{fir} = $fir;
-    $data->{sec} = $sec;
-    $data->{thi} = $thi;
-    $data->{fou} = $fou;
-    $data->{fiv} = $fiv;
-    $data->{six} = $six;
-    $data->{params} = '';
-    unless ($tag) {
-        my $pa = $self->params(
-            {
-                c       => $c,
-                period    => [0,
-                                $self->quote( $data->{period_from} ),
-                                'period_from',
-                                $self->quote( $data->{period_to} ),
-                                'period_to'],
-                p       => $p,
-                bi      => $bi,
-                fp      => $fp,
-                tx_date => $tx_date
-            }
-        );
-        my $condition = $pa->{condition};
-        $data->{params} = $pa->{params};
+    my $p = $self->params( { c => $c && $self->quote($c),
+                             p => $p,
+                             bi => $bi,
+                             fp => $fp && $self->quote($fp),
+                             tx_date =>[
+                                0,
+                                $tx_date_from && $self->quote( $tx_date_from ),
+                                $tx_date_to && $self->quote( $tx_date_to)
+                             ],
+                             period => [
+                                $self->quote( $period_from ),
+                                $self->quote( $period_to )
+                             ], } );
+    my $condition = $p->{condition};
+
+    my $sql =
+"select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_cost_bfee_zg $condition group by $fields";
+    warn $sql;
+    my $data = $self->page_data( $sql, $page, $limit );
+    $data->{success} = true;
     
-        my $sql =
-    "select $fields, sum(j) as j, sum(d) as d, rownumber() over() as rowid from sum_cost_bfee_zg $condition group by $fields";
-        my $pager = $self->page_data( $sql, $data->{index} );
-        $data->{data} = delete $pager->{data};
-        for my $key ( keys %$pager ) {
-            $data->{$key} = $pager->{$key};
-        }
-    }
-    $data->{items} = {
-        c       => $self->dict->{dim}->{c},
-        period  => $self->dict->{dim}->{period},
-        p       => $self->dict->{dim}->{p},
-        bi      => $self->dict->{dim}->{bi},
-        fp      => $self->dict->{dim}->{fp},
-        tx_date => $self->dict->{dim}->{tx_date}
-    };
-    $data->{header} = [
-        grep { $_ } (
-            $self->dict->{dim}->{$fir}, $self->dict->{dim}->{$sec},
-            $self->dict->{dim}->{$thi}, $self->dict->{dim}->{$fou},
-            $self->dict->{dim}->{$fiv}, $self->dict->{dim}->{$six},
-            '借方金额',             '贷方金额'
-        )
-    ];
-    $data->{params} .= "&fir=$fir&sec=$sec&thi=$thi&fou=$fou&fiv=$fiv&six=$six";
-    $data->{params} .= "&tag=1" if $tag;
-    $data->{p_dict}  = $self->p;
-    $data->{bi_dict} = $self->bi;
-
     warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-
-    $self->stash( pd => $data );
+    
+    $self->render(json => $data);
 }
 
 1;

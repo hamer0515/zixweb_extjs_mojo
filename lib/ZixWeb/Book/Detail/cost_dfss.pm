@@ -1,7 +1,9 @@
-package ZixWeb::BookMgr::Book::cost_dfss;
+package ZixWeb::Book::Detail::cost_dfss;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
+use boolean;
+use JSON::XS;
 
 use constant {
     DEBUG  => $ENV{BOOK_DEBUG} || 0 ,
@@ -13,48 +15,53 @@ BEGIN {
 
 # result:
 #{
-#  c => undef,
-#  count => 0,
-#  data => [],
-#  fir => "c",
-#  header => [
-#    "\x{5BA2}\x{6237}id",
-#    ...
-#  ],
-#  index => 1,
-#  items => {
-#    c => "\x{5BA2}\x{6237}id",
-#    p => "\x{4EA7}\x{54C1}id",
-#    period => "\x{671F}\x{95F4}\x{65E5}\x{671F}",
-#  },
-#  next_page => 1,
-#  p => undef,
-#  p_dict => {
-#    1 => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#    ...
-#  },
-#  params => "&fir=c&sec=p&thi=period",
-#  period => undef,
-#  prev_page => 1,
-#  sec => "p",
-#  thi => "period",
-#  total_page => 1,
+#  bfj_acct      => undef,
+#  bfj_acct_dict => {
+#                     1  => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                     ...
+#                   },
+#  count         => 2,
+#  data          => [
+#                     {
+#                       bfj_acct => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                       d => 0,
+#                       j => "65,8063.28",
+#                       period => "2013-03-25",
+#                       rowid => 1,
+#                     }, ...
+#                   ],
+#  fir           => "bfj_acct",
+#  header        => [
+#                     "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id",
+#                     ...
+#                   ],
+#  index         => 1,
+#  items         => {
+#                     bfj_acct => "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id",
+#                     period   => "\x{671F}\x{95F4}\x{65E5}\x{671F}",
+#                   },
+#  next_page     => 1,
+#  params        => "&fir=bfj_acct&sec=period",
+#  period        => undef,
+#  prev_page     => 1,
+#  sec           => "period",
+#  total_page    => 1,
 #}
+
 sub cost_dfss {
     my $self = shift;
-    my $data;
-    $data->{index} = $self->param('index') || 1;
-    my $tag  = $self->param('tag');
     
-    #p
+    my $page = $self->param('page');
+    my $limit = $self->param('limit');
+
+    # p 
     my $p = $self->param('p');
-    $data->{p} = $p;
 
     #period
-    $data->{period_from} = $self->param('period_from');
-    $data->{period_to} = $self->param('period_to');
+    my $period_from = $self->param('period_from');
+    my $period_to = $self->param('period_to');
 
-    my ( $fir, $sec );
+    my ( $fir, $sec);
     $fir = $self->param('fir');
     $sec = $self->param('sec');
     unless ( $fir || $sec ) {
@@ -62,43 +69,23 @@ sub cost_dfss {
         $sec = 'period';
     }
     my $fields = join ',', grep { $_ } ( $fir, $sec );
-    $data->{fir} = $fir;
-    $data->{sec} = $sec;
-    $data->{params} = '';
-    unless ($tag) {
-        my $pa = $self->params( { period    => [0,
-                                    $self->quote( $data->{period_from} ),
-                                    'period_from',
-                                    $self->quote( $data->{period_to} ),
-                                    'period_to'], p => $p } );
-        my $condition = $pa->{condition};
-        $data->{params} = $pa->{params};
-    
-        my $sql =
-    "select $fields, sum(j) as j, sum(d) as d, rownumber() over() as rowid from sum_cost_dfss $condition group by $fields";
-        my $pager = $self->page_data( $sql, $data->{index} );
-        $data->{data} = delete $pager->{data};
-        for my $key ( keys %$pager ) {
-            $data->{$key} = $pager->{$key};
-        }
-    }
-    $data->{items} = {
-        period => $self->dict->{dim}->{period},
-        p      => $self->dict->{dim}->{p}
-    };
-    $data->{header} = [
-        grep { $_ } (
-            $self->dict->{dim}->{$fir}, $self->dict->{dim}->{$sec},
-            '借方金额', '贷方金额'
-        )
-    ];
-    $data->{params} .= "&fir=$fir&sec=$sec";
-    $data->{params} .= "&tag=1" if $tag;
-    $data->{p_dict} = $self->p;
+    my $p = $self->params( { 
+                             p=> $p,
+                             period => [
+                                $self->quote( $period_from ),
+                                $self->quote( $period_to )
+                             ], } );
+    my $condition = $p->{condition};
+
+    my $sql =
+"select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_cost_dfss $condition group by $fields";
+    warn $sql;
+    my $data = $self->page_data( $sql, $page, $limit );
+    $data->{success} = true;
     
     warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-   
-    $self->stash( pd => $data );
+    
+    $self->render(json => $data);
 }
 
 1;

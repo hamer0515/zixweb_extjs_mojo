@@ -1,4 +1,4 @@
-package ZixWeb::Book::Hist::wlzj_ysbf;
+package ZixWeb::Book::Hist::bfee_rb;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
@@ -15,8 +15,8 @@ BEGIN {
 
 # result:
 #{
-#  wlzj_type      => undef,
-#  wlzj_type_dict => {
+#  bi      => undef,
+#  bi_dict => {
 #                     1  => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
 #                     ...
 #                   },
@@ -26,7 +26,7 @@ BEGIN {
 #  d_to          => undef,
 #  data          => [
 #                     {
-#                       wlzj_type => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                       bi => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
 #                       d => 0,
 #                       id => 2,
 #                       j => "65,8063.28",
@@ -39,7 +39,7 @@ BEGIN {
 #                   ],
 #  id            => undef,
 #  index         => 1,
-#  items         => { wlzj_type => "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id" },
+#  items         => { bi => "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id" },
 #  j_from        => undef,
 #  j_to          => undef,
 #  next_page     => 1,
@@ -55,7 +55,7 @@ BEGIN {
 #                     ...
 #                   },
 #}
-sub wlzj_ysbf {
+sub bfee_rb {
     my $self = shift;
     
     my $page = $self->param('page');
@@ -63,7 +63,7 @@ sub wlzj_ysbf {
     
     my $id = $self->param('id');
     my $params = {};
-    for (qw/ys_type ys_id j_from j_to d_from d_to period_from period_to wlzj_type/) {
+    for (qw/ys_type ys_id j_from j_to d_from d_to period_from period_to tx_date_from tx_date_to bi/) {
         my $p = $self->param($_);
         undef $p if $p eq '';
         $params->{$_} = $p;
@@ -72,7 +72,7 @@ sub wlzj_ysbf {
     $p = $self->params(
         {
             id => $id,
-            wlzj_type => $params->{wlzj_type},
+            bi => $params->{bi},
             ys_type  => $params->{ys_type}
               && $self->quote( $params->{ys_type} ),
             ys_id => $params->{ys_id},
@@ -80,6 +80,11 @@ sub wlzj_ysbf {
               [ 0, $params->{j_from}, $params->{j_to} ],
             d =>
               [ 0, $params->{d_from}, $params->{d_to} ],
+            tx_date => [
+                0,
+                $params->{tx_date_from} && $self->quote( $params->{tx_date_from} ),
+                $params->{tx_date_to} && $self->quote( $params->{tx_date_to} ),
+            ],
             period => [
                 $self->quote( $params->{period_from} ),
                 $self->quote( $params->{period_to} ),
@@ -87,7 +92,7 @@ sub wlzj_ysbf {
         }
     );
     my $sql =
-"select id, wlzj_type, ys_id, ys_type, j, d, period, rownumber() over(order by id desc) as rowid from book_wlzj_ysbf $p->{condition}";
+"select id, bi, ys_id, ys_type, j, d, tx_date, period, rownumber() over(order by id desc) as rowid from book_bfee_rb $p->{condition}";
     my $data = $self->page_data( $sql, $page, $limit );
     $data->{success} = true;
     

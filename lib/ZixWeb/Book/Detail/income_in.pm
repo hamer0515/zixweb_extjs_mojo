@@ -1,4 +1,4 @@
-package ZixWeb::BookMgr::Book::income_in;
+package ZixWeb::Book::Detail::income_in;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
@@ -15,53 +15,48 @@ BEGIN {
 
 # result:
 #{
-#  c => undef,
-#  count => 0,
-#  data => [],
-#  fir => "c",
-#  header => [
-#    "\x{5BA2}\x{6237}id",
-#    ...
-#  ],
-#  index => 1,
-#  items => {
-#    c => "\x{5BA2}\x{6237}id",
-#    p => "\x{4EA7}\x{54C1}id",
-#    period => "\x{671F}\x{95F4}\x{65E5}\x{671F}",
-#  },
-#  next_page => 1,
-#  p => undef,
-#  p_dict => {
-#    1 => "\x{57FA}\x{91D1}\x{6536}\x{6B3E}",
-#    ...
-#  },
-#  params => "&fir=c&sec=p&thi=period",
-#  period => undef,
-#  prev_page => 1,
-#  sec => "p",
-#  thi => "period",
-#  total_page => 1,
+#  bfj_acct      => undef,
+#  bfj_acct_dict => {
+#                     1  => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                     ...
+#                   },
+#  count         => 2,
+#  data          => [
+#                     {
+#                       bfj_acct => "\x{5305}\x{5546}\x{94F6}\x{884C}\x{5317}\x{4EAC}\x{5206}\x{884C}-002477419700010",
+#                       d => 0,
+#                       j => "65,8063.28",
+#                       period => "2013-03-25",
+#                       rowid => 1,
+#                     }, ...
+#                   ],
+#  fir           => "bfj_acct",
+#  header        => [
+#                     "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id",
+#                     ...
+#                   ],
+#  index         => 1,
+#  items         => {
+#                     bfj_acct => "\x{5907}\x{4ED8}\x{91D1}\x{8D26}\x{53F7}id",
+#                     period   => "\x{671F}\x{95F4}\x{65E5}\x{671F}",
+#                   },
+#  next_page     => 1,
+#  params        => "&fir=bfj_acct&sec=period",
+#  period        => undef,
+#  prev_page     => 1,
+#  sec           => "period",
+#  total_page    => 1,
 #}
+
 sub income_in {
     my $self = shift;
     
     my $page = $self->param('page');
     my $limit = $self->param('limit');
-    my $sort = $self->param('sort');
-    my $s_str = '';
-    if ($sort) {
-        $s_str = 'order by ';
-        $sort = decode_json $sort;
-        for my $s (@$sort) {
-            $s_str .= $s->{property}.' '.$s->{direction};
-        }
-    }
 
-    #c
+    # c
     my $c = $self->param('c');
-    $c = $self->quote($c) if $c;
-
-    #p
+    # p 
     my $p = $self->param('p');
 
     #period
@@ -74,24 +69,26 @@ sub income_in {
     $thi = $self->param('thi');
     unless ( $fir || $sec || $thi ) {
         $fir = 'c';
-        $sec = 'p';
-        $thi = 'period';
+        $sec = 'period';
+        $thi ='p';
     }
     my $fields = join ',', grep { $_ } ( $fir, $sec, $thi );
-    my $pa = $self->params( { c         => $c, 
-                              period    => [
+    my $p = $self->params( { c=> $c && $self->quote($c), 
+                             p=> $p,
+                             period => [
                                 $self->quote( $period_from ),
-                                $self->quote( $period_to )],
-                              p         => $p } );
-    my $condition = $pa->{condition};
+                                $self->quote( $period_to )
+                             ], } );
+    my $condition = $p->{condition};
 
     my $sql =
-"select $fields, sum(j) as j, sum(d) as d, rownumber() over($s_str) as rowid from sum_income_in $condition group by $fields";
-    my $data = $self->page_data( $sql, $page, $limit, $sort );
+"select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_income_in $condition group by $fields";
+    warn $sql;
+    my $data = $self->page_data( $sql, $page, $limit );
     $data->{success} = true;
     
     warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-   
+    
     $self->render(json => $data);
 }
 

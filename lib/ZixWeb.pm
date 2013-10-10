@@ -178,7 +178,7 @@ sub set_route {
     $r->any('/')->to(namespace => 'ZixWeb::Login::Login', action => 'show');
     
     # 基础信息
-    $r->any("/base/$_")->to(namespace => "ZixWeb::Component::Component", action => $_)   for (qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype bi_dict c fp cust_proto/);
+    $r->any("/base/$_")->to(namespace => "ZixWeb::Component::Component", action => $_)   for (qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype wlzjtype bi_dict c fp cust_proto/);
     
     # 登录路由
     $r->any("/login/$_")->to(namespace => "ZixWeb::Login::Login", action => $_)   for (qw/menu passwordreset login logout/);

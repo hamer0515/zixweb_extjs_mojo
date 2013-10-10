@@ -115,6 +115,17 @@ sub zjbdtype {
     $self->render( json => $result );
 }
 
+sub wlzjtype {
+     my $self = shift;
+     my $result = [];
+     my $wlzj_type = $self->dict->{types}{wlzj_type};
+     for my $key (sort {$wlzj_type->{$a} cmp $wlzj_type->{$b}} keys %$wlzj_type){
+         push @$result, {id => $key, name => $wlzj_type->{$key}};
+     }
+ 
+     $self->render( json => $result );
+}
+
 sub product {
     my $self = shift;
     my $result = [];
