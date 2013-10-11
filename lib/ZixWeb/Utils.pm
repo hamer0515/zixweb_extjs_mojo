@@ -367,7 +367,7 @@ sub _transform{
     $row->{zyzj_acct}    = $self->zyzj_acct->{ $row->{zyzj_acct} }    if $row->{zyzj_acct};
     
     for (qw/flag wlzj_type acct mission_status job_status dim_bi_type tx_type status/) {
-      $row->{$_}         = $self->dict->{types}->{$_}->{ $row->{$_} }             if defined $row->{$_};
+      $row->{$_}         = $self->dict->{types}->{$_}{ $row->{$_} }             if defined $row->{$_};
     }
     for ( qw/pack_status user_role_status/ ) {
       $row->{$_.'_name'}         = $self->dict->{types}{$_}{ $row->{$_} }             if defined $row->{$_};
@@ -380,10 +380,10 @@ sub _transform{
     
     if ( defined $row->{crt_id} ) {
         if ($row->{crt_id} == 0) {
-            $row->{crt_id} = "系统";
+            $row->{crt_id_name} = "系统";
         } 
         else {
-            $row->{crt_id} = $self->usernames->{$row->{crt_id}} || $row->{crt_id};
+            $row->{crt_id_name} = $self->usernames->{$row->{crt_id}} || $row->{crt_id};
         }
     }
     for (qw/bjhf_period round/) {

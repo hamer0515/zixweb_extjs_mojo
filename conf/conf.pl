@@ -24,6 +24,8 @@
     #expire
     expire => 14400,
     
+    di => [a..z, A..Z, 0..9],
+    
     #Accounting entries
     headers => {'1'=>['zyzj_acct','zjbd_type','zjbd_date'],
                 '2'=>['zyzj_acct','zjbd_type','zjbd_date'],

@@ -5,7 +5,6 @@ use DBI;
 use Env qw/ZIXWEB_HOME/;
 use Encode qw/decode/;
 use Cache::Memcached;
-use Mojolicious::Plugin::WWWSession;
 use ZixWeb::Utils qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
 use constant {
     DEBUG  => $ENV{ZIXWEB_DEBUG} || 0 ,
@@ -25,6 +24,17 @@ sub startup {
         'debug' => 0,
         'compress_threshold' => 10_000,
     };
+    
+    # 设置session签名的验证码（随机生成，每次重启后台的时候，session失效）
+    my $secret = '';
+    for (1..10){
+    $secret .= ${$config->{di}}[rand(62)];
+    }
+    $self->secret($secret);
+    
+    # 设置session过期时间
+    $self->session(expiration => $config->{expire});
+    
     #my $logdir = "$ZIXWEB_HOME/log";
     #unless (-e $logdir && -d $logdir){
     #    `mkdir $logdir`;
@@ -41,16 +51,6 @@ sub startup {
     
     # plugin
     $self->plugin( Charset => { charset => 'utf-8' } );
-    $self->plugin('RenderFile');
-    $self->plugin(
-        WWWSession => {
-               storage => [ 
-                            'Memcached' => { servers => $config->{mem_server} }
-                          ],
-               serialization => 'JSON',
-               expires => $config->{expire},
-            }
-    );
     
     # helper
     $self->helper( dbh          => sub { $dbh = &connect_db($self->configure) unless $dbh; return $dbh; } );
@@ -97,7 +97,7 @@ sub startup {
 
     # hook
     $self->hook( before_dispatch => \&_before_dispatch );
-
+    
     # Router
     $self->set_route;
     
@@ -124,7 +124,6 @@ sub _before_dispatch {
     #warn $path;
     if ( $path =~ /^index.html$/ ) {
         unless ( exists $sess->{uid} ) {
-            warn $path;
             $self->redirect_to('/');
             return;
         }

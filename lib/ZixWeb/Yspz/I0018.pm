@@ -1,8 +1,12 @@
-package ZixWeb::VoucherEntry::I0018;
+package ZixWeb::Yspz::I0018;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
 use Data::Dump qw/dump/;
+use JSON::XS;
+use boolean;
+use URI::Escape;
+use Encode qw/encode/;
 
 use constant {
     DEBUG  => $ENV{VOUCHERENTRY_DEBUG} || 0 ,
@@ -21,12 +25,29 @@ BEGIN {
 #  }
 sub i0018 {
     my $self = shift;
-    my $data;
-    $data->{bfj_acct_bj_dict} = $self->bfj_acct;
+    my $res;
+          
+    my $data = {};
+    $data->{_type} = "0018";
+    $data->{tx_amt} = $self->param('tx_amt') * 100;
+    for (qw/bfj_acct_bj zjbd_date_in c memo/) {
+        my $p = $self->param($_);
+        undef $p if $p eq '';
+        $data->{$_} = $p;
+    }
     
-    warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-
-    $self->stash( 'pd' => $data );
+    $res = $self->ua->post (
+        $self->configure->{svc_url}, encode_json {   
+            data => $data,
+            svc  => "yspz_0018",
+            sys  => { oper_user => $self->session->{uid} },
+        })->res->json->{status};
+    my $result->{success} = false;
+    if (defined $res && $res == 0){
+        $result->{success} = true;
+    }
+    $self->render(json => $result);
 }
+
 
 1;
