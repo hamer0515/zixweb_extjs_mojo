@@ -19,10 +19,16 @@ sub y0012 {
     my $limit = $self->param('limit');
     
     my $data = {};
-    for (qw/id flag period_from period_to /) {
+    for (qw/id flag period_from period_to revoke_user ts_revoke/) {
         $data->{$_} = $self->param($_);
     }
-    
+    if ( $data->{revoke_user} ) {
+        $data->{revoker} = $self->uids->{ $data->{revoke_user} } || -1;
+    }
+    if ( $data->{ts_revoke} ) {
+        $data->{ts_revoke_from} = $data->{ts_revoke} . ' 00:00:00';
+        $data->{ts_revoke_to}   = $data->{ts_revoke} . ' 23:59:59';
+    }
     my $p = $self->params(
         {
             period => [
@@ -32,17 +38,19 @@ sub y0012 {
             status      => 1,
             id          => $data->{id},
             flag        => $data->{flag},
+            revoke_user => $data->{revoker},
+            ts_revoke   => [
+                0,
+                $data->{ts_revoke_from} && $self->quote( $data->{ts_revoke_from} ),
+                $data->{ts_revoke_to} && $self->quote( $data->{ts_revoke_to} )
+            ]
         }
     );
     my $sql =
         "select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0012 $p->{condition}";
-    warn $sql;
+
     my $pager = $self->page_data( $sql, $page, $limit );
 
-    # id
-    for (@{$pager->{data}}){
-        $_->{crt_user} = $self->usernames->{ delete $_->{crt_id} } if $_->{crt_id};
-    }
     $pager->{success} = true;
     
     $self->render(json => $pager);

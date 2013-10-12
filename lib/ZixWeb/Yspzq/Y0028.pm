@@ -2,11 +2,11 @@ package ZixWeb::Yspzq::Y0028;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
-use JSON::XS;
 use boolean;
-use URI::Escape;
 
-use constant { DEBUG => $ENV{SOURCEDOC_DEBUG} || 0, };
+use constant {
+    DEBUG  => $ENV{SOURCEDOC_DEBUG} || 0 ,
+};
 
 BEGIN {
     require Data::Dump if DEBUG;
@@ -14,29 +14,11 @@ BEGIN {
 
 sub y0028 {
     my $self = shift;
-
-    my $page  = $self->param('page');
+    
+    my $page = $self->param('page');
     my $limit = $self->param('limit');
-
+    
     my $data = {};
-
-    for (
-        qw/ ssn c  cust_proto
-
-        wlzj_type p
-
-        tx_date_from  tx_date_to
-
-        cfee_from cwws_cfee_from
-        cfee_to cwws_cfee_to
-        cfee_back_from cwws_cfee_back_from
-        cfee_back_to cwws_cfee_back_to
-        /
-      )
-    {
-        $data->{$_} = $self->param($_);
-    }
-
     for (qw/id flag period_from period_to revoke_user ts_revoke/) {
         $data->{$_} = $self->param($_);
     }
@@ -47,40 +29,11 @@ sub y0028 {
         $data->{ts_revoke_from} = $data->{ts_revoke} . ' 00:00:00';
         $data->{ts_revoke_to}   = $data->{ts_revoke} . ' 23:59:59';
     }
-
-    
     my $p = $self->params(
         {
-            ssn => $data->{ssn} && $self->quote( $data->{ssn} ),
-            wlzj_type  => $data->{wlzj_type} && $self->quote($data->{wlzj_type} ),
-            p          => $data->{p} && $self->quote( $data->{p} ),
-            c          => $data->{c} && $self->quote( $data->{c} ),
-            cust_proto => $data->{cust_proto}
-              && $self->quote( $data->{cust_proto} ),
-
-            tx_date => [
-                0,
-                $data->{tx_date_from} && $self->quote( $data->{tx_date_from} ),
-                $data->{tx_date_to}   && $self->quote( $data->{tx_date_to} )
-            ],
-            cfee      => [ 2, $data->{cfee_from},      $data->{cfee_to} ],
-            cwws_cfee => [ 2, $data->{cwws_cfee_from}, $data->{cwws_cfee_to} ],
-            cfee_back => [
-                2,
-                $data->{cfee_back_from},
-                $data->{cfee_back_to}
-
-            ],
-            cwws_cfee_back => [
-                2,
-                $data->{cwws_cfee_back_from},
-                $data->{cwws_cfee_back_to}
-
-            ],
-
             period => [
                 $self->quote( $data->{period_from} ),
-                $self->quote( $data->{period_to} )
+                $self->quote( $data->{period_to} ),
             ],
             status      => 1,
             id          => $data->{id},
@@ -88,22 +41,19 @@ sub y0028 {
             revoke_user => $data->{revoker},
             ts_revoke   => [
                 0,
-                $data->{ts_revoke_from}
-                  && $self->quote( $data->{ts_revoke_from} ),
+                $data->{ts_revoke_from} && $self->quote( $data->{ts_revoke_from} ),
                 $data->{ts_revoke_to} && $self->quote( $data->{ts_revoke_to} )
             ]
         }
     );
-
     my $sql =
-"select id,c,cust_proto,  flag,  period, rownumber() over(order by id desc) as rowid from yspz_0028 $p->{condition}";
-
+        "select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0028 $p->{condition}";
 
     my $pager = $self->page_data( $sql, $page, $limit );
 
     $pager->{success} = true;
-
-    $self->render( json => $pager );
+    
+    $self->render(json => $pager);
 }
 
 1;
