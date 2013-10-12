@@ -73,16 +73,16 @@ sub add {
 
 sub action {
     my $self = shift;
-    my $action = $self->param('action');
+    my $opt = $self->param('action');
     my $id   = $self->param('id');
     my $date = $self->param('date');
     my $type = $self->param('type');
     my $res;
     my $result = { success => false };
-    if ($action eq 'run_job' || $action eq 'get_log') {
+    if ($opt eq 'run_job' || $opt eq 'get_log') {
         $res = $self->ua->post(
             $self->configure->{mgr_url}, encode_json {
-                action  => $action,
+                action  => $opt,
                 param   => {
                     job_id     => $id,
                     date       => $date,
@@ -90,9 +90,9 @@ sub action {
                     oper_user  => $self->session->{uid},
                 }
             })->res->json;
-        if ($action eq 'get_log') {
+        if ($opt eq 'get_log') {
             unless($res){
-                $self->render(json => {success : false});
+                $self->render(json => {success => false});
                 return;
             }
             my $r = "";
@@ -104,7 +104,7 @@ sub action {
     } else {
         $res = $self->ua->post(
             $self->configure->{mgr_url}, encode_json {
-                action  => $action,
+                action  => $opt,
                 param   => {
                     mission_id => $id,
                     date       => $date,
