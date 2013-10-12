@@ -5,7 +5,6 @@ use utf8;
 use JSON::XS;
 use boolean;
 use URI::Escape;
-use Data::Dump;
 
 use constant { DEBUG => $ENV{SOURCEDOC_DEBUG} || 0, };
 

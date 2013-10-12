@@ -1,4 +1,4 @@
-package ZixWeb::Yspzq::Y0000;
+package ZixWeb::Yspzq::Y0063;
 
 use Mojo::Base 'Mojolicious::Controller';
 use utf8;
@@ -12,7 +12,7 @@ BEGIN {
     require Data::Dump if DEBUG;
 }
 
-sub y0000 {
+sub y0063 {
     my $self = shift;
     
     my $page = $self->param('page');
@@ -47,14 +47,10 @@ sub y0000 {
         }
     );
     my $sql =
-        "select id, flag, crt_id, period, cause, rownumber() over(order by id desc) as rowid from yspz_0000 $p->{condition}";
-    warn $sql;
+        "select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0063 $p->{condition}";
+
     my $pager = $self->page_data( $sql, $page, $limit );
 
-    # id
-    for (@{$pager->{data}}){
-        $_->{crt_user} = $self->usernames->{ delete $_->{crt_id} } if $_->{crt_id};
-    }
     $pager->{success} = true;
     
     $self->render(json => $pager);
