@@ -55,8 +55,8 @@ archive)
     git archive master --format tar -o $ZIXWEB_HOME/tar/${temp}
     cd $ZIXWEB_HOME/tar
     tar -uf ${temp} ../public -h
-    gzip -f ${temp}> ${temp}.gz
-    echo archive file succeed ${temp}.gz
+    #gzip -f ${temp}> ${temp}.gz
+    echo archive file succeed ${temp}
     exit 0
     ;;
 restart)

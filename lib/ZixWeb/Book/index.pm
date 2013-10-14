@@ -46,12 +46,12 @@ sub get_books {
         $total->{d} += $row->{d};
         $tree->{$cls}{j} += $row->{j};
         $tree->{$cls}{d} += $row->{d};
-        $tree->{$cls}{text} = $self->dict->{types}{class}{$cls}.'-'.$cls;
+        $tree->{$cls}{text} = $cls.'-'.$self->dict->{types}{class}{$cls};
         my @name = split '-', $name;
         my @code = split '\.', $code;
         $tree->{$cls}{$code[0]}{j} +=  $row->{j};
         $tree->{$cls}{$code[0]}{d} +=  $row->{d};
-        $tree->{$cls}{$code[0]}{text} =  $name[0].'-'.$code[0];
+        $tree->{$cls}{$code[0]}{text} =  $code[0].'-'.$name[0];
         
         if($#name == 0) {
           $tree->{$cls}->{$code[0]}->{url} = $bn;
@@ -60,7 +60,7 @@ sub get_books {
         if($#name > 0) {
           $tree->{$cls}->{$code[0]}->{$code[1]}->{j} +=  $row->{j};
           $tree->{$cls}->{$code[0]}->{$code[1]}->{d} +=  $row->{d};
-          $tree->{$cls}->{$code[0]}->{$code[1]}->{text} =  $name[1].'-'.join '.', @code[0..1];
+          $tree->{$cls}->{$code[0]}->{$code[1]}->{text} =  join('.', @code[0..1]).'-'.$name[1];
           if($#name == 1){
             $tree->{$cls}->{$code[0]}->{$code[1]}->{url} = $bn;
             $tree->{$cls}->{$code[0]}->{$code[1]}->{leaf} = true;
@@ -69,7 +69,7 @@ sub get_books {
         if($#name > 1) {
           $tree->{$cls}->{$code[0]}->{$code[1]}->{$code[2]}->{j} +=  $row->{j};
           $tree->{$cls}->{$code[0]}->{$code[1]}->{$code[2]}->{d} +=  $row->{d};
-          $tree->{$cls}->{$code[0]}->{$code[1]}->{$code[2]}->{text} =  $name[2].'-'.join '.', @code[0..2];
+          $tree->{$cls}->{$code[0]}->{$code[1]}->{$code[2]}->{text} =  join('.', @code[0..2]).'-'.$name[2];
           if($#name == 2){
             $tree->{$cls}->{$code[0]}->{$code[1]}->{$code[2]}->{url} = $bn;
             $tree->{$cls}->{$code[0]}->{$code[1]}->{$code[2]}->{leaf} = true;
