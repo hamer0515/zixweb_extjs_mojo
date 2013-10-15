@@ -150,7 +150,7 @@ sub detail {
 			}
 			push @{ $fl->{j_book} }, $property if $property;
 		}
-		$fl->{j_amt} = $self->nf( $j_book->{amt} / 100 );
+		$fl->{j_amt} = $self->nf( $j_book->{j} / 100 );
 
 		#d_book
 		$property = {};
@@ -191,7 +191,7 @@ sub detail {
 			}
 			push @{ $fl->{d_book} }, $property if $property;
 		}
-		$fl->{d_amt} = $self->nf( $d_book->{amt} / 100 );
+		$fl->{d_amt} = $self->nf( $d_book->{d} / 100 );
 		push @$data, $fl;
 	}
 	$self->render( json => $data );
