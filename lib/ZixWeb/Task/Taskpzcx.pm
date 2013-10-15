@@ -211,7 +211,7 @@ sub detail {
             push @{$fl->{j_book}}, $property;
         }
         $fl->{j_amt} = ($jbook_data->{j} ne '0') ? $jbook_data->{j} : $jbook_data->{d};
-        $fl->{j_amt} = $self->nf($fl->{j_amt});
+        $fl->{j_amt} = $self->nf($fl->{j_amt} / 100);
         #d_book
         $property = {};    
         my $dbook_name    =$self->dict->{book}->{$pz->{db_id}}->[0];
@@ -250,7 +250,7 @@ sub detail {
             push @{$fl->{d_book}}, $property;        
         }    
         $fl->{d_amt} = ($dbook_data->{d} ne '0')?$dbook_data->{d}:$dbook_data->{j};
-        $fl->{d_amt} = $self->nf($fl->{d_amt});
+        $fl->{d_amt} = $self->nf($fl->{d_amt} / 100);
         push @$data, $fl;    
     }
     $self->render(json => $data);

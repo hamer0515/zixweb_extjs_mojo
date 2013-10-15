@@ -117,7 +117,7 @@ sub detail {
 
 		# 组成借方科目的表头部分
 		$property->{key}   = '借方科目';
-		$property->{value} = $jbook_name;
+		$property->{value} = $self->dict->{types}{book}{$jbook_name};
 		push @{ $fl->{j_book} }, $property;
 
 		#jbook的核算项
@@ -150,7 +150,7 @@ sub detail {
 			}
 			push @{ $fl->{j_book} }, $property if $property;
 		}
-		$fl->{j_amt} = $self->nf( $j_book->{amt} );
+		$fl->{j_amt} = $self->nf( $j_book->{amt} / 100 );
 
 		#d_book
 		$property = {};
@@ -158,7 +158,7 @@ sub detail {
 
 		# 组成贷方科目的表头部分
 		$property->{key}   = '贷方科目';
-		$property->{value} = $dbook_name;
+		$property->{value} = $self->dict->{types}{book}{$dbook_name};
 		push @{ $fl->{d_book} }, $property;
 
 		#dbook的核算项
@@ -191,7 +191,7 @@ sub detail {
 			}
 			push @{ $fl->{d_book} }, $property if $property;
 		}
-		$fl->{d_amt} = $self->nf( $d_book->{amt} );
+		$fl->{d_amt} = $self->nf( $d_book->{amt} / 100 );
 		push @$data, $fl;
 	}
 	$self->render( json => $data );
@@ -228,6 +228,14 @@ sub deny {
 	my $id     = $self->param('id');    #参数2
 	my $result = false;
 	my $res    = 1;
+
+	warn $self->dumper(
+		{
+			data => { id        => $id, },
+			svc  => "refuse_verify",
+			sys  => { oper_user => $self->session->{uid} },
+		}
+	);
 	$res = $self->ua->post(
 		$self->configure->{svc_url},
 		encode_json {

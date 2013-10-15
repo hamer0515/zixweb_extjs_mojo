@@ -227,8 +227,7 @@ sub bfjcheck {
 		my $zjbd_type;
 		$zjbd_type = $self->zjbd_type->{$tid};
 		$all->{$zjbd_type}->{bfee_yhys} =
-		  [ $ys_fee->{$tid}->{j_amt} / 100, $ys_fee->{$tid}->{d_amt} / 100 ]
-		  ;
+		  [ $ys_fee->{$tid}->{j_amt} / 100, $ys_fee->{$tid}->{d_amt} / 100 ];
 		$all->{$zjbd_type}->{zjbd_type_id} = $tid;
 	}
 
@@ -283,6 +282,7 @@ sub bfjcheck {
 	my $before_sql =
 "select sum(j)-sum(d) as b from sum_deposit_bfj where period<\'$zjbd_date\' and bfj_acct = $acct_id";
 	my $before_amt = ( $self->select($before_sql) )->[0]->{b} || 0;
+	$before_amt /= 100;
 	$all->{$before}  = $self->nf($before_amt);
 	$all->{$current} = $self->nf($ch);
 	$all->{$predict} = $self->nf( $before_amt + $ch );
