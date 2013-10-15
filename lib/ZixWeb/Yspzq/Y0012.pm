@@ -19,7 +19,7 @@ sub y0012 {
     my $limit = $self->param('limit');
     
     my $data = {};
-    for (qw/id flag period_from period_to revoke_user ts_revoke/) {
+    for (qw/id bfj_acct bfj_zjbd_type flag period_from period_to revoke_user ts_revoke/) {
         $data->{$_} = $self->param($_);
     }
     if ( $data->{revoke_user} ) {
@@ -37,6 +37,8 @@ sub y0012 {
             ],
             status      => 1,
             id          => $data->{id},
+            bfj_acct    => $data->{bfj_acct},
+            bfj_zjbd_type   => $data->{bfj_zjbd_type},
             flag        => $data->{flag},
             revoke_user => $data->{revoker},
             ts_revoke   => [
@@ -47,8 +49,8 @@ sub y0012 {
         }
     );
     my $sql =
-        "select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0012 $p->{condition}";
-
+        "select id, bfj_acct, zyzj_acct, flag, period, rownumber() over(order by id desc) as rowid from yspz_0012 $p->{condition}";
+    
     my $pager = $self->page_data( $sql, $page, $limit );
 
     $pager->{success} = true;

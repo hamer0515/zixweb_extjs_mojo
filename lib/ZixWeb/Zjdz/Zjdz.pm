@@ -16,41 +16,6 @@ BEGIN {
 #
 #模块名称:需对账银行账户查询
 #
-#param: index 第几页
-#       from 银行出入账起始时间
-#       to 银行出入账终止时间
-#       acct_type 账户分类
-#
-#return: hash  数据集
-#{
-#  count => 20,
-#  data => [
-#    {
-#      acct_id => 2,
-#      type => 1,
-#      b_acct => "\x{5317}\x{4EAC}\x{94F6}\x{884C}\x{4E0A}\x{6D77}\x{5206}\x{884C}\x{8425}\x{4E1A}\x{90E8}-00130630500120109167292",
-#      d => 0,
-#      j => "43,1972.81",
-#      rowid => 1,
-#      zjbd_date => "2013-03-26",
-#    },
-#    {
-#      acct_id => 3,
-#      acct_type => 1,
-#      b_acct => "\x{5DE5}\x{5546}\x{94F6}\x{884C}\x{5E7F}\x{897F}\x{94A6}\x{5DDE}\x{5206}\x{884C}-2107590019300023518",
-#      d => 2034.76,
-#      j => "52,2252.30",
-#      rowid => 2,
-#      zjbd_date => "2013-03-26",
-#    },
-#  ],
-#  from => ,
-#  index => 1,
-#  next_page => 1,
-#  prev_page => 1,
-#  to => undef,
-#  total_page => 1,
-#}
 
 sub bfj {
 	my $self = shift;
@@ -87,61 +52,6 @@ sub bfj {
 
 #
 #模块名称:需对账银行账户-对账 / 计算长短款
-#
-#param: tag       标记
-#       acct_type 账户分类
-#       acct_id   账户id
-#       zjbd_date 资金对账日期
-#       XXXX_j    某资金变动类型银行存款借方变动金额
-#       XXXX_d    某资金变动类型银行存款贷方变动金额
-#
-# return:  hash类型的数据集合
-#   例:
-# { acct_id  => 9,
-#   b_acct   => "\x{5E73}\x{5B89}\x{94F6}\x{884C}\x{4E0A}\x{6D77}\x{5F20}\x{6C5F}\x{652F}\x{884C}-2000004743525",
-#   data      => {
-#                 "length" => 3,
-#                 "records" => 21,
-#                 "t_ids" => [
-#                   "\x{5DE5}\x{884C}\x{76D1}\x{7BA1}\x{8D4E}\x{56DE}\x{672C}\x{6253}        ",
-#                   "\x{5176}\x{5B83}",
-#                   "\x{603B}\x{8BA1}",
-#                 ],
-#                 "\x{5176}\x{5B83}" => {
-#                   bfee_yhyf => ["0.00", "0.00"],
-#                   bfee_yhys => ["0.00", "0.00"],
-#                   ch_d => "0.00",
-#                   ch_j => "1,2222.00",
-#                   lc => ["0.00", "1,2222.00"],
-#                   sc => ["0.00", "0.00"],
-#                   txamt_yhyf => ["0.00", "0.00"],
-#                   txamt_yhys => ["0.00", "0.00"],
-#                   zjbd_type_id => 0,
-#                 },
-#                 "\x{5DE5}\x{884C}\x{76D1}\x{7BA1}\x{8D4E}\x{56DE}\x{672C}\x{6253}        " => {
-#                   bfee_yhyf => ["0.00", "0.00"],
-#                   bfee_yhys => ["0.00", "0.00"],
-#                   ch_d => "14,0458.94",
-#                   ch_j => "0.00",
-#                   lc => ["0.00", "0.00"],
-#                   sc => ["0.00", "0.00"],
-#                   txamt_yhyf => ["0.00", "14,0458.94"],
-#                   txamt_yhys => ["0.00", "0.00"],
-#                   zjbd_type_id => 9,
-#                 },
-#                 "\x{603B}\x{8BA1}" => {
-#                   bfee_yhyf => ["0.00", "0.00"],
-#                   bfee_yhys => ["0.00", "0.00"],
-#                   ch_d => "14,0458.94",
-#                   ch_j => "1,2222.00",
-#                   lc => ["0.00", "1,2222.00"],
-#                   sc => ["0.00", "0.00"],
-#                   txamt_yhyf => ["0.00", "14,0458.94"],
-#                   txamt_yhys => ["0.00", "0.00"],
-#                 },
-#               },
-#  zjbd_date => "2013-03-25",
-# }
 #
 sub bfjcheck {
 	my $self = shift;
@@ -264,13 +174,20 @@ sub bfjcheck {
 	my $ch   = $ch_j - $ch_d;
 
 	#金额数据格式化
+	my $tag = $self->param('tag');
 	for my $o ( @{ $all->{t_ids} } ) {
 		for my $k (qw/txamt_yhyf txamt_yhys bfee_yhyf bfee_yhys sc lc/) {
-			$all->{$o}->{$k}->[0] = $self->nf( $all->{$o}->{$k}->[0] );
-			$all->{$o}->{$k}->[1] = $self->nf( $all->{$o}->{$k}->[1] );
+			$all->{$o}{$k}[0] = $self->nf( $all->{$o}{$k}[0] );
+			$all->{$o}{$k}[1] = $self->nf( $all->{$o}{$k}[1] );
 		}
-		$all->{$o}->{ch_j} = $self->nf( $all->{$o}->{ch_j} );
-		$all->{$o}->{ch_d} = $self->nf( $all->{$o}->{ch_d} );
+		$all->{$o}{ch_j} = $self->nf( $all->{$o}{ch_j} );
+		$all->{$o}{ch_d} = $self->nf( $all->{$o}{ch_d} );
+		if ($tag) {
+			$all->{$o}->{ch_j} = $all->{$o}{lc}[1];
+			$all->{$o}{lc}[1]  = '0.00';
+			$all->{$o}->{ch_d} = $all->{$o}{sc}[0];
+			$all->{$o}{sc}[0]  = '0.00';
+		}
 	}
 
 	my ( $before, $current, $predict ) = (
@@ -291,7 +208,6 @@ sub bfjcheck {
 		$data->{$_} = delete $all->{$_};
 	}
 	$data->{data} = $all;
-
 	$data->{real_bank_ch} = $self->param('real_bank_ch') || '';
 	$self->render( json => $data );
 }
