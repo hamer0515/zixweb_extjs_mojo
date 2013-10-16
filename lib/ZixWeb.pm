@@ -119,7 +119,7 @@ sub _before_dispatch {
 
 	my $path = $self->req->url->path;
 	return 1 if $path =~ /^\/$/;                     # 登陆页面可以访问
-	return 1 if $path =~ /(js|jpg|gif|css|png)$/;    # 静态文件可以访问
+	return 1 if $path =~ /(js|jpg|gif|css|png|ico)$/;    # 静态文件可以访问
 	return 1 if $path =~ /html$/;                    # login
 
 	my $sess = $self->session;

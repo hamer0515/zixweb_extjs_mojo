@@ -188,7 +188,6 @@ sub c {
 	my $result = false;
 	my $c      = $self->param('name');
 	my @arr    = split( '\.', $c );
-	$arr[0] =~ s/^\-//;
 	my $cid   = $arr[0];
 	my $c_sql = "select count(*) as count from dict_dept where id= $cid";
 	my $count = $self->dbh->selectrow_hashref($c_sql);

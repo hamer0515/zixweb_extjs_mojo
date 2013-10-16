@@ -148,6 +148,9 @@ sub detail {
 			elsif ( $_ eq "acct" ) {
 				$property->{value} = $self->dict->{types}{acct}->{$co};
 			}
+			else {
+				$property->{value} = $co || "";
+			}
 			push @{ $fl->{j_book} }, $property if $property;
 		}
 		$fl->{j_amt} = $self->nf( $j_book->{j} / 100 );
@@ -189,9 +192,13 @@ sub detail {
 			elsif ( $_ eq "acct" ) {
 				$property->{value} = $self->dict->{types}{acct}{$co};
 			}
+			else {
+				$property->{value} = $co || "";
+			}
 			push @{ $fl->{d_book} }, $property if $property;
 		}
 		$fl->{d_amt} = $self->nf( $d_book->{d} / 100 );
+		warn $self->dumper($fl);
 		push @$data, $fl;
 	}
 	$self->render( json => $data );
