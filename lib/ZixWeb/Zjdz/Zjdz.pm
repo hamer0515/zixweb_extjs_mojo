@@ -368,7 +368,7 @@ sub get_sum {
 	my $tag  = shift;              #参数1
 	my $sum  = $all->{"总计"};
 
-	#Caculate short and long
+	# 计算长短款
 	for my $key ( @{ $all->{t_ids} } ) {
 		my $total_j = 0;
 		my $total_d = 0;
@@ -378,22 +378,26 @@ sub get_sum {
 		}
 		my $change = $total_j - $total_d;
 		$change = $all->{$key}->{ch_j} - $all->{$key}->{ch_d} - $change;
-		my @sc = ( "0", "0" );
-		my @lc = ( "0", "0" );
+		my @sc = ( 0, 0 );
+		my @lc = ( 0, 0 );
 		if ( $change > 0 ) {
-			$lc[1] = $change;
+			if ($tag) {
+				$all->{$key}->{ch_d} = $change;
+			}
+			else {
+				$lc[1] = $change;
+			}
 		}
 		elsif ( $change < 0 ) {
-			$sc[0] = -$change;
+			if ($tag) {
+				$all->{$key}->{ch_j} = -$change;
+			}
+			else {
+				$sc[0] = -$change;
+			}
 		}
-		if ($tag) {
-			$all->{$key}->{ch_j} = $sc[0];
-			$all->{$key}->{ch_d} = $sc[1];
-		}
-		else {
-			$all->{$key}->{sc} = [@sc];
-			$all->{$key}->{lc} = [@lc];
-		}
+		$all->{$key}->{sc} = [@sc];
+		$all->{$key}->{lc} = [@lc];
 	}
 
 	my ( $sum_ch_d, $sum_ch_j, $sc0, $sc1, $lc0, $lc1 ) = ( 0, 0, 0, 0, 0, 0 );
