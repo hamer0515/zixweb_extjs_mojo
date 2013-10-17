@@ -67,6 +67,9 @@ sub bfjcheck {
 	# date
 	my $zjbd_date = $self->param('zjbd_date');    #参数3
 
+	#tag
+	my $tag = $self->param('tag') || 0;
+
 	$data->{zjbd_date} = $zjbd_date;
 
 	my $p = $self->params(
@@ -166,7 +169,7 @@ sub bfjcheck {
 	@zjbd = grep { $_ ne "其它" } @zjbd;
 
 	#总计
-	$self->get_sum($all);
+	$self->get_sum( $all, $tag );
 	$all->{t_ids} = [ @zjbd, "其它", "总计" ];
 	$all->{length}++;
 	my $ch_j = $all->{"总计"}{ch_j};
@@ -174,7 +177,6 @@ sub bfjcheck {
 	my $ch   = $ch_j - $ch_d;
 
 	#金额数据格式化
-	my $tag = $self->param('tag');
 	for my $o ( @{ $all->{t_ids} } ) {
 		for my $k (qw/txamt_yhyf txamt_yhys bfee_yhyf bfee_yhys sc lc/) {
 			$all->{$o}{$k}[0] = $self->nf( $all->{$o}{$k}[0] );
@@ -182,12 +184,6 @@ sub bfjcheck {
 		}
 		$all->{$o}{ch_j} = $self->nf( $all->{$o}{ch_j} );
 		$all->{$o}{ch_d} = $self->nf( $all->{$o}{ch_d} );
-		if ($tag) {
-			$all->{$o}->{ch_j} = $all->{$o}{lc}[1];
-			$all->{$o}{lc}[1]  = '0.00';
-			$all->{$o}->{ch_d} = $all->{$o}{sc}[0];
-			$all->{$o}{sc}[0]  = '0.00';
-		}
 	}
 
 	my ( $before, $current, $predict ) = (
@@ -368,7 +364,8 @@ sub bfjcheckdone {
 sub get_sum {
 
 	my $self = shift;
-	my $all  = shift;              #参数1
+	my $all  = shift;
+	my $tag  = shift;              #参数1
 	my $sum  = $all->{"总计"};
 
 	#Caculate short and long
@@ -389,8 +386,14 @@ sub get_sum {
 		elsif ( $change < 0 ) {
 			$sc[0] = -$change;
 		}
-		$all->{$key}->{sc} = [@sc];
-		$all->{$key}->{lc} = [@lc];
+		if ($tag) {
+			$all->{$key}->{ch_j} = $sc[0];
+			$all->{$key}->{ch_d} = $sc[1];
+		}
+		else {
+			$all->{$key}->{sc} = [@sc];
+			$all->{$key}->{lc} = [@lc];
+		}
 	}
 
 	my ( $sum_ch_d, $sum_ch_j, $sc0, $sc1, $lc0, $lc1 ) = ( 0, 0, 0, 0, 0, 0 );

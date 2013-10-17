@@ -118,15 +118,15 @@ sub _before_dispatch {
 	my $self = shift;
 
 	my $path = $self->req->url->path;
-	return 1 if $path =~ /^\/$/;                     # 登陆页面可以访问
-	return 1 if $path =~ /(js|jpg|gif|css|png|ico)$/;    # 静态文件可以访问
-	return 1 if $path =~ /html$/;                    # login
+	return 1 if $path =~ /^\/$/;                      # 登陆页面可以访问
+	return 1 if $path =~ /(js|jpg|gif|css|png|ico)$/; # 静态文件可以访问
+	return 1 if $path =~ /html$/;                     # login
 
 	my $sess = $self->session;
 
 	# 没有登陆不让访问
-	return 1 if $path =~ /^\/login/;                 # 可以访问主菜单
-	return 1 if $path =~ /^\/base/;                  # 可以访问主菜单
+	return 1 if $path =~ /^\/login/;                  # 可以访问主菜单
+	return 1 if $path =~ /^\/base/;                   # 可以访问主菜单
 
 	#warn $path;
 	if ( $path =~ /^index.html$/ ) {
