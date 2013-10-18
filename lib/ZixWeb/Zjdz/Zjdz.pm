@@ -323,8 +323,8 @@ sub bfjcheckdone {
 			$c_d = $self->uf( $self->param( $self->zjbd_type->{$_} . "_d" ) )
 			  || 0;    #参数5
 		}
-		$data->{zjbd_type}->{$_}->{ch_j} = int( $c_j * 100 );
-		$data->{zjbd_type}->{$_}->{ch_d} = int( $c_d * 100 );
+		$data->{zjbd_type}->{$_}->{ch_j} = $c_j * 100;
+		$data->{zjbd_type}->{$_}->{ch_d} = $c_d * 100;
 	}
 	my $user = $self->session->{uid};
 	my $res  = $self->ua->post(
