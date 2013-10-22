@@ -4,12 +4,10 @@ use Mojo::Base 'Mojolicious::Controller';
 use utf8;
 use Data::Dump qw/dump/;
 
-use constant {
-    DEBUG  => $ENV{VOUCHERENTRY_DEBUG} || 0 ,
-};
+use constant { DEBUG => $ENV{VOUCHERENTRY_DEBUG} || 0, };
 
 BEGIN {
-    require Data::Dump if DEBUG;
+	require Data::Dump if DEBUG;
 }
 
 # result:
@@ -20,13 +18,13 @@ BEGIN {
 #                      }
 #  }
 sub i0054 {
-    my $self = shift;
-    my $data;
-    $data->{zyzj_acct_dict} = $self->zyzj_acct;
-    
-    warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
-    dump($data);
-    $self->stash( 'pd' => $data );
+	my $self = shift;
+	my $data;
+	$data->{zyzj_acct_dict} = $self->zyzj_acct;
+
+	warn "package: ", __FILE__, "\ndata:", Data::Dump->dump($data) if DEBUG;
+	dump($data);
+	$self->stash( 'pd' => $data );
 }
 
 1;
