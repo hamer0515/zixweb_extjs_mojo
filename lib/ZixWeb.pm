@@ -6,12 +6,8 @@ use Env qw/ZIXWEB_HOME/;
 use Encode qw/decode/;
 use Cache::Memcached;
 use ZixWeb::Utils
-  qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
-use constant { DEBUG => $ENV{ZIXWEB_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
+  qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/
+  ;
 
 # This method will run once at server start
 sub startup {

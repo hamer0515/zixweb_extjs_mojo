@@ -1,7 +1,6 @@
 package ZixWeb::Yspz::Action;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 use boolean;
 use JSON::XS;
 

@@ -2,16 +2,9 @@ package ZixWeb::Zjdz::Zjdz;
 
 use Mojo::Base 'Mojolicious::Controller';
 use POSIX qw/mktime/;
-use utf8;
 use DateTime;
 use boolean;
 use JSON::XS;
-
-use constant { DEBUG => $ENV{RECONCILIATION_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 #
 #模块名称:需对账银行账户查询

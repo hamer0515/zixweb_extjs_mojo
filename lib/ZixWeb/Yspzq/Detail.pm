@@ -1,26 +1,7 @@
 package ZixWeb::Yspzq::Detail;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
-use JSON::XS;
 use boolean;
-use URI::Escape;
-use Data::Dump;
-
-use constant { DEBUG => $ENV{SOURCEDOC_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
-
-#
-#模块名称:动态生成yspz详细信息
-#
-#param: ys_type 原始凭证类型
-#       id 原始凭证id
-#
-#return :hash数据集
-#
 
 sub detail {
 

@@ -1,17 +1,7 @@
 package ZixWeb::Component::Component;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
-use Digest::MD5;
-use JSON::XS;
 use boolean;
-use Encode;
-
-use constant { DEBUG => $ENV{BASIC_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 sub roles {
 	my $self = shift;
@@ -35,8 +25,7 @@ sub allroles {
 sub routes {
 	my $self = shift;
 	my $id   = $self->param('id');
-	my $sql =
-	  "select distinct route_name as text, parent_id, route_id
+	my $sql  = "select distinct route_name as text, parent_id, route_id
 	    from tbl_route_inf where status>=1";
 	my $rdata   = $self->select($sql);
 	my $checked = {};
@@ -52,10 +41,10 @@ sub routes {
 		if ( $pid != 0 ) {
 			my $p = [ grep { $_->{route_id} == $pid } @$rdata ]->[0];
 			unless ( exists $p->{children} ) {
-				$_->{leaf}    = true;
-				$_->{checked} = $checked->{ $_->{route_id} } ||= false;
-				$p->{leaf}    = false;
-				$p->{checked} = $checked->{ $p->{route_id} } ||= false;
+				$_->{leaf}     = true;
+				$_->{checked}  = $checked->{ $_->{route_id} } ||= false;
+				$p->{leaf}     = false;
+				$p->{checked}  = $checked->{ $p->{route_id} } ||= false;
 				$p->{children} = [];
 				push @{ $p->{children} }, $_;
 			}
@@ -188,9 +177,9 @@ sub c {
 	my $result = false;
 	my $c      = $self->param('name');
 	my @arr    = split( '\.', $c );
-	my $cid   = $arr[0];
-	my $c_sql = "select count(*) as count from dict_dept where id= $cid";
-	my $count = $self->dbh->selectrow_hashref($c_sql);
+	my $cid    = $arr[0];
+	my $c_sql  = "select count(*) as count from dict_dept where id= $cid";
+	my $count  = $self->dbh->selectrow_hashref($c_sql);
 	$result = true if $count && $count->{count} == 1;
 	return $self->render( json => { success => $result } );
 }

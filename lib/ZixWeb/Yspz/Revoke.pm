@@ -1,28 +1,8 @@
 package ZixWeb::Yspz::Revoke;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 use JSON::XS;
 use boolean;
-use URI::Escape;
-
-use constant { DEBUG => $ENV{SOURCEDOC_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
-
-#
-#模块名称:原始凭证撤销
-#
-#param: ys_type 原始凭证类型
-#       ys_id 原始凭证id
-#       revoke_cause 撤销原因
-#       period 会计期间
-#
-#return :hash数据集{"0"=>撤销提交成功或失败,"1"=>该原始凭证的类型（用于刷新父页面）}
-#      {"0"=>0,"1"=>1}
-#
 
 sub revoke {
 	my $self         = shift;

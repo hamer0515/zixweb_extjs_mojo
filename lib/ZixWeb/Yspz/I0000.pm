@@ -1,9 +1,9 @@
 package ZixWeb::Yspz::I0000;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 use JSON::XS;
 use boolean;
+use Encode qw/encode/;
 
 #
 #
