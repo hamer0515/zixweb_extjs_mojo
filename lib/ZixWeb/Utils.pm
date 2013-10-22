@@ -70,7 +70,7 @@ sub _initDict {
 		$dict->{dim}{ $row->{dim} } = $row->{name};
 	}
 	$data = $self->select(
-		"select class, key, val from dict where class like 'yspz%'" );
+		"select class, key, val from dict where class like 'yspz%'");
 	for my $row (@$data) {
 		$dict->{types}{ $row->{class} }{ $row->{key} } = $row->{val};
 	}
@@ -361,22 +361,7 @@ sub _transform {
 	my $self = shift;
 	my $row  = shift;
 
-# 单位转换：分=>元
-#for (qw/j d zjhb_amt zyzj_bfee tx_amt bfj_bfee cwwf_bfee wk_cfee
-#        bfee yhyf_bamt yhyf_txamt yhys_bamt yhys_txamt bfj_blc zyzj_blc
-#        zhgl_fee zhlx_amt yhys_bfee yhyf_bfee bfj_bsc zyzj_bsc
-#        psp_amt cfee psp_lfee lfee bfee_1 bfee_2 bfee_3 cwws_cfee
-#            cfee_back cwws_cfee_back zg_bfee zg_bfee_1 zg_bfee_2 zg_bfee_3
-#        ls_amt cwwf_bfee_1 cwwf_bfee_2 bfee_2_back bfee_3_back
-#        cwwf_bfee_3 cwwf_bfee_1_back cwwf_bfee_2_back cwwf_bfee_3_back
-#        zg_bfee_1_back zg_bfee_2_back zg_bfee_3_back bfee_1_back
-#        cwwf_bfee_1 cwwf_bfee_2 cwwf_bfee_3 cc_bfee_1 cc_bfee_2 cc_bfee_3
-#        cc_bfee_1_back cc_bfee_2_back cc_bfee_3_back in_cost rb_cwwf_bfee
-#        rb_cwwf_bfee_back bfee_4 bfee_5 cwwf_bfee_4 cwwf_bfee_5 zg_bfee_4 zg_bfee_5
-#        /) {
-#  $row->{$_}          /= 100  if $row->{$_};
-#}
-# 单位转换：分=>元 并格式化
+	# 单位转换：分=>元 并格式化
 	for (
 		qw/j d zjhb_amt zyzj_bfee tx_amt bfj_bfee cwwf_bfee wk_cfee
 		bfee yhyf_bamt yhyf_txamt yhys_bamt yhys_txamt bfj_blc zyzj_blc
