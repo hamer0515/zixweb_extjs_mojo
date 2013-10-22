@@ -40,7 +40,6 @@ sub y0000 {
 	);
 	my $sql =
 "select id, flag, crt_id, period, cause, rownumber() over(order by id desc) as rowid from yspz_0000 $p->{condition}";
-	warn $sql;
 	my $pager = $self->page_data( $sql, $page, $limit );
 
 	# 录入员登录名转化为id

@@ -6,8 +6,7 @@ use Env qw/ZIXWEB_HOME/;
 use Encode qw/decode/;
 use Cache::Memcached;
 use ZixWeb::Utils
-  qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/
-  ;
+  qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
 
 # This method will run once at server start
 sub startup {
@@ -124,7 +123,6 @@ sub _before_dispatch {
 	return 1 if $path =~ /^\/login/;                  # 可以访问主菜单
 	return 1 if $path =~ /^\/base/;                   # 可以访问主菜单
 
-	#warn $path;
 	if ( $path =~ /^index.html$/ ) {
 		unless ( exists $sess->{uid} ) {
 			$self->redirect_to('/');
