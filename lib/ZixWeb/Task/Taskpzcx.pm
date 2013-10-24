@@ -85,7 +85,7 @@ sub detail {
 "select id as shid, content, status as shstatus, v_user, v_ts,type as shtype, c_user, v_ts, ts_c from verify where id=$id";
 
 	my $ex = $self->select($ex_sql)->[0];
-	$ex->{content}      = decode_json $self->my_decode( $ex->{content} );
+	$ex->{content}      = decode_json $ex->{content};
 	$verify->{isverify} = true;
 	$verify->{title} =
 	  $ys_type . $self->ys_type->{$ys_type} . "凭证撤销审核详细信息";
