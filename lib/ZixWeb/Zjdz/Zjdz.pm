@@ -143,23 +143,22 @@ sub bfjcheck {
 		  [ $ys_fee->{$tid}->{j_amt} / 100, $ys_fee->{$tid}->{d_amt} / 100 ];
 		$all->{$zjbd_type}->{zjbd_type_id} = $tid;
 	}
-	
-		#########处理未知长短款###############
-	$all->{"未知入款"}->{ch_j} = $self->uf( $self->param( "未知入款_j" ) )
-		  || 0;    #参数4
-	$all->{"未知入款"}->{ch_d} = $self->uf( $self->param( "未知入款_d" ) )
-		  || 0;    #参数5
+
+	#########处理未知长短款###############
+	$all->{"未知入款"}->{ch_j} = $self->uf( $self->param("未知入款_j") )
+	  || 0;    #参数4
+	$all->{"未知入款"}->{ch_d} = $self->uf( $self->param("未知入款_d") )
+	  || 0;    #参数5
 	$all->{"未知入款"}->{txamt_yhys} = [ "0", "0" ];
 	$all->{"未知入款"}->{txamt_yhyf} = [ "0", "0" ];
 	$all->{"未知入款"}->{bfee_yhys}  = [ "0", "0" ];
 	$all->{"未知入款"}->{bfee_yhyf}  = [ "0", "0" ];
 	$all->{"未知入款"}->{zjbd_type_id} = '-6';
-	
-	
-	$all->{"未知出款"}->{ch_j} = $self->uf( $self->param( "未知出款_j" ) )
-		  || 0;    #参数5
-	$all->{"未知出款"}->{ch_d} = $self->uf( $self->param( "未知出款_d" ) )
-		  || 0;    #参数5
+
+	$all->{"未知出款"}->{ch_j} = $self->uf( $self->param("未知出款_j") )
+	  || 0;    #参数5
+	$all->{"未知出款"}->{ch_d} = $self->uf( $self->param("未知出款_d") )
+	  || 0;    #参数5
 	$all->{"未知出款"}->{txamt_yhys} = [ "0", "0" ];
 	$all->{"未知出款"}->{txamt_yhyf} = [ "0", "0" ];
 	$all->{"未知出款"}->{bfee_yhys}  = [ "0", "0" ];
@@ -167,40 +166,34 @@ sub bfjcheck {
 	$all->{"未知出款"}->{zjbd_type_id} = '-7';
 
 	##其它
-#	$all->{"其它"}->{txamt_yhys} = [ "0", "0" ];
-#	$all->{"其它"}->{txamt_yhyf} = [ "0", "0" ];
-#	$all->{"其它"}->{bfee_yhys}  = [ "0", "0" ];
-#	$all->{"其它"}->{bfee_yhyf}  = [ "0", "0" ];
-#	$all->{"其它"}->{zjbd_type_id} = 0;
-	
+	#	$all->{"其它"}->{txamt_yhys} = [ "0", "0" ];
+	#	$all->{"其它"}->{txamt_yhyf} = [ "0", "0" ];
+	#	$all->{"其它"}->{bfee_yhys}  = [ "0", "0" ];
+	#	$all->{"其它"}->{bfee_yhyf}  = [ "0", "0" ];
+	#	$all->{"其它"}->{zjbd_type_id} = 0;
 
 	my $length = keys %{$all};
 	$all->{t_ids} = [ keys %{$all} ];
 
 	$all->{l}       = $length;
 	$all->{records} = ( $length + 1 ) * 7 + 5;
-		
+
 	for ( @{ $all->{t_ids} } ) {
 		$all->{$_}->{ch_j} = $self->uf( $self->param( $_ . "_j" ) )
 		  || 0;    #参数4
 		$all->{$_}->{ch_d} = $self->uf( $self->param( $_ . "_d" ) )
 		  || 0;    #参数5
-		$all->{$_}->{memo} =  $self->param( $_ . "_memo" ) 
-		  || "";    
-		  warn"$all->{$_}->{memo}";
+		$all->{$_}->{memo} = $self->param( $_ . "_memo" )
+		  || "";
 	}
-		  
-		  
-		  
+
 	#sort delete "其它"
-#	my @zjbd = ( @{ $all->{t_ids} } );
-#	@zjbd = grep { $_ ne "其它"  } @zjbd;
-	
+	#	my @zjbd = ( @{ $all->{t_ids} } );
+	#	@zjbd = grep { $_ ne "其它"  } @zjbd;
+
 	#sort delete "其它"
 	my @zjbd = ( @{ $all->{t_ids} } );
-	@zjbd = grep { $_ ne "未知出款" &&  $_ ne "未知入款" } @zjbd;
-	
-	
+	@zjbd = grep { $_ ne "未知出款" && $_ ne "未知入款" } @zjbd;
 
 	#总计
 	$self->get_sum( $all, $tag );
@@ -336,14 +329,14 @@ sub bfjcheckdone {
 		$all->{$zjbd_type}->{bfee_yhys} =
 		  [ $ys_fee->{$zjbd_type}->{j_amt}, $ys_fee->{$zjbd_type}->{d_amt} ];
 	}
-	
+
 	####其他长款
 	$all->{'-6'}->{txamt_yhyf} = [ "0", "0" ];
 	$all->{'-6'}->{txamt_yhys} = [ "0", "0" ];
 	$all->{'-6'}->{bfee_yhys}  = [ "0", "0" ];
 	$all->{'-6'}->{bfee_yhyf}  = [ "0", "0" ];
 
-  ####其他短款
+	####其他短款
 	$all->{'-7'}->{txamt_yhyf} = [ "0", "0" ];
 	$all->{'-7'}->{txamt_yhys} = [ "0", "0" ];
 	$all->{'-7'}->{bfee_yhys}  = [ "0", "0" ];
@@ -354,28 +347,32 @@ sub bfjcheckdone {
 	for ( @{ $all->{t_ids} } ) {
 		my $c_j;
 		my $c_d;
-		if ( $_ == '-6' ) {##未知入款
+		if ( $_ == '-6' ) {    ##未知入款
 			$c_j = $self->uf( $self->param("未知入款_j") ) || 0;
 			$c_d = $self->uf( $self->param("未知入款_d") ) || 0;
-			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知入款_memo') || '';
+			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知入款_memo')
+			  || '';
 		}
-		elsif ( $_ == '-7' ) {##未知出款
+		elsif ( $_ == '-7' ) {    ##未知出款
 			$c_j = $self->uf( $self->param("未知出款_j") ) || 0;
 			$c_d = $self->uf( $self->param("未知出款_d") ) || 0;
-			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知出款_memo') || '';
+			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知出款_memo')
+			  || '';
 		}
 		else {
 			$c_j = $self->uf( $self->param( $self->zjbd_type->{$_} . "_j" ) )
-			  || 0;    #参数4
+			  || 0;               #参数4
 			$c_d = $self->uf( $self->param( $self->zjbd_type->{$_} . "_d" ) )
-			  || 0;    #参数5
-			$data->{zjbd_type}->{$_}->{memo} = $self->param( $self->zjbd_type->{$_}. 'memo') || '';
+			  || 0;               #参数5
+			$data->{zjbd_type}->{$_}->{memo} =
+			  $self->param( $self->zjbd_type->{$_} . 'memo' ) || '';
 		}
-		$data->{zjbd_type}->{$_}->{ch_j} = int( $c_j * 100 );
-		$data->{zjbd_type}->{$_}->{ch_d} = int( $c_d * 100 );		
+		$data->{zjbd_type}->{$_}->{ch_j} = $c_j * 100;
+		$data->{zjbd_type}->{$_}->{ch_d} = $c_d * 100;
 	}
-#	use Data::Dump;
-#	Data::Dump->dump($data);
+
+	#	use Data::Dump;
+	#	Data::Dump->dump($data);
 	my $user = $self->session->{uid};
 	my $res  = $self->ua->post(
 		$self->configure->{svc_url},
