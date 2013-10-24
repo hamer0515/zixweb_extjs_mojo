@@ -3,6 +3,7 @@ package ZixWeb::Role::Role;
 use Mojo::Base 'Mojolicious::Controller';
 use DateTime;
 use boolean;
+use JSON::XS;
 ################################
 # show role list
 ################################

@@ -37,24 +37,28 @@ sub menu {
 "select distinct route.route_name as text, route.route_value as url , route.parent_id, route.route_id 
 	from tbl_route_inf route
 	join tbl_role_route_map role_route
-	on route.status = 1 and route.route_id = role_route.route_id
+	on route.status between 1 and 2 and route.route_id = role_route.route_id
 	join tbl_user_role_map user_role
 	on user_role.role_id = role_route.role_id and user_role.user_id = $uid"
 	);
-	my $parents = [ grep { $_->{parent_id} == 0 } @$rdata ];
-	for my $parent (@$parents) {
-		my $children =
-		  [ grep { $_->{parent_id} && $_->{parent_id} == $parent->{route_id} }
-			  @$rdata ];
-		map {
-			delete $_->{route_id};
-			delete $_->{parent_id};
-			$_->{leaf} = true;
-		} @$children;
-		delete $parent->{route_id};
-		delete $parent->{parent_id};
-		$parent->{children} = $children;
+	for (@$rdata) {
+		my $pid = $_->{parent_id};
+		if ( $pid != 0 ) {
+			my $p = [ grep { $_->{route_id} == $pid } @$rdata ]->[0];
+			unless ( exists $p->{children} ) {
+				$_->{leaf}     = true;
+				$p->{leaf}     = false;
+				$p->{children} = [];
+				push @{ $p->{children} }, $_;
+			}
+			else {
+				$_->{leaf} = true;
+				push @{ $p->{children} }, $_;
+			}
+		}
 	}
+	my $parents =
+	  [ grep { exists $_->{parent_id} && $_->{parent_id} == 0 } @$rdata ];
 	$self->render( json => $parents );
 }
 

@@ -3,7 +3,7 @@ package ZixWeb::User::User;
 use Mojo::Base 'Mojolicious::Controller';
 use DateTime;
 use boolean;
-
+use JSON::XS;
 
 ################################
 # show user list

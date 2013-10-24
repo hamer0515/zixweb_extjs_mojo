@@ -2,9 +2,16 @@ package ZixWeb::Zjdz::Zjdz;
 
 use Mojo::Base 'Mojolicious::Controller';
 use POSIX qw/mktime/;
+use utf8;
 use DateTime;
 use boolean;
 use JSON::XS;
+
+use constant { DEBUG => $ENV{RECONCILIATION_DEBUG} || 0, };
+
+BEGIN {
+	require Data::Dump if DEBUG;
+}
 
 #
 #模块名称:需对账银行账户查询
@@ -137,12 +144,33 @@ sub bfjcheck {
 		$all->{$zjbd_type}->{zjbd_type_id} = $tid;
 	}
 
+	#########处理未知长短款###############
+	$all->{"未知长款"}->{ch_j} = $self->uf( $self->param("未知长款_j") )
+	  || 0;    #参数4
+	$all->{"未知长款"}->{ch_d} = $self->uf( $self->param("未知长款_d") )
+	  || 0;    #参数5
+	$all->{"未知长款"}->{txamt_yhys} = [ "0", "0" ];
+	$all->{"未知长款"}->{txamt_yhyf} = [ "0", "0" ];
+	$all->{"未知长款"}->{bfee_yhys}  = [ "0", "0" ];
+	$all->{"未知长款"}->{bfee_yhyf}  = [ "0", "0" ];
+	$all->{"未知长款"}->{zjbd_type_id} = '-6';
+
+	$all->{"未知短款"}->{ch_j} = $self->uf( $self->param("未知短款_j") )
+	  || 0;    #参数5
+	$all->{"未知短款"}->{ch_d} = $self->uf( $self->param("未知短款_d") )
+	  || 0;    #参数5
+	$all->{"未知短款"}->{txamt_yhys} = [ "0", "0" ];
+	$all->{"未知短款"}->{txamt_yhyf} = [ "0", "0" ];
+	$all->{"未知短款"}->{bfee_yhys}  = [ "0", "0" ];
+	$all->{"未知短款"}->{bfee_yhyf}  = [ "0", "0" ];
+	$all->{"未知短款"}->{zjbd_type_id} = '-7';
+
 	##其它
-	$all->{"其它"}->{txamt_yhys} = [ "0", "0" ];
-	$all->{"其它"}->{txamt_yhyf} = [ "0", "0" ];
-	$all->{"其它"}->{bfee_yhys}  = [ "0", "0" ];
-	$all->{"其它"}->{bfee_yhyf}  = [ "0", "0" ];
-	$all->{"其它"}->{zjbd_type_id} = 0;
+	#	$all->{"其它"}->{txamt_yhys} = [ "0", "0" ];
+	#	$all->{"其它"}->{txamt_yhyf} = [ "0", "0" ];
+	#	$all->{"其它"}->{bfee_yhys}  = [ "0", "0" ];
+	#	$all->{"其它"}->{bfee_yhyf}  = [ "0", "0" ];
+	#	$all->{"其它"}->{zjbd_type_id} = 0;
 
 	my $length = keys %{$all};
 	$all->{t_ids} = [ keys %{$all} ];
@@ -155,15 +183,21 @@ sub bfjcheck {
 		  || 0;    #参数4
 		$all->{$_}->{ch_d} = $self->uf( $self->param( $_ . "_d" ) )
 		  || 0;    #参数5
+		$all->{$_}->{memo} = $self->param( $_ . "_memo" )
+		  || "";
 	}
 
 	#sort delete "其它"
+	#	my @zjbd = ( @{ $all->{t_ids} } );
+	#	@zjbd = grep { $_ ne "其它"  } @zjbd;
+
+	#sort delete "其它"
 	my @zjbd = ( @{ $all->{t_ids} } );
-	@zjbd = grep { $_ ne "其它" } @zjbd;
+	@zjbd = grep { $_ ne "未知短款" && $_ ne "未知长款" } @zjbd;
 
 	#总计
 	$self->get_sum( $all, $tag );
-	$all->{t_ids} = [ @zjbd, "其它", "总计" ];
+	$all->{t_ids} = [ @zjbd, "未知长款", "未知短款", "总计" ];
 	$all->{length}++;
 	my $ch_j = $all->{"总计"}{ch_j};
 	my $ch_d = $all->{"总计"}{ch_d};
@@ -295,30 +329,50 @@ sub bfjcheckdone {
 		$all->{$zjbd_type}->{bfee_yhys} =
 		  [ $ys_fee->{$zjbd_type}->{j_amt}, $ys_fee->{$zjbd_type}->{d_amt} ];
 	}
-	####other
-	$all->{0}->{txamt_yhyf} = [ "0", "0" ];
-	$all->{0}->{txamt_yhys} = [ "0", "0" ];
-	$all->{0}->{bfee_yhys}  = [ "0", "0" ];
-	$all->{0}->{bfee_yhyf}  = [ "0", "0" ];
+
+	####其他长款
+	$all->{'-6'}->{txamt_yhyf} = [ "0", "0" ];
+	$all->{'-6'}->{txamt_yhys} = [ "0", "0" ];
+	$all->{'-6'}->{bfee_yhys}  = [ "0", "0" ];
+	$all->{'-6'}->{bfee_yhyf}  = [ "0", "0" ];
+
+	####其他短款
+	$all->{'-7'}->{txamt_yhyf} = [ "0", "0" ];
+	$all->{'-7'}->{txamt_yhys} = [ "0", "0" ];
+	$all->{'-7'}->{bfee_yhys}  = [ "0", "0" ];
+	$all->{'-7'}->{bfee_yhyf}  = [ "0", "0" ];
 
 	$all->{t_ids} = [ keys %{$all} ];
 
 	for ( @{ $all->{t_ids} } ) {
 		my $c_j;
 		my $c_d;
-		if ( $_ == 0 ) {
-			$c_j = $self->uf( $self->param("其它_j") ) || 0;
-			$c_d = $self->uf( $self->param("其它_d") ) || 0;
+		if ( $_ == '-6' ) {    ##未知长款
+			$c_j = $self->uf( $self->param("未知长款_j") ) || 0;
+			$c_d = $self->uf( $self->param("未知长款_d") ) || 0;
+			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知长款_memo')
+			  || '';
+		}
+		elsif ( $_ == '-7' ) {    ##未知短款
+			$c_j = $self->uf( $self->param("未知短款_j") ) || 0;
+			$c_d = $self->uf( $self->param("未知短款_d") ) || 0;
+			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知短款_memo')
+			  || '';
 		}
 		else {
 			$c_j = $self->uf( $self->param( $self->zjbd_type->{$_} . "_j" ) )
-			  || 0;    #参数4
+			  || 0;               #参数4
 			$c_d = $self->uf( $self->param( $self->zjbd_type->{$_} . "_d" ) )
-			  || 0;    #参数5
+			  || 0;               #参数5
+			$data->{zjbd_type}->{$_}->{memo} =
+			  $self->param( $self->zjbd_type->{$_} . 'memo' ) || '';
 		}
-		$data->{zjbd_type}->{$_}->{ch_j} = $c_j * 100;
-		$data->{zjbd_type}->{$_}->{ch_d} = $c_d * 100;
+		$data->{zjbd_type}->{$_}->{ch_j} = int( $c_j * 100 );
+		$data->{zjbd_type}->{$_}->{ch_d} = int( $c_d * 100 );
 	}
+
+	#	use Data::Dump;
+	#	Data::Dump->dump($data);
 	my $user = $self->session->{uid};
 	my $res  = $self->ua->post(
 		$self->configure->{svc_url},
