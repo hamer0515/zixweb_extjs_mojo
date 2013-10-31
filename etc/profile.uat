@@ -9,7 +9,7 @@ alias cde='cd $ZIXWEB_HOME/etc';
 alias cdl='cd $ZIXWEB_HOME/log';
 alias cdh='cd $ZIXWEB_HOME';
 
-export DB_NAME=zdb_uat
+export DB_NAME=zdb
 export DB_USER=db2inst
 export DB_PASS=db2inst
 export DB_SCHEMA=db2inst

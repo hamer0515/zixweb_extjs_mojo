@@ -51,7 +51,7 @@ status)
 archive)
     cd $ZIXWEB_HOME
     if [ "x$2" = 'x' ]; then
-        $2=mater
+        $2=master
     fi  
     temp=v$2.tar
     git archive $2 --format tar -o $ZIXWEB_HOME/tar/${temp}
