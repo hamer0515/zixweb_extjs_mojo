@@ -11,7 +11,11 @@ sub get_books {
 	my $data   = {};
 	my @books;
 	if ( $type eq 'all' ) {
-		@books = sort { $books->{$a}[2] cmp $books->{$b}[2] } keys %$books;
+		@books =
+		  grep { $books->{$_}[4] == 1 }
+		  sort { $books->{$a}[2] cmp $books->{$b}[2] } keys %$books;
+		push @books, grep { $books->{$_}[4] == 0 }
+		  sort { $books->{$a}[2] cmp $books->{$b}[2] } keys %$books;
 	}
 	elsif ( $type eq 'bfj' ) {
 		@books =
@@ -21,6 +25,11 @@ sub get_books {
 	elsif ( $type eq 'zyzj' ) {
 		@books =
 		  grep { $books->{$_}[4] == 0 }
+		  sort { $books->{$a}[2] cmp $books->{$b}[2] } keys %$books;
+	}
+	elsif ( $type eq 'fhyd' ) {
+		@books =
+		  grep { $books->{$_}[4] == 2 }
 		  sort { $books->{$a}[2] cmp $books->{$b}[2] } keys %$books;
 	}
 
@@ -111,6 +120,14 @@ sub zyzj {
 	my $self = shift;
 	my $data = $self->get_books('zyzj');
 	$data->{title} = '科目余额表-自有资金帐套';
+
+	$self->render( json => $data->{children} );
+}
+
+sub fhyd {
+	my $self = shift;
+	my $data = $self->get_books('fhyd');
+	$data->{title} = '科目余额表-富汇易达帐套';
 
 	$self->render( json => $data->{children} );
 }
