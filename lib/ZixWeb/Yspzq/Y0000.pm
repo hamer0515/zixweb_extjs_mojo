@@ -10,11 +10,14 @@ sub y0000 {
 	my $limit = $self->param('limit');
 
 	my $data = {};
-	for (qw/id flag period_from period_to revoke_user ts_revoke/) {
+	for (qw/id flag period_from period_to revoke_user ts_revoke crt_user/) {
 		$data->{$_} = $self->param($_);
 	}
 	if ( $data->{revoke_user} ) {
 		$data->{revoker} = $self->uids->{ $data->{revoke_user} } || -1;
+	}
+	if ( $data->{crt_user} ) {
+		$data->{crt_id} = $self->uids->{ $data->{crt_user} } || -1;
 	}
 	if ( $data->{ts_revoke} ) {
 		$data->{ts_revoke_from} = $data->{ts_revoke} . ' 00:00:00';
@@ -35,7 +38,8 @@ sub y0000 {
 				$data->{ts_revoke_from}
 				  && $self->quote( $data->{ts_revoke_from} ),
 				$data->{ts_revoke_to} && $self->quote( $data->{ts_revoke_to} )
-			]
+			],
+			crt_id => $data->{crt_id}
 		}
 	);
 	my $sql =

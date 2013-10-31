@@ -10,7 +10,7 @@ fi
 memcached=${ZIXWEB_HOME}/script/memcached.pid
 hypnotoad=${ZIXWEB_HOME}/script/hypnotoad.pid
 
-case $@ in
+case $1 in
 start) 
     if [ -f "$memcached" ]; then
         $0 status
@@ -50,7 +50,10 @@ status)
     ;;
 archive)
     cd $ZIXWEB_HOME
-    version=zixweb-`git describe master`
+    if [ "x$2" = 'x' ]; then
+        $2=mater
+    fi  
+    version=zixweb-`git describe $2`
     temp=${version}.tar
     git archive master --format tar -o $ZIXWEB_HOME/tar/${temp}
     cd $ZIXWEB_HOME/tar
