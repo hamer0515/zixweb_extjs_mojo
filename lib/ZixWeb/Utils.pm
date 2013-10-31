@@ -7,7 +7,7 @@ use warnings;
 
 our @ISA = qw(Exporter);
 our @EXPORT =
-  qw(_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
+  qw(_updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
   ;    #要输出给外部调用的函数或者变量，以空格分隔
 
 sub _uf {
@@ -141,6 +141,14 @@ sub _initDict {
 		$dict->{types}{wlzj_type}{ $row->{id} }      = $row->{name};
 		$dict->{types}{wlzjtypes_id}{ $row->{name} } = $row->{id};
 	}
+
+	#业务类型
+	$data = $self->select("select id, name from dim_fyw_type");
+	for my $row (@$data) {
+		$dict->{types}{fyw_type}{ $row->{id} } = $row->{name};
+		$dict->{types}{fyw_id}{ $row->{name} } = $row->{id};
+
+	}
 	$data = $self->select("select key, val from dict where class='class'");
 	for my $row (@$data) {
 		$dict->{types}{class}{ $row->{key} } = $row->{val};
@@ -169,6 +177,9 @@ sub _initDict {
 	$self->updateAcct;
 	$self->updateBfjacct;
 	$self->updateZyzjacct;
+	$self->updateFypacct;
+	$self->updateFhydacct;
+	$self->updateFhwtype;
 }
 
 # 更新角色路由信息
@@ -314,6 +325,49 @@ sub _updateZyzjacct {
 	$self->memd->set( 'zyzj_id',   $zyzj_id );
 }
 
+# 更新易宝中间账户号字典信息
+sub _updateFypacct {
+	my $self     = shift;
+	my $fyp_acct = {};
+	my $fyp_id   = {};
+	my $data     = $self->select("select id, acct, name from dim_fyp_acct");
+	for my $row (@$data) {
+		$fyp_acct->{ $row->{id} } = $row->{name} . "-" . $row->{acct};
+		$fyp_id->{ $row->{name} . "-" . $row->{acct} } = $row->{id};
+	}
+	$self->memd->set( 'fyp_acct', $fyp_acct );
+	$self->memd->set( 'fyp_id',   $fyp_id );
+}
+
+# 更新货物类型字典信息
+sub _updateFhwtype {
+	my $self     = shift;
+	my $fhw_type = {};
+	my $fhw_id   = {};
+	my $data     = $self->select("select id, name from dim_fhw_type");
+	for my $row (@$data) {
+		$fhw_type->{ $row->{id} } = $row->{name};
+		$fhw_id->{ $row->{name} } = $row->{id};
+	}
+	$self->memd->set( 'fhw_type', $fhw_type );
+	$self->memd->set( 'fhw_id',   $fhw_id );
+}
+
+# 更新富汇易达帐号字典信息
+sub _updateFhydacct {
+	my $self      = shift;
+	my $fhyd_acct = {};
+	my $fhyd_id   = {};
+	my $data =
+	  $self->select("select id, acct, acct_name, name from dim_fhyd_acct");
+	for my $row (@$data) {
+		$fhyd_acct->{ $row->{id} } = $row->{name} . "-" . $row->{acct};
+		$fhyd_id->{ $row->{name} . "-" . $row->{acct} } = $row->{id};
+	}
+	$self->memd->set( 'fhyd_acct', $fhyd_acct );
+	$self->memd->set( 'fhyd_id',   $fhyd_id );
+}
+
 sub _decode_ch {
 	my $self = shift;
 	my $row  = shift;
@@ -394,8 +448,17 @@ sub _transform {
 	$row->{zyzj_acct} = $self->zyzj_acct->{ $row->{zyzj_acct} }
 	  if $row->{zyzj_acct};
 
+	$row->{fyp_acct} = $self->fyp_acct->{ $row->{fyp_acct} }
+	  if $row->{fyp_acct};
+
+	$row->{fhyd_acct} = $self->fhyd_acct->{ $row->{fhyd_acct} }
+	  if $row->{fhyd_acct};
+
+	$row->{fhw_type} = $self->fhw_type->{ $row->{fhw_type} }
+	  if $row->{fhw_type};
+
 	for (
-		qw/flag wlzj_type acct mission_status job_status dim_bi_type tx_type status/
+		qw/flag wlzj_type fyw_type acct mission_status job_status dim_bi_type tx_type status/
 	  )
 	{
 		$row->{$_} = $self->dict->{types}->{$_}{ $row->{$_} }
