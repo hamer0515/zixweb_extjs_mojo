@@ -6,7 +6,8 @@ use Env qw/ZIXWEB_HOME/;
 use Encode qw/decode/;
 use Cache::Memcached;
 use ZixWeb::Utils
-  qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
+  qw/_updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
+
 # This method will run once at server start
 sub startup {
 	my $self   = shift;
@@ -77,6 +78,9 @@ sub startup {
 	$self->helper( updateAcct   => sub { $self->_updateAcct; } );
 	$self->helper( updateBfjacct  => sub { $self->_updateBfjacct; } );
 	$self->helper( updateZyzjacct => sub { $self->_updateZyzjacct; } );
+	$self->helper( updateFypacct  => sub { $self->_updateFypacct; } );
+	$self->helper( updateFhydacct => sub { $self->_updateFhydacct; } );
+	$self->helper( updateFhwtype  => sub { $self->_updateFhwtype; } );
 	$self->helper( routes         => sub { $self->memd->get('routes'); } );
 	$self->helper( users          => sub { $self->memd->get('users'); } );
 	$self->helper( usernames      => sub { $self->memd->get('usernames'); } );
@@ -94,6 +98,12 @@ sub startup {
 	$self->helper( zyzj_id        => sub { $self->memd->get('zyzj_id'); } );
 	$self->helper( acct           => sub { $self->memd->get('acct'); } );
 	$self->helper( acct_id        => sub { $self->memd->get('acct_id'); } );
+	$self->helper( fyp_acct       => sub { $self->memd->get('fyp_acct'); } );
+	$self->helper( fyp_id         => sub { $self->memd->get('fyp_id'); } );
+	$self->helper( fhyd_acct      => sub { $self->memd->get('fhyd_acct'); } );
+	$self->helper( fhyd_id        => sub { $self->memd->get('fhyd_id'); } );
+	$self->helper( fhw_type       => sub { $self->memd->get('fhw_type'); } );
+	$self->helper( fhw_id         => sub { $self->memd->get('fhw_id'); } );
 
 	# hook
 	$self->hook( before_dispatch => \&_before_dispatch );
@@ -180,7 +190,7 @@ sub set_route {
 	$r->any("/base/$_")
 	  ->to( namespace => "ZixWeb::Component::Component", action => $_ )
 	  for (
-		qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype wlzjtype bi_dict c fp cust_proto/
+		qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype wlzjtype fhwtype fywtype fypacct fhydacct bi_dict c fp cust_proto/
 	  );
 
 	# 登录路由
@@ -216,7 +226,7 @@ sub set_route {
 	  for (qw/bfj bfjcheck bfjcheckdone bfjgzcx/);
 
 	# 帐套查询
-	for (qw/all bfj zyzj/) {
+	for (qw/all bfj zyzj fhyd/) {
 		$r->any("/book/$_")
 		  ->to( namespace => "ZixWeb::Book::index", action => $_ );
 	}
@@ -237,7 +247,7 @@ sub set_route {
 		cost_dfss income_zhlx fee_jrjg bfee_cwwf
 		txamt_dqr_oys txamt_dqr_byf cost_bfee_zg
 		lfee_psp income_in cost_in
-		bfee_zqqr bfee_zqqr_zg/
+		bfee_zqqr bfee_zqqr_zg ckrsp_fhyd/
 	  )
 	{
 		$r->any("/book/hist/$_")
@@ -248,7 +258,8 @@ sub set_route {
 
 	# 原始凭证查询
 	for (
-		qw/   y0000 y0001 y0002 y0003 y0004
+		qw/
+		y0000 y0001 y0002 y0003 y0004
 		y0005 y0006 y0007 y0008 y0009
 		y0010 y0011 y0012 y0013 y0014
 		y0015 y0016 y0017 y0018

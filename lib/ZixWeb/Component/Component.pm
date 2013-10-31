@@ -153,6 +153,58 @@ sub wlzjtype {
 	$self->render( json => $result );
 }
 
+sub fywtype {
+	my $self     = shift;
+	my $result   = [];
+	my $fyw_type = $self->dict->{types}{fyw_type};
+	for my $key (
+		sort { $fyw_type->{$a} cmp $fyw_type->{$b} }
+		keys %$fyw_type
+	  )
+	{
+		push @$result, { id => $key, name => $fyw_type->{$key} };
+	}
+
+	$self->render( json => $result );
+}
+
+sub fhwtype {
+	my $self     = shift;
+	my $result   = [];
+	my $fhw_type = $self->fhw_type;
+	for my $key ( sort { $fhw_type->{$a} cmp $fhw_type->{$b} } keys %$fhw_type )
+	{
+		push @$result, { id => $key, name => $fhw_type->{$key} };
+	}
+
+	$self->render( json => $result );
+}
+
+sub fypacct {
+	my $self     = shift;
+	my $result   = [];
+	my $fyp_acct = $self->fyp_acct;
+	for my $key ( sort { $fyp_acct->{$a} cmp $fyp_acct->{$b} } keys %$fyp_acct )
+	{
+		push @$result, { id => $key, name => $fyp_acct->{$key} };
+	}
+
+	$self->render( json => $result );
+}
+
+sub fhydacct {
+	my $self      = shift;
+	my $result    = [];
+	my $fhyd_acct = $self->fhyd_acct;
+	for my $key ( sort { $fhyd_acct->{$a} cmp $fhyd_acct->{$b} }
+		keys %$fhyd_acct )
+	{
+		push @$result, { id => $key, name => $fhyd_acct->{$key} };
+	}
+
+	$self->render( json => $result );
+}
+
 sub product {
 	my $self   = shift;
 	my $result = [];
