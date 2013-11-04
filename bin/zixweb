@@ -51,9 +51,12 @@ status)
 archive)
     cd $ZIXWEB_HOME
     version=zixweb-`git describe master`
-    prefix=${version}/
-    git archive master --prefix="$prefix" |gzip > ${ZIXWEB_HOME}/tar/${version}.tar.gz
-    echo archive file succeed ${ZIXWEB_HOME}/tar/${version}.tar.gz
+    temp=${version}.tar
+    git archive master --format tar -o $ZIXWEB_HOME/tar/${temp}
+    cd $ZIXWEB_HOME/tar
+    tar -uf ${temp} ../public -h
+    #gzip -f ${temp}> ${temp}.gz
+    echo archive file succeed ${temp}
     exit 0
     ;;
 restart)

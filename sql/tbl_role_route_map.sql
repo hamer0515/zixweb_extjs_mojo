@@ -42,6 +42,8 @@ insert into tbl_role_route_map(role_id, route_id) values
 
 (1, 60),
 (1, 61),
+(1, 62),
+(1, 63),
 
 (1, 70),
 (1, 71),
