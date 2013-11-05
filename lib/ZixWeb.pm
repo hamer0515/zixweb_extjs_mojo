@@ -7,12 +7,6 @@ use Encode qw/decode/;
 use Cache::Memcached;
 use ZixWeb::Utils
   qw/_updateAcct _transform _updateBfjacct _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
-use constant { DEBUG => $ENV{ZIXWEB_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
-
 # This method will run once at server start
 sub startup {
 	my $self   = shift;
@@ -128,7 +122,6 @@ sub _before_dispatch {
 	return 1 if $path =~ /^\/login/;                  # 可以访问主菜单
 	return 1 if $path =~ /^\/base/;                   # 可以访问主菜单
 
-	#warn $path;
 	if ( $path =~ /^index.html$/ ) {
 		unless ( exists $sess->{uid} ) {
 			$self->redirect_to('/');
@@ -293,7 +286,7 @@ sub set_route {
 	# 凭证录入
 	for (
 		qw/i0000 i0001 i0006 i0008 i0009 i0013
-		i0014 i0015 i0018 i0028 i0029 i0054
+		i0014 i0015 i0018 i0028 i0029 i0054 i0101
 		/
 	  )
 	{

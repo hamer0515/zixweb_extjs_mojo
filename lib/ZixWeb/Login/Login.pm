@@ -43,12 +43,12 @@ sub menu {
 		return;
 	}
 	my $rdata = $self->select(
-"select distinct route.route_name as text, route.route_value as url , route.parent_id, route.route_id
-        from tbl_route_inf route
-        join tbl_role_route_map role_route
-        on route.status between 1 and 2 and route.route_id = role_route.route_id
-        join tbl_user_role_map user_role
-        on user_role.role_id = role_route.role_id and user_role.user_id = $uid"
+"select distinct route.route_name as text, route.route_value as url , route.parent_id, route.route_id 
+	from tbl_route_inf route
+	join tbl_role_route_map role_route
+	on route.status between 1 and 2 and route.route_id = role_route.route_id
+	join tbl_user_role_map user_role
+	on user_role.role_id = role_route.role_id and user_role.user_id = $uid"
 	);
 	for (@$rdata) {
 		my $pid = $_->{parent_id};
