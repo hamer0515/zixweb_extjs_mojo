@@ -47,7 +47,7 @@ sub y0014 {
 		}
 	);
 	my $sql =
-"select bfj_acct, zhlx_amt, id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0014 $p->{condition}"
+"select  bfj_acct, zhlx_amt, id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0014 $p->{condition}"
 	  ;
 
 	my $pager = $self->page_data( $sql, $page, $limit );
