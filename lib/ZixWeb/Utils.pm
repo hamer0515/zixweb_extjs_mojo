@@ -427,7 +427,10 @@ sub _transform {
 		zg_bfee_1_back zg_bfee_2_back zg_bfee_3_back bfee_1_back
 		cwwf_bfee_1 cwwf_bfee_2 cwwf_bfee_3 cc_bfee_1 cc_bfee_2 cc_bfee_3
 		cc_bfee_1_back cc_bfee_2_back cc_bfee_3_back in_cost rb_cwwf_bfee
-		rb_cwwf_bfee_back bfee_4 bfee_5 cwwf_bfee_4 cwwf_bfee_5 zg_bfee_4 zg_bfee_5
+		rb_cwwf_bfee_back bfee_4 bfee_5 cwwf_bfee_4 cwwf_bfee_5 zg_bfee_4 zg_bfee_5  back_amt
+        income_amt
+        entrust_amt
+        loss_amt
 		/
 	  )
 	{
