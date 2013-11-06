@@ -247,7 +247,9 @@ sub set_route {
 		cost_dfss income_zhlx fee_jrjg bfee_cwwf
 		txamt_dqr_oys txamt_dqr_byf cost_bfee_zg
 		lfee_psp income_in cost_in
-		bfee_zqqr bfee_zqqr_zg ckrsp_fhyd/
+		bfee_zqqr bfee_zqqr_zg ckrsp_fhyd deposit_fhyd
+        camt_fhyd ypsc_fhyd camt_dgd_fhyd yp_acct_fhyd 
+        yufamt_ch_fhyd nctxamt_dqr_oys_fhyd  tctxamt_dqr_oys_fhyd/
 	  )
 	{
 		$r->any("/book/hist/$_")
@@ -283,6 +285,11 @@ sub set_route {
 		y0110 y0111 y0112 y0113 y0114
 		y0115 y0116 y0117 y0118 y0119
 		y0120 y0121 y0122 y0123 y0124
+        yF0022 yF0023 yF0024 yF0025 yF0026
+        yF0027 yF0028 yF0029 yF0030 yF0031
+        yF0032 yF0033 yF0034 yF0035 yF0036
+        yF0037 yF0038 yF0039 yF0040 yF0041
+        yF0042 yF0043 yF0044
 		detail/
 	  )
 	{

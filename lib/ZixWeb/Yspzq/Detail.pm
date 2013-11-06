@@ -95,11 +95,10 @@ sub detail {
 	push @$data, $detail;
 
 	my $jzpz_sql =
-"select * from jzpz where ys_type=$ys_type and ys_id=$ys_id order by cast(left(fid,3) as float)";
-
+"select * from jzpz where ys_type='$ys_type' and ys_id=$ys_id order by cast(left(fid,3) as float)";
+  
 	#jzpz所有记录
 	my $jzpz = $self->select($jzpz_sql);
-
 	#组建jd_books的json
 	#
 	my $num = 0;
@@ -153,6 +152,18 @@ sub detail {
 			elsif ( $_ eq "acct" ) {
 				$property->{value} = $self->acct->{$co};
 			}
+            elsif ( $_ eq "fhw_type" ) {
+                $property->{value} = $self->fhw_type->{$co};
+            }
+            elsif ( $_ eq "fyw_type" ) {
+                $property->{value} = $self->dict->{types}{fyw_type}->{$co};
+            }
+            elsif ( $_ eq "fhyd_acct" ) {
+                $property->{value} = $self->fhyd_acct->{$co};
+            }
+            elsif ( $_ eq "fyp_acct" ) {
+                $property->{value} = $self->fyp_acct->{$co};
+            }
 			else {
 				$property->{value} = $co || "";
 			}
@@ -203,6 +214,18 @@ sub detail {
 			elsif ( $_ eq "acct" ) {
 				$property->{value} = $self->acct->{$co};
 			}
+            elsif ( $_ eq "fhw_type" ) {
+                $property->{value} = $self->fhw_type->{$co};
+            }
+            elsif ( $_ eq "fyw_type" ) {
+                $property->{value} = $self->dict->{types}{fyw_type}->{$co};
+            }
+            elsif ( $_ eq "fhyd_acct" ) {
+                $property->{value} = $self->fhyd_acct->{$co};
+            }
+            elsif ( $_ eq "fyp_acct" ) {
+                $property->{value} = $self->fyp_acct->{$co};
+            }
 			else {
 				$property->{value} = $co || "";
 			}
