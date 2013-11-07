@@ -24,8 +24,7 @@ sub camt_dgd_fhyd {
 	my $period_to   = $self->param('period_to');
 
     # fhw_type
-	my $fhw_type = $self->param('fhw_type');
- 
+    my $fhw_type = $self->param('fhw_type'); 
     # f_ssn
     my $f_ssn = $self->param('f_ssn');
 
@@ -49,7 +48,7 @@ sub camt_dgd_fhyd {
         $six = 'f_ssn';
         $sev = 'fs_rate';
 	}
-	my $fields = join ',', grep { $_ } ( $fir, $sec, $thi, $fou , $fiv, $six, $sev);
+	my $fields = join ',', grep { $_ } ( $fir, $sec, $thi, $fou, $fiv, $six, $sev);
 	my $pp = $self->params(
 		{
 			fc => $fc && $self->quote($fc),
