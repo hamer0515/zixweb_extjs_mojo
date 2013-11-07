@@ -247,7 +247,9 @@ sub set_route {
 		cost_dfss income_zhlx fee_jrjg bfee_cwwf
 		txamt_dqr_oys txamt_dqr_byf cost_bfee_zg
 		lfee_psp income_in cost_in
-		bfee_zqqr bfee_zqqr_zg ckrsp_fhyd/
+		bfee_zqqr bfee_zqqr_zg ckrsp_fhyd deposit_fhyd
+		camt_fhyd ypsc_fhyd camt_dgd_fhyd yp_acct_fhyd
+		yufamt_ch_fhyd nctxamt_dqr_oys_fhyd  tctxamt_dqr_oys_fhyd cost_fee_fhyd cost_ncss_fhyd /
 	  )
 	{
 		$r->any("/book/hist/$_")
