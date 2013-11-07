@@ -164,7 +164,7 @@ sub _initDict {
 		zjbd_date_in_zyzj zjbd_date_out zjbd_date_out_1 zjbd_date_out_2 zjbd_date_out_3
 		zjbd_date_out_bj zjbd_date_out_bfj zjbd_date_out_zyzj zjhb_amt zhlx_amt zhgl_fee
 		zyzj_bfee zyzj_blc zyzj_bsc wk_cfee yhys_txamt yhys_bamt yhys_bfee yhys_bamt yhyf_bamt
-		yhyf_bfee yhyf_bamt lfee ls_amt psp_lfee psp_amt rp_bfee in_cost/
+		yhyf_bfee yhyf_bamt lfee ls_amt psp_lfee psp_amt rp_bfee in_cost fe_date/
 	  )
 	{
 		$dict->{types}{range_fields}->{$_} = 1;
