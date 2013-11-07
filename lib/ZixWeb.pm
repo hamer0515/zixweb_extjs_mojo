@@ -253,7 +253,8 @@ sub set_route {
 		yufamt_ch_fhyd nctxamt_dqr_oys_fhyd  tctxamt_dqr_oys_fhyd cost_fee_fhyd cost_ncss_fhyd
 		yplc_fhyd yfamt_m_fhyd chamt_dgd_fhyd
 		yfamt_ch_fhyd yfamt_dcch_fhyd yusamt_c_fhyd nctxamt_dqr_oyf_fhyd
-		tctxamt_dqr_oyf_fhyd cost_tcss_fhyd cost_dcch_fhyd/
+		tctxamt_dqr_oyf_fhyd cost_tcss_fhyd cost_dcch_fhyd
+		income_main_fhyd income_add_fhyd /
 	  )
 	{
 		$r->any("/book/hist/$_")
