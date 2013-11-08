@@ -69,7 +69,7 @@
         '203'=> [ 'fyp_acct','fyw_type','fe_date'],
         '204'=> [ 'fc','fhw_type','f_ssn','fs_rate','fyw_type','ftx_date'],
         '205'=> [ 'fyp_acct','fio_date'],
-        '206'=> [ 'fc','fyw_type', 'fio_date'],
+        '206'=> [ 'fc','fyw_type'],
         '207'=> [ 'fc',  'fhw_type' , 'f_ssn' ,'fs_rate' , 'ftx_date'],
         '208'=> [ 'fc',  'fhw_type',  'fch_ssn',  'f_rate',  'ftx_date'],
         '209'=> [ 'fyp_acct', 'fyw_type', 'fe_date'],
