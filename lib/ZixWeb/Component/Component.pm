@@ -35,8 +35,7 @@ sub allroles {
 sub routes {
 	my $self = shift;
 	my $id   = $self->param('id');
-	my $sql =
-	  "select distinct route_name as text, parent_id, route_id
+	my $sql  = "select distinct route_name as text, parent_id, route_id
 	    from tbl_route_inf where status>=1";
 	my $rdata   = $self->select($sql);
 	my $checked = {};
@@ -52,10 +51,10 @@ sub routes {
 		if ( $pid != 0 ) {
 			my $p = [ grep { $_->{route_id} == $pid } @$rdata ]->[0];
 			unless ( exists $p->{children} ) {
-				$_->{leaf}    = true;
-				$_->{checked} = $checked->{ $_->{route_id} } ||= false;
-				$p->{leaf}    = false;
-				$p->{checked} = $checked->{ $p->{route_id} } ||= false;
+				$_->{leaf}     = true;
+				$_->{checked}  = $checked->{ $_->{route_id} } ||= false;
+				$p->{leaf}     = false;
+				$p->{checked}  = $checked->{ $p->{route_id} } ||= false;
 				$p->{children} = [];
 				push @{ $p->{children} }, $_;
 			}
@@ -196,8 +195,10 @@ sub fhydacct {
 	my $self      = shift;
 	my $result    = [];
 	my $fhyd_acct = $self->fhyd_acct;
-	for my $key ( sort { $fhyd_acct->{$a} cmp $fhyd_acct->{$b} }
-		keys %$fhyd_acct )
+	for my $key (
+		sort { $fhyd_acct->{$a} cmp $fhyd_acct->{$b} }
+		keys %$fhyd_acct
+	  )
 	{
 		push @$result, { id => $key, name => $fhyd_acct->{$key} };
 	}
@@ -227,6 +228,19 @@ sub bi_dict {
 
 sub ystype {
 	my $self    = shift;
+	my $entity  = $self->param('entity') || 0;
+	my $fir     = { 0 => '.', 1 => 0, 2 => 'F' };
+	my $result  = [];
+	my $ys_type = $self->ys_type;
+	for my $key ( sort keys %$ys_type ) {
+		push @$result, { id => $key, name => $key . $ys_type->{$key} }
+		  if $key =~ /^$fir->{$entity}/;
+	}
+	$self->render( json => $result );
+}
+
+sub ystype_fhyd {
+	my $self    = shift;
 	my $result  = [];
 	my $ys_type = $self->ys_type;
 	for my $key ( sort keys %$ys_type ) {
@@ -240,9 +254,9 @@ sub c {
 	my $result = false;
 	my $c      = $self->param('name');
 	my @arr    = split( '\.', $c );
-	my $cid   = $arr[0];
-	my $c_sql = "select count(*) as count from dict_dept where id= $cid";
-	my $count = $self->dbh->selectrow_hashref($c_sql);
+	my $cid    = $arr[0];
+	my $c_sql  = "select count(*) as count from dict_dept where id= $cid";
+	my $count  = $self->dbh->selectrow_hashref($c_sql);
 	$result = true if $count && $count->{count} == 1;
 	return $self->render( json => { success => $result } );
 }
