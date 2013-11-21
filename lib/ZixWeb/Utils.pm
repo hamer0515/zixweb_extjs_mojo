@@ -4,10 +4,12 @@ use base qw/Exporter/;
 use utf8;
 use strict;
 use warnings;
+use UUID;
+use Spreadsheet::WriteExcel;
 
 our @ISA = qw(Exporter);
 our @EXPORT =
-  qw(_updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
+  qw(_gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
   ;    #要输出给外部调用的函数或者变量，以空格分隔
 
 sub _uf {
@@ -27,7 +29,6 @@ sub _nf {
 	}
 	$num = sprintf "%.2f", $num;
 	my ( $p1, $p2 ) = split '\.', $num;
-
 	my $len = length $p1;
 
 	my $grp = int( $len / 3 );
@@ -42,7 +43,6 @@ sub _nf {
 	}
 
 	$p1 = join ',', unpack $format, $p1;
-
 	if ( $minus > 0 ) {
 		return "$p1.$p2";
 	}
@@ -427,9 +427,8 @@ sub _transform {
 		zg_bfee_1_back zg_bfee_2_back zg_bfee_3_back bfee_1_back
 		cwwf_bfee_1 cwwf_bfee_2 cwwf_bfee_3 cc_bfee_1 cc_bfee_2 cc_bfee_3
 		cc_bfee_1_back cc_bfee_2_back cc_bfee_3_back in_cost rb_cwwf_bfee
-		rb_cwwf_bfee_back bfee_4 bfee_5 cwwf_bfee_4 cwwf_bfee_5 zg_bfee_4 zg_bfee_5  
-
-        tx_amt cj_amt chtx_amt mtx_amt income_amt back_amt entrust_amt yyws_amt ls_amt
+		rb_cwwf_bfee_back bfee_4 bfee_5 cwwf_bfee_4 cwwf_bfee_5 zg_bfee_4 zg_bfee_5
+		tx_amt cj_amt chtx_amt mtx_amt income_amt back_amt entrust_amt yyws_amt ls_amt
 		/
 	  )
 	{
@@ -551,8 +550,9 @@ sub _update {
 sub _errhandle {
 	my $self = shift;
 	my $sql  = shift;
-	$self->dbh->rollback;
-	die "can't do [$sql]:" . $self->dbh->errstr;
+
+	#	$self->dbh->rollback;
+	$self->log->error("can't do [$sql]:[$self->dbh->errstr]");
 	return 0;
 }
 
@@ -618,6 +618,50 @@ sub _params {
 	$condition =~ s/^ and // if $condition;
 	$condition = ' where ' . $condition if $condition;
 	return { condition => $condition };
+}
+
+sub _gen_file {
+	my $self   = shift;
+	my $sql    = shift;
+	my $header = shift;
+	my $uuid;
+	my $filename;
+	UUID::generate($uuid);
+	UUID::unparse( $uuid, $filename );
+	$filename = "${filename}.xls";
+	my $path = "$ENV{ZIXWEB_HOME}/var/${filename}";
+	my $data = $self->select($sql);
+
+	# Create a new Excel workbook
+	my $workbook = Spreadsheet::WriteExcel->new($path);
+
+	# Add a worksheet
+	my $worksheet = $workbook->add_worksheet();
+
+	#  Add and define a format
+	my $format = $workbook->add_format();
+	$format->set_align('center');
+	my ( $c, $r ) = ( 0, 0 );
+
+	# 表头（包含顺序）
+	my @hs = @{ $header->{headers} };
+
+	# 写入表头
+	for my $h (@hs) {
+		$worksheet->write( 0, $c++, $header->{$h}, $format );
+	}
+	$r++;
+	for my $row (@$data) {
+		$self->transform($row);
+		$c = 0;
+		for my $h (@hs) {
+			$worksheet->write( $r, $c, $row->{$h}, $format )
+			  if $row->{$h};
+			$c++;
+		}
+		$r++;
+	}
+	return $filename;
 }
 
 1;

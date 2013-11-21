@@ -5,15 +5,16 @@ use DBI;
 use Env qw/ZIXWEB_HOME/;
 use Encode qw/decode/;
 use Cache::Memcached;
+use JSON::XS;
 use ZixWeb::Utils
-  qw/_updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
+  qw/_gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
 
 # This method will run once at server start
 sub startup {
 	my $self   = shift;
 	my $dict   = {};
 	my $config = do "$ZIXWEB_HOME/conf/conf.pl";
-	my $dbh    = &connect_db($config);
+	my $dbh    = $self->connect_db($config);
 	my $memd   = new Cache::Memcached {
 		'servers'            => $config->{mem_server},
 		'debug'              => 0,
@@ -30,34 +31,38 @@ sub startup {
 	# 设置session过期时间
 	$self->session( expiration => $config->{expire} );
 
-#my $logdir = "$ZIXWEB_HOME/log";
-#unless (-e $logdir && -d $logdir){
-#    `mkdir $logdir`;
-#}
-#my $logfile = "$ZIXWEB_HOME/log/zixweb.log";
-#unless (-e $logfile){
-#    `touch $logfile`;
-#}
-#my $log = Mojo::Log->new(path => "$ZIXWEB_HOME/log/zixweb.log", level => 'info');
-# hypnoload
+	# 日志目录
+	my $logdir = "$ZIXWEB_HOME/log";
+	unless ( -e $logdir && -d $logdir ) {
+		`mkdir $logdir`;
+	}
+	my $logfile = "$ZIXWEB_HOME/log/zixweb.log";
+	unless ( -e $logfile ) {
+		`touch $logfile`;
+	}
+	my $log =
+	  Mojo::Log->new( path => "$ZIXWEB_HOME/log/zixweb.log", level => 'info' );
+
+	# hypnoload
 	$self->config(
 		hypnotoad => { listen => [ 'http://*:' . $config->{port} ] } );
 
 	# plugin
 	$self->plugin( Charset => { charset => 'utf-8' } );
+	$self->plugin('RenderFile');
 
 	# helper
 	$self->helper(
 		dbh => sub {
-			$dbh = &connect_db( $self->configure )
+			$dbh = $self->connect_db( $self->configure )
 			  unless $dbh;
 			return $dbh;
 		}
 	);
-	$self->helper( memd => sub { return $memd; } );
-
-	#$self->helper( log          => sub { return $log; } );
+	$self->helper( memd         => sub { return $memd; } );
+	$self->helper( log          => sub { return $log; } );
 	$self->helper( configure    => sub { return $config; } );
+	$self->helper( header       => sub { return $config->{header}; } );
 	$self->helper( quote        => sub { return $self->dbh->quote( $_[1] ); } );
 	$self->helper( dict         => sub { return $dict; } );
 	$self->helper( transform    => sub { &_transform(@_); } );
@@ -70,6 +75,7 @@ sub startup {
 	$self->helper( uf           => sub { &_uf( $_[1] ); } );
 	$self->helper( nf           => sub { &_nf( $_[1] ); } );
 	$self->helper( params       => sub { &_params(@_); } );
+	$self->helper( gen_file     => sub { $self->_gen_file( @_[ 1 .. 2 ] ); } );
 	$self->helper( updateUsers  => sub { $self->_updateUsers; } );
 	$self->helper( updateRoutes => sub { $self->_updateRoutes; } );
 	$self->helper( updateP      => sub { $self->_updateP; } );
@@ -122,23 +128,31 @@ sub _before_dispatch {
 	my $self = shift;
 
 	my $path = $self->req->url->path;
-	return 1 if $path =~ /^\/$/;                      # 登陆页面可以访问
-	return 1 if $path =~ /(js|jpg|gif|css|png|ico)$/; # 静态文件可以访问
-	return 1 if $path =~ /html$/;                     # login
+
+	# 可以访问主页
+	return 1 if $path =~ /^\/$/;
+	return 1
+	  if $path =~ /(js|jpg|gif|css|png|ico)$/;    # 静态文件可以访问
+
+	# 可以进行登录操作
+	return 1 if $path =~ /^\/login\/login$/;
 
 	my $sess = $self->session;
-
-	# 没有登陆不让访问
-	return 1 if $path =~ /^\/login/;                  # 可以访问主菜单
-	return 1 if $path =~ /^\/base/;                   # 可以访问主菜单
-
-	if ( $path =~ /^index.html$/ ) {
-		unless ( exists $sess->{uid} ) {
-			$self->redirect_to('/');
-			return;
-		}
-	}
 	my $uid  = $sess->{uid};
+
+	unless ($uid) {
+		$self->render( json => { success => 'forbidden' } );
+		return 0;
+	}
+
+	# 登录之後可以访问基础信息数据
+	return 1
+	  if $path =~ /^\/base/;
+
+	# 登录之後可以獲得菜单
+	return 1
+	  if $path =~ /^\/login\/menu/;
+
 	my $role = $self->users->{$uid};
 	for my $role (@$role) {
 		for my $route ( @{ $self->routes->{$role} } ) {
@@ -150,10 +164,8 @@ sub _before_dispatch {
 	$self->render( json => { success => 'forbidden' } );
 }
 
-#
-#
-#
 sub connect_db {
+	my $self   = shift;
 	my $config = shift;
 	my $dbh;
 	$dbh = DBI->connect(
@@ -169,12 +181,12 @@ sub connect_db {
 		}
 	);
 	unless ($dbh) {
-		die "can not connect $config->{dsn}";
+		$self->log->error("can not connect $config->{dsn}");
 		return;
 	}
 
 	$dbh->do("set current schema $config->{schema}")
-	  or die "can not set current schema $config->{schema}";
+	  or $self->log->error("can not set current schema $config->{schema}");
 
 	return $dbh;
 }
@@ -190,7 +202,14 @@ sub set_route {
 	$r->any("/base/$_")
 	  ->to( namespace => "ZixWeb::Component::Component", action => $_ )
 	  for (
-		qw/routes roles allroles account bfjacct zyzjacct product ystype books zjbdtype wlzjtype fhwtype fywtype fypacct fhydacct bi_dict c fp cust_proto/
+		qw/
+		routes roles allroles account
+		bfjacct zyzjacct product ystype
+		books zjbdtype wlzjtype fhwtype
+		fywtype fypacct fhydacct bi_dict
+		c fp cust_proto excel book_headers
+		book_dim
+		/
 	  );
 
 	# 登录路由
@@ -239,24 +258,79 @@ sub set_route {
 
 	# 科目历史  详细查询
 	for (
-		qw/deposit_bfj bamt_yhys deposit_zyzj txamt_dgd
-		txamt_yhys bfee_yhys cfee_dqhf bsc bsc_zyzj
-		txamt_yhyf bamt_yhyf bfee_yhyf bfj_cust blc
-		blc_zyzj txamt_dqr_oyf wlzj_ysbf wlzj_yszy
-		wlzj_yfbf wlzj_yfzy income_cfee cost_bfee
-		cost_dfss income_zhlx fee_jrjg bfee_cwwf
-		txamt_dqr_oys txamt_dqr_byf cost_bfee_zg
-		lfee_psp income_in cost_in
-		bfee_zqqr bfee_zqqr_zg
-		ckrsp_fhyd deposit_fhyd
-		camt_fhyd ypsc_fhyd camt_dgd_fhyd yp_acct_fhyd
-		yufamt_ch_fhyd nctxamt_dqr_oys_fhyd  tctxamt_dqr_oys_fhyd cost_fee_fhyd cost_ncss_fhyd
-		yplc_fhyd yfamt_m_fhyd chamt_dgd_fhyd
-		yfamt_ch_fhyd yfamt_dcch_fhyd yusamt_c_fhyd nctxamt_dqr_oyf_fhyd
-		tctxamt_dqr_oyf_fhyd cost_tcss_fhyd cost_dcch_fhyd
-		income_main_fhyd income_add_fhyd /
+		qw/
+		deposit_bfj deposit_bfj_excel
+		deposit_fhyd deposit_fhyd_excel
+		deposit_zyzj deposit_zyzj_excel
+		txamt_dgd txamt_dgd_excel
+		txamt_yhys txamt_yhys_excel
+		bamt_yhys bamt_yhys_excel
+		bfee_yhys bfee_yhys_excel
+		camt_fhyd camt_fhyd_excel
+		cfee_dqhf cfee_dqhf_excel
+		lfee_psp lfee_psp_excel
+		bsc bsc_excel
+		bsc_zyzj bsc_zyzj_excel
+		bfee_rb bfee_rb_excel
+		ypsc_fhyd ypsc_fhyd_excel
+		camt_dgd_fhyd camt_dgd_fhyd_excel
+		yp_acct_fhyd yp_acct_fhyd_excel
+		yufamt_ch_fhyd yufamt_ch_fhyd_excel
+		txamt_dqr_oys txamt_dqr_oys_excel
+		nctxamt_dqr_oys_fhyd nctxamt_dqr_oys_fhyd_excel
+		tctxamt_dqr_oys_fhyd tctxamt_dqr_oys_fhyd_excel
+		txamt_yhyf txamt_yhyf_excel
+		bamt_yhyf bamt_yhyf_excel
+		bfee_yhyf bfee_yhyf_excel
+		txamt_dqr_byf txamt_dqr_byf_excel
+		yplc_fhyd yplc_fhyd_excel
+		blc blc_excel
+		blc_zyzj blc_zyzj_excel
+		bfee_cwwf bfee_cwwf_excel
+		bfee_zqqr_zg bfee_zqqr_zg_excel
+		bfee_zqqr bfee_zqqr_excel
+		ckrsp_fhyd ckrsp_fhyd_excel
+		yfamt_m_fhyd yfamt_m_fhyd_excel
+		chamt_dgd_fhyd chamt_dgd_fhyd_excel
+		yfamt_ch_fhyd yfamt_ch_fhyd_excel
+		yfamt_dcch_fhyd yfamt_dcch_fhyd_excel
+		bfj_cust bfj_cust_excel
+		yusamt_c_fhyd yusamt_c_fhyd_excel
+		txamt_dqr_oyf txamt_dqr_oyf_excel
+		nctxamt_dqr_oyf_fhyd nctxamt_dqr_oyf_fhyd_excel
+		tctxamt_dqr_oyf_fhyd tctxamt_dqr_oyf_fhyd_excel
+		wlzj_ysbf wlzj_ysbf_excel
+		wlzj_yszy wlzj_yszy_excel
+		wlzj_yfbf wlzj_yfbf_excel
+		wlzj_yfzy wlzj_yfzy_excel
+		income_cfee income_cfee_excel
+		income_main_fhyd income_main_fhyd_excel
+		income_add_fhyd income_add_fhyd_excel
+		income_in income_in_excel
+		cost_bfee cost_bfee_excel
+		cost_fee_fhyd cost_fee_fhyd_excel
+		cost_dfss cost_dfss_excel
+		cost_ncss_fhyd cost_ncss_fhyd_excel
+		cost_bfee_zg cost_bfee_zg_excel
+		cost_tcss_fhyd cost_tcss_fhyd_excel
+		cost_dcch_fhyd cost_dcch_fhyd_excel
+		cost_in cost_in_excel
+		income_zhlx income_zhlx_excel
+		fee_jrjg fee_jrjg_excel
+		/
 	  )
 	{
+
+		if (/excel$/) {
+			my $pm = join '_', ( grep !/^excel$/, ( split '_', $_ ) );
+			$r->any("/book/detail/$_")->to(
+				namespace => "ZixWeb::Book::Detail::$pm",
+				action    => $_
+			);
+			$r->any("/book/hist/$_")
+			  ->to( namespace => "ZixWeb::Book::Hist::$pm", action => $_ );
+			next;
+		}
 		$r->any("/book/hist/$_")
 		  ->to( namespace => "ZixWeb::Book::Hist::$_", action => $_ );
 		$r->any("/book/detail/$_")

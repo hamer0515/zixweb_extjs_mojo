@@ -1,7 +1,0 @@
-#!/bin/bash
-for ((i=22;i<=28;i++));
-do sed 's/F0029/F00'$i'/g' YF0029.pm > YF00$i.pm;
-done
-for ((i=30;i<=44;i++));
-do sed 's/F0029/F00'$i'/g' YF0029.pm > YF00$i.pm;
-done

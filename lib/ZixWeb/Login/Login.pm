@@ -1,18 +1,9 @@
 package ZixWeb::Login::Login;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 use Digest::MD5;
-use JSON::XS;
 use DateTime;
 use boolean;
-use Encode qw/decode/;
-
-use constant { DEBUG => $ENV{SYSTEM_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 sub login {
 	my $self      = shift;
@@ -97,10 +88,9 @@ sub passwordreset {
 	my $dt = DateTime->now( time_zone => 'local' );
 	my $oper_date = $dt->ymd('-');
 	$sql =
-	    "update tbl_user_inf set pwd_chg_date = \'$oper_date\', user_pwd = '"
-	  . $new_password
-	  . "' where user_id = $uid";
-	$self->dbh->do($sql) or die "can't do $sql:$self->dbh->errstr/n";
+"update tbl_user_inf set pwd_chg_date = \'$oper_date\', user_pwd = \'$new_password\' where user_id = $uid";
+	$self->dbh->do($sql)
+	  or $self->errhandle($sql) and $self->dbh->rollback;
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }

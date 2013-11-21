@@ -82,7 +82,8 @@ sub get_books {
 			}
 		}
 		if ( $#name > 1 ) {
-			$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }->{j} +=
+			$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }
+			  ->{j} +=
 			  $row->{j};
 			$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }->{d} +=
 			  $row->{d};

@@ -1,22 +1,12 @@
 package ZixWeb::Zjdz::Zjdz;
 
 use Mojo::Base 'Mojolicious::Controller';
-use POSIX qw/mktime/;
-use utf8;
-use DateTime;
 use boolean;
 use JSON::XS;
-
-use constant { DEBUG => $ENV{RECONCILIATION_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 #
 #模块名称:需对账银行账户查询
 #
-
 sub bfj {
 	my $self = shift;
 
@@ -145,25 +135,25 @@ sub bfjcheck {
 	}
 
 	#########处理未知长短款###############
-	$all->{"未知长款"}->{ch_j} = $self->uf( $self->param("未知长款_j") )
+	$all->{"未知入款"}->{ch_j} = $self->uf( $self->param("未知入款_j") )
 	  || 0;    #参数4
-	$all->{"未知长款"}->{ch_d} = $self->uf( $self->param("未知长款_d") )
+	$all->{"未知入款"}->{ch_d} = $self->uf( $self->param("未知入款_d") )
 	  || 0;    #参数5
-	$all->{"未知长款"}->{txamt_yhys} = [ "0", "0" ];
-	$all->{"未知长款"}->{txamt_yhyf} = [ "0", "0" ];
-	$all->{"未知长款"}->{bfee_yhys}  = [ "0", "0" ];
-	$all->{"未知长款"}->{bfee_yhyf}  = [ "0", "0" ];
-	$all->{"未知长款"}->{zjbd_type_id} = '-6';
+	$all->{"未知入款"}->{txamt_yhys} = [ "0", "0" ];
+	$all->{"未知入款"}->{txamt_yhyf} = [ "0", "0" ];
+	$all->{"未知入款"}->{bfee_yhys}  = [ "0", "0" ];
+	$all->{"未知入款"}->{bfee_yhyf}  = [ "0", "0" ];
+	$all->{"未知入款"}->{zjbd_type_id} = '-6';
 
-	$all->{"未知短款"}->{ch_j} = $self->uf( $self->param("未知短款_j") )
+	$all->{"未知出款"}->{ch_j} = $self->uf( $self->param("未知出款_j") )
 	  || 0;    #参数5
-	$all->{"未知短款"}->{ch_d} = $self->uf( $self->param("未知短款_d") )
+	$all->{"未知出款"}->{ch_d} = $self->uf( $self->param("未知出款_d") )
 	  || 0;    #参数5
-	$all->{"未知短款"}->{txamt_yhys} = [ "0", "0" ];
-	$all->{"未知短款"}->{txamt_yhyf} = [ "0", "0" ];
-	$all->{"未知短款"}->{bfee_yhys}  = [ "0", "0" ];
-	$all->{"未知短款"}->{bfee_yhyf}  = [ "0", "0" ];
-	$all->{"未知短款"}->{zjbd_type_id} = '-7';
+	$all->{"未知出款"}->{txamt_yhys} = [ "0", "0" ];
+	$all->{"未知出款"}->{txamt_yhyf} = [ "0", "0" ];
+	$all->{"未知出款"}->{bfee_yhys}  = [ "0", "0" ];
+	$all->{"未知出款"}->{bfee_yhyf}  = [ "0", "0" ];
+	$all->{"未知出款"}->{zjbd_type_id} = '-7';
 
 	##其它
 	#	$all->{"其它"}->{txamt_yhys} = [ "0", "0" ];
@@ -186,18 +176,12 @@ sub bfjcheck {
 		$all->{$_}->{memo} = $self->param( $_ . "_memo" )
 		  || "";
 	}
-
-	#sort delete "其它"
-	#	my @zjbd = ( @{ $all->{t_ids} } );
-	#	@zjbd = grep { $_ ne "其它"  } @zjbd;
-
-	#sort delete "其它"
 	my @zjbd = ( @{ $all->{t_ids} } );
-	@zjbd = grep { $_ ne "未知短款" && $_ ne "未知长款" } @zjbd;
+	@zjbd = grep { $_ ne "未知出款" && $_ ne "未知入款" } @zjbd;
 
 	#总计
 	$self->get_sum( $all, $tag );
-	$all->{t_ids} = [ @zjbd, "未知长款", "未知短款", "总计" ];
+	$all->{t_ids} = [ @zjbd, "未知入款", "未知出款", "总计" ];
 	$all->{length}++;
 	my $ch_j = $all->{"总计"}{ch_j};
 	my $ch_d = $all->{"总计"}{ch_d};
@@ -347,16 +331,16 @@ sub bfjcheckdone {
 	for ( @{ $all->{t_ids} } ) {
 		my $c_j;
 		my $c_d;
-		if ( $_ == '-6' ) {    ##未知长款
-			$c_j = $self->uf( $self->param("未知长款_j") ) || 0;
-			$c_d = $self->uf( $self->param("未知长款_d") ) || 0;
-			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知长款_memo')
+		if ( $_ == '-6' ) {    ##未知入款
+			$c_j = $self->uf( $self->param("未知入款_j") ) || 0;
+			$c_d = $self->uf( $self->param("未知入款_d") ) || 0;
+			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知入款_memo')
 			  || '';
 		}
-		elsif ( $_ == '-7' ) {    ##未知短款
-			$c_j = $self->uf( $self->param("未知短款_j") ) || 0;
-			$c_d = $self->uf( $self->param("未知短款_d") ) || 0;
-			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知短款_memo')
+		elsif ( $_ == '-7' ) {    ##未知出款
+			$c_j = $self->uf( $self->param("未知出款_j") ) || 0;
+			$c_d = $self->uf( $self->param("未知出款_d") ) || 0;
+			$data->{zjbd_type}->{$_}->{memo} = $self->param('未知出款_memo')
 			  || '';
 		}
 		else {
@@ -371,8 +355,6 @@ sub bfjcheckdone {
 		$data->{zjbd_type}->{$_}->{ch_d} = int( $c_d * 100 );
 	}
 
-	#	use Data::Dump;
-	#	Data::Dump->dump($data);
 	my $user = $self->session->{uid};
 	my $res  = $self->ua->post(
 		$self->configure->{svc_url},
@@ -511,319 +493,353 @@ sub zjdz {
 
 sub bfjgzcx {
 	my $self = shift;
-	my $data;
-	my $dt       = DateTime->now( time_zone => 'local' );
-	my $beg_date = $dt->ymd('-');
-	my $end_date = $self->next_n_date( -6, $beg_date );
-	my @dates;
-	for ( my $i = 6 ; $i >= 0 ; $i-- ) {
-		my $cur_date = $self->next_n_date( $i, $end_date );
-		push @dates, $cur_date;
-	}
 
-	# 查询有挂帐的帐号和资金变动类型
-	my $records = $self->select(
-		" select bfj_acct, zjbd_type, (sum(d) - sum(j)) total
-                            from book_blc
-                            group by bfj_acct, zjbd_type
-                            union
-                            (select bfj_acct, zjbd_type, (sum(j) - sum(d)) total
-                            from book_bsc
-                            group by bfj_acct, zjbd_type)"
+	my $page  = $self->param('page');
+	my $limit = $self->param('limit');
+
+	my $params = {};
+	for (qw/from to bfj_acct/) {
+		my $p = $self->param($_);
+		$p = undef if $p eq '';
+		$params->{$_} = $p;
+	}
+	my $p->{condition} = '';
+	$p = $self->params(
+		{
+			bfj_acct => $params->{bfj_acct},
+			e_date   => [
+				0,
+				$params->{from} && $self->quote( $params->{from} ),
+				$params->{to}   && $self->quote( $params->{to} ),
+			  ]
+
+		}
 	);
-	my @accts;
-	my $acct_zjbd_types;
-	for my $row (@$records) {
-		push @accts, $row->{bfj_acct}
-		  unless ( grep( /$row->{bfj_acct}/, @accts ) );
-		push @{ $acct_zjbd_types->{ $row->{bfj_acct} } }, $row->{zjbd_type}
-		  unless (
-			grep( /$row->{zjbd_type}/,
-				@{ $acct_zjbd_types->{ $row->{bfj_acct} } } )
-		  );
-	}
-	$data->{accts} = [@accts];
 
-	# 计算七天前每天的挂帐
-	$data->{data} =
-	  $self->data_between( $end_date, $beg_date, \@dates, $acct_zjbd_types );
-
-	$data->{dates} = [@dates];
-
-	# 计算按资金变动类型和帐号汇总的挂帐
-	$data->{sum_total} = $self->sum_by_zjbd_type;
-
-	my $heji;
-
-	my $acct_rowspan;
-	for (@accts) {
-		$heji->{$_} = delete $data->{data}->{$_}->{heji};
-		my @zjbd_types = keys %{ $data->{sum_total}->{$_} };
-		$acct_rowspan->{$_} = ( @{ $acct_zjbd_types->{$_} } + 1 ) * 2;
-	}
-
-	# 计算七天前的挂帐情况
-	$data->{sum_week} =
-	  $self->cal_week( $data->{data}, [@dates], $data->{sum_total} );
-
-	# 总累计
-	$data->{total_sum} =
-	  $self->cal_total( $data->{data}, [@dates], $data->{sum_week},
-		$data->{sum_total}, $acct_zjbd_types );
-	$data->{total_sum}->{week}->{lc} =
-	  $data->{total_sum}->{total}->{lc} - $data->{total_sum}->{week}->{lc};
-	$data->{total_sum}->{week}->{sc} =
-	  $data->{total_sum}->{total}->{sc} - $data->{total_sum}->{week}->{sc};
-	$data->{heji}            = $heji;
-	$data->{acct_zjbd_types} = $acct_zjbd_types;
-	$data->{acct_rowspan}    = $acct_rowspan;
+	my $sql = qq/
+		select bfj_acct, e_date, blc, bsc, rownumber() over(order by e_date desc) as rowid
+		from viw_blc_bsc
+		$p->{condition} /;
+	my $data = $self->page_data( $sql, $page, $limit );
+	$data->{success} = true;
 	$self->render( json => $data );
 }
 
 #
-# $self->data_between($beg_date, $end_date);
+#sub bfjgzcx {
+#	my $self = shift;
+#	my $data;
+#	my $dt       = DateTime->now( time_zone => 'local' );
+#	my $beg_date = $dt->ymd('-');
+#	my $end_date = $self->next_n_date( -6, $beg_date );
+#	my @dates;
+#	for ( my $i = 6 ; $i >= 0 ; $i-- ) {
+#		my $cur_date = $self->next_n_date( $i, $end_date );
+#		push @dates, $cur_date;
+#	}
 #
+#	# 查询有挂帐的帐号和资金变动类型
+#	my $records = $self->select(
+#		" select bfj_acct, zjbd_type, (sum(d) - sum(j)) total
+#                            from book_blc
+#                            group by bfj_acct, zjbd_type
+#                            union
+#                            (select bfj_acct, zjbd_type, (sum(j) - sum(d)) total
+#                            from book_bsc
+#                            group by bfj_acct, zjbd_type)"
+#	);
+#	my @accts;
+#	my $acct_zjbd_types;
+#	for my $row (@$records) {
+#		push @accts, $row->{bfj_acct}
+#		  unless ( grep( /$row->{bfj_acct}/, @accts ) );
+#		push @{ $acct_zjbd_types->{ $row->{bfj_acct} } }, $row->{zjbd_type}
+#		  unless (
+#			grep( /$row->{zjbd_type}/,
+#				@{ $acct_zjbd_types->{ $row->{bfj_acct} } } )
+#		  );
+#	}
+#	$data->{accts} = [@accts];
 #
-sub data_between {
-	my $self            = shift;
-	my $date_beg        = shift;
-	my $date_end        = shift;
-	my $dates           = shift;
-	my $acct_zjbd_types = shift;
-	my $data;
-
-	# short currency
-	my $sc = $self->select(
-		"select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, e_date, zjbd_type 
-                                from book_bsc 
-                                where e_date >= "
-		  . $self->quote($date_beg)
-		  . " and e_date <= "
-		  . $self->quote($date_end)
-		  . "group by bfj_acct, zjbd_type, e_date"
-	);
-	if ( $sc && @$sc ) {
-		for my $row (@$sc) {
-			my $j_amt = $row->{j_amt} || 0;
-			my $d_amt = $row->{d_amt} || 0;
-			my $acct  = $row->{bfj_acct};
-			my $zjbd_type = $row->{zjbd_type};
-			my $e_date    = $row->{e_date};
-			my $amt       = $j_amt - $d_amt;
-
-			$data->{$acct}->{$zjbd_type}->{$e_date}->{sc} = $amt;
-			$data->{$acct}->{heji}->{$e_date}->{sc} += $amt;
-		}
-	}
-
-	# long currency
-	my $lc = $self->select(
-		"select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, e_date, zjbd_type
-                                from book_blc
-                                where e_date >= "
-		  . $self->quote($date_beg)
-		  . " and e_date <= "
-		  . $self->quote($date_end)
-		  . "group by bfj_acct, zjbd_type, e_date"
-	);
-	if ( $lc && @$lc ) {
-		for my $row (@$lc) {
-			my $j_amt = $row->{j_amt} || 0;
-			my $d_amt = $row->{d_amt} || 0;
-			my $acct  = $row->{bfj_acct};
-			my $zjbd_type = $row->{zjbd_type};
-			my $e_date    = $row->{e_date};
-			my $amt       = $d_amt - $j_amt;
-			$data->{$acct}->{$zjbd_type}->{$e_date}->{lc} = $amt;
-			$data->{$acct}->{heji}->{$e_date}->{lc} += $amt;
-		}
-	}
-
-	for my $acct ( keys %$acct_zjbd_types ) {
-		for my $zjbd_type ( @{ $acct_zjbd_types->{$acct} } ) {
-			for (@$dates) {
-				$data->{$acct}{$zjbd_type}{$_}{sc} ||= 0;
-				$data->{$acct}{$zjbd_type}{$_}{lc} ||= 0;
-			}
-		}
-		for (@$dates) {
-			$data->{$acct}{heji}{$_}{sc} ||= 0;
-			$data->{$acct}{heji}{$_}{lc} ||= 0;
-		}
-	}
-	return $data;
-}
-
+#	# 计算七天前每天的挂帐
+#	$data->{data} =
+#	  $self->data_between( $end_date, $beg_date, \@dates, $acct_zjbd_types );
 #
-# $self->sum_by_zjbd_type;
+#	$data->{dates} = [@dates];
 #
+#	# 计算按资金变动类型和帐号汇总的挂帐
+#	$data->{sum_total} = $self->sum_by_zjbd_type;
 #
-sub sum_by_zjbd_type {
-	my $self = shift;
-	my $data;
-
-	# short currency
-	my $sc = $self->select(
-'select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, zjbd_type from book_bsc group by bfj_acct, zjbd_type'
-	);
-	if ( $sc && @$sc ) {
-		for my $row (@$sc) {
-			my $j_amt = $row->{j_amt} || 0;
-			my $d_amt = $row->{d_amt} || 0;
-			my $zjbd_type = $row->{zjbd_type};
-			my $acct      = $row->{bfj_acct};
-			my $amt       = $j_amt - $d_amt;
-
-			$data->{$acct}->{$zjbd_type}->{sc} = $amt;
-			$data->{$acct}->{heji}->{sc} += $amt;
-		}
-	}
-
-	# long currency
-	my $lc = $self->select(
-'select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, zjbd_type from book_blc group by bfj_acct, zjbd_type'
-	);
-	if ( $lc && @$lc ) {
-		for my $row (@$lc) {
-			my $j_amt = $row->{j_amt} || 0;
-			my $d_amt = $row->{d_amt} || 0;
-			my $zjbd_type = $row->{zjbd_type};
-			my $acct      = $row->{bfj_acct};
-			my $amt       = $d_amt - $j_amt;
-			$data->{$acct}->{$zjbd_type}->{lc} = $amt;
-			$data->{$acct}->{heji}->{lc} += $amt;
-		}
-	}
-
-	# 补齐没有数据的项
-	for my $acct ( keys %$data ) {
-		for my $type ( keys %{ $data->{$acct} } ) {
-			$data->{$acct}{$type}{sc} ||= 0;
-			$data->{$acct}{$type}{lc} ||= 0;
-		}
-	}
-	return $data;
-}
-
+#	my $heji;
 #
-# $self->cal_week($data, @dates);
+#	my $acct_rowspan;
+#	for (@accts) {
+#		$heji->{$_} = delete $data->{data}->{$_}->{heji};
+#		my @zjbd_types = keys %{ $data->{sum_total}->{$_} };
+#		$acct_rowspan->{$_} = ( @{ $acct_zjbd_types->{$_} } + 1 ) * 2;
+#	}
 #
+#	# 计算七天前的挂帐情况
+#	$data->{sum_week} =
+#	  $self->cal_week( $data->{data}, [@dates], $data->{sum_total} );
 #
-sub cal_week {
-	my $self      = shift;
-	my $data      = shift;
-	my $dates     = shift;
-	my $sum_total = shift;
-	my $week_sum;
-	for my $acct ( keys %{$sum_total} ) {
-		my $total_sc = 0;
-		my $total_lc = 0;
-		for my $zjbd_type ( keys %{ $sum_total->{$acct} } ) {
-			next if $zjbd_type eq 'heji';
-			my $lc = 0;
-			my $sc = 0;
-			for ( @{$dates} ) {
-				if ( $data->{$acct}->{$zjbd_type}->{$_}->{lc} ) {
-					$lc       += $data->{$acct}->{$zjbd_type}->{$_}->{lc};
-					$total_lc += $data->{$acct}->{$zjbd_type}->{$_}->{lc};
-				}
-				if ( $data->{$acct}->{$zjbd_type}->{$_}->{sc} ) {
-					$sc       += $data->{$acct}->{$zjbd_type}->{$_}->{sc};
-					$total_sc += $data->{$acct}->{$zjbd_type}->{$_}->{sc};
-				}
-			}
-			$week_sum->{$acct}->{$zjbd_type}->{sc} =
-			  $sum_total->{$acct}->{$zjbd_type}->{sc} - $sc;
-			$week_sum->{$acct}->{$zjbd_type}->{lc} =
-			  $sum_total->{$acct}->{$zjbd_type}->{lc} - $lc;
-		}
-		$week_sum->{$acct}->{heji}->{sc} =
-		  $sum_total->{$acct}->{heji}->{sc} - $total_sc;
-		$week_sum->{$acct}->{heji}->{lc} =
-		  $sum_total->{$acct}->{heji}->{lc} - $total_lc;
-	}
-
-	return $week_sum;
-}
-
+#	# 总累计
+#	$data->{total_sum} =
+#	  $self->cal_total( $data->{data}, [@dates], $data->{sum_week},
+#		$data->{sum_total}, $acct_zjbd_types );
+#	$data->{total_sum}->{week}->{lc} =
+#	  $data->{total_sum}->{total}->{lc} - $data->{total_sum}->{week}->{lc};
+#	$data->{total_sum}->{week}->{sc} =
+#	  $data->{total_sum}->{total}->{sc} - $data->{total_sum}->{week}->{sc};
+#	$data->{heji}            = $heji;
+#	$data->{acct_zjbd_types} = $acct_zjbd_types;
+#	$data->{acct_rowspan}    = $acct_rowspan;
+#	$self->render( json => $data );
+#}
 #
-# $self->cal_total($data, \@dates, $sum_week, $sum_total);
+##
+## $self->data_between($beg_date, $end_date);
+##
+##
+#sub data_between {
+#	my $self            = shift;
+#	my $date_beg        = shift;
+#	my $date_end        = shift;
+#	my $dates           = shift;
+#	my $acct_zjbd_types = shift;
+#	my $data;
 #
+#	# short currency
+#	my $sc = $self->select(
+#		"select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, e_date, zjbd_type
+#                                from book_bsc
+#                                where e_date >= "
+#		  . $self->quote($date_beg)
+#		  . " and e_date <= "
+#		  . $self->quote($date_end)
+#		  . "group by bfj_acct, zjbd_type, e_date"
+#	);
+#	if ( $sc && @$sc ) {
+#		for my $row (@$sc) {
+#			my $j_amt = $row->{j_amt} || 0;
+#			my $d_amt = $row->{d_amt} || 0;
+#			my $acct  = $row->{bfj_acct};
+#			my $zjbd_type = $row->{zjbd_type};
+#			my $e_date    = $row->{e_date};
+#			my $amt       = $j_amt - $d_amt;
 #
-sub cal_total {
-	my $self = shift;
-
-	my $data           = shift;
-	my $dates          = shift;
-	my $sum_week       = shift;
-	my $sum_total      = shift;
-	my $acct_zjbd_type = shift;
-	my $total_sum;
-	$total_sum->{total}->{sc} = 0;
-	$total_sum->{total}->{lc} = 0;
-	for my $acct ( keys %$acct_zjbd_type ) {
-
-		for my $zjbd_type ( @{ $acct_zjbd_type->{$acct} } ) {
-			if ( $sum_total->{$acct}->{$zjbd_type}->{sc} ) {
-				$total_sum->{total}->{sc} +=
-				  $sum_total->{$acct}->{$zjbd_type}->{sc};
-			}
-			if ( $sum_total->{$acct}->{$zjbd_type}->{lc} ) {
-				$total_sum->{total}->{lc} +=
-				  $sum_total->{$acct}->{$zjbd_type}->{lc};
-			}
-		}
-	}
-
-	#total_by_week
-	$total_sum->{week}->{sc} = 0;
-	$total_sum->{week}->{lc} = 0;
-	for my $date ( @{$dates} ) {
-
-		#total_by_day
-		$total_sum->{$date}->{sc} = 0;
-		$total_sum->{$date}->{lc} = 0;
-		for my $acct ( keys %$acct_zjbd_type ) {
-			for my $zjbd_type ( @{ $acct_zjbd_type->{$acct} } ) {
-				if ( $data->{$acct}->{$zjbd_type}->{$date}->{sc} ) {
-					$total_sum->{$date}->{sc} +=
-					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{sc} );
-					$total_sum->{week}->{sc} +=
-					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{sc} );
-				}
-				if ( $data->{$acct}->{$zjbd_type}->{$date}->{lc} ) {
-					$total_sum->{$date}->{lc} +=
-					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{lc} );
-					$total_sum->{week}->{lc} +=
-					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{lc} );
-				}
-			}
-		}
-	}
-	return $total_sum;
-}
-
-sub next_n_date {
-	my $self = shift;
-	my $n    = shift;
-	my $date = shift;
-	$date =~ s/\-//g;
-	my $epoch = get_epoch_time($date);
-	$epoch += $n * 24 * 60 * 60;
-	my ( $y, $m, $d ) = ( localtime($epoch) )[ 5, 4, 3 ];
-	$y += 1900;
-	$m += 1;
-	return sprintf( "%04d-%02d-%02d", $y, $m, $d );
-}
-
-sub get_epoch_time {
-	my $date = shift;
-	unless ( $date =~ /(\d{4})(\d{2})(\d{2})/ ) {
-		return undef;
-	}
-	else {
-		return mktime( 0, 0, 0, $3, $2 - 1, $1 - 1900 );
-	}
-}
-
+#			$data->{$acct}->{$zjbd_type}->{$e_date}->{sc} = $amt;
+#			$data->{$acct}->{heji}->{$e_date}->{sc} += $amt;
+#		}
+#	}
+#
+#	# long currency
+#	my $lc = $self->select(
+#		"select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, e_date, zjbd_type
+#                                from book_blc
+#                                where e_date >= "
+#		  . $self->quote($date_beg)
+#		  . " and e_date <= "
+#		  . $self->quote($date_end)
+#		  . "group by bfj_acct, zjbd_type, e_date"
+#	);
+#	if ( $lc && @$lc ) {
+#		for my $row (@$lc) {
+#			my $j_amt = $row->{j_amt} || 0;
+#			my $d_amt = $row->{d_amt} || 0;
+#			my $acct  = $row->{bfj_acct};
+#			my $zjbd_type = $row->{zjbd_type};
+#			my $e_date    = $row->{e_date};
+#			my $amt       = $d_amt - $j_amt;
+#			$data->{$acct}->{$zjbd_type}->{$e_date}->{lc} = $amt;
+#			$data->{$acct}->{heji}->{$e_date}->{lc} += $amt;
+#		}
+#	}
+#
+#	for my $acct ( keys %$acct_zjbd_types ) {
+#		for my $zjbd_type ( @{ $acct_zjbd_types->{$acct} } ) {
+#			for (@$dates) {
+#				$data->{$acct}{$zjbd_type}{$_}{sc} ||= 0;
+#				$data->{$acct}{$zjbd_type}{$_}{lc} ||= 0;
+#			}
+#		}
+#		for (@$dates) {
+#			$data->{$acct}{heji}{$_}{sc} ||= 0;
+#			$data->{$acct}{heji}{$_}{lc} ||= 0;
+#		}
+#	}
+#	return $data;
+#}
+#
+##
+## $self->sum_by_zjbd_type;
+##
+##
+#sub sum_by_zjbd_type {
+#	my $self = shift;
+#	my $data;
+#
+#	# short currency
+#	my $sc = $self->select(
+#'select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, zjbd_type from book_bsc group by bfj_acct, zjbd_type'
+#	);
+#	if ( $sc && @$sc ) {
+#		for my $row (@$sc) {
+#			my $j_amt = $row->{j_amt} || 0;
+#			my $d_amt = $row->{d_amt} || 0;
+#			my $zjbd_type = $row->{zjbd_type};
+#			my $acct      = $row->{bfj_acct};
+#			my $amt       = $j_amt - $d_amt;
+#
+#			$data->{$acct}->{$zjbd_type}->{sc} = $amt;
+#			$data->{$acct}->{heji}->{sc} += $amt;
+#		}
+#	}
+#
+#	# long currency
+#	my $lc = $self->select(
+#'select sum(j) as j_amt, sum(d) as d_amt, bfj_acct, zjbd_type from book_blc group by bfj_acct, zjbd_type'
+#	);
+#	if ( $lc && @$lc ) {
+#		for my $row (@$lc) {
+#			my $j_amt = $row->{j_amt} || 0;
+#			my $d_amt = $row->{d_amt} || 0;
+#			my $zjbd_type = $row->{zjbd_type};
+#			my $acct      = $row->{bfj_acct};
+#			my $amt       = $d_amt - $j_amt;
+#			$data->{$acct}->{$zjbd_type}->{lc} = $amt;
+#			$data->{$acct}->{heji}->{lc} += $amt;
+#		}
+#	}
+#
+#	# 补齐没有数据的项
+#	for my $acct ( keys %$data ) {
+#		for my $type ( keys %{ $data->{$acct} } ) {
+#			$data->{$acct}{$type}{sc} ||= 0;
+#			$data->{$acct}{$type}{lc} ||= 0;
+#		}
+#	}
+#	return $data;
+#}
+#
+##
+## $self->cal_week($data, @dates);
+##
+##
+#sub cal_week {
+#	my $self      = shift;
+#	my $data      = shift;
+#	my $dates     = shift;
+#	my $sum_total = shift;
+#	my $week_sum;
+#	for my $acct ( keys %{$sum_total} ) {
+#		my $total_sc = 0;
+#		my $total_lc = 0;
+#		for my $zjbd_type ( keys %{ $sum_total->{$acct} } ) {
+#			next if $zjbd_type eq 'heji';
+#			my $lc = 0;
+#			my $sc = 0;
+#			for ( @{$dates} ) {
+#				if ( $data->{$acct}->{$zjbd_type}->{$_}->{lc} ) {
+#					$lc       += $data->{$acct}->{$zjbd_type}->{$_}->{lc};
+#					$total_lc += $data->{$acct}->{$zjbd_type}->{$_}->{lc};
+#				}
+#				if ( $data->{$acct}->{$zjbd_type}->{$_}->{sc} ) {
+#					$sc       += $data->{$acct}->{$zjbd_type}->{$_}->{sc};
+#					$total_sc += $data->{$acct}->{$zjbd_type}->{$_}->{sc};
+#				}
+#			}
+#			$week_sum->{$acct}->{$zjbd_type}->{sc} =
+#			  $sum_total->{$acct}->{$zjbd_type}->{sc} - $sc;
+#			$week_sum->{$acct}->{$zjbd_type}->{lc} =
+#			  $sum_total->{$acct}->{$zjbd_type}->{lc} - $lc;
+#		}
+#		$week_sum->{$acct}->{heji}->{sc} =
+#		  $sum_total->{$acct}->{heji}->{sc} - $total_sc;
+#		$week_sum->{$acct}->{heji}->{lc} =
+#		  $sum_total->{$acct}->{heji}->{lc} - $total_lc;
+#	}
+#
+#	return $week_sum;
+#}
+#
+##
+## $self->cal_total($data, \@dates, $sum_week, $sum_total);
+##
+##
+#sub cal_total {
+#	my $self = shift;
+#
+#	my $data           = shift;
+#	my $dates          = shift;
+#	my $sum_week       = shift;
+#	my $sum_total      = shift;
+#	my $acct_zjbd_type = shift;
+#	my $total_sum;
+#	$total_sum->{total}->{sc} = 0;
+#	$total_sum->{total}->{lc} = 0;
+#	for my $acct ( keys %$acct_zjbd_type ) {
+#
+#		for my $zjbd_type ( @{ $acct_zjbd_type->{$acct} } ) {
+#			if ( $sum_total->{$acct}->{$zjbd_type}->{sc} ) {
+#				$total_sum->{total}->{sc} +=
+#				  $sum_total->{$acct}->{$zjbd_type}->{sc};
+#			}
+#			if ( $sum_total->{$acct}->{$zjbd_type}->{lc} ) {
+#				$total_sum->{total}->{lc} +=
+#				  $sum_total->{$acct}->{$zjbd_type}->{lc};
+#			}
+#		}
+#	}
+#
+#	#total_by_week
+#	$total_sum->{week}->{sc} = 0;
+#	$total_sum->{week}->{lc} = 0;
+#	for my $date ( @{$dates} ) {
+#
+#		#total_by_day
+#		$total_sum->{$date}->{sc} = 0;
+#		$total_sum->{$date}->{lc} = 0;
+#		for my $acct ( keys %$acct_zjbd_type ) {
+#			for my $zjbd_type ( @{ $acct_zjbd_type->{$acct} } ) {
+#				if ( $data->{$acct}->{$zjbd_type}->{$date}->{sc} ) {
+#					$total_sum->{$date}->{sc} +=
+#					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{sc} );
+#					$total_sum->{week}->{sc} +=
+#					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{sc} );
+#				}
+#				if ( $data->{$acct}->{$zjbd_type}->{$date}->{lc} ) {
+#					$total_sum->{$date}->{lc} +=
+#					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{lc} );
+#					$total_sum->{week}->{lc} +=
+#					  $self->uf( $data->{$acct}->{$zjbd_type}->{$date}->{lc} );
+#				}
+#			}
+#		}
+#	}
+#	return $total_sum;
+#}
+#
+#sub next_n_date {
+#	my $self = shift;
+#	my $n    = shift;
+#	my $date = shift;
+#	$date =~ s/\-//g;
+#	my $epoch = get_epoch_time($date);
+#	$epoch += $n * 24 * 60 * 60;
+#	my ( $y, $m, $d ) = ( localtime($epoch) )[ 5, 4, 3 ];
+#	$y += 1900;
+#	$m += 1;
+#	return sprintf( "%04d-%02d-%02d", $y, $m, $d );
+#}
+#
+#sub get_epoch_time {
+#	my $date = shift;
+#	unless ( $date =~ /(\d{4})(\d{2})(\d{2})/ ) {
+#		return undef;
+#	}
+#	else {
+#		return mktime( 0, 0, 0, $3, $2 - 1, $1 - 1900 );
+#	}
+#}
 1;

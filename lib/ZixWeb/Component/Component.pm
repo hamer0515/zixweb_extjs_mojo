@@ -1,17 +1,9 @@
 package ZixWeb::Component::Component;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
-use Digest::MD5;
-use JSON::XS;
 use boolean;
-use Encode;
-
-use constant { DEBUG => $ENV{BASIC_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
+use JSON::XS;
+use Env qw/ZIXWEB_HOME/;
 
 sub roles {
 	my $self = shift;
@@ -73,13 +65,20 @@ sub routes {
 
 sub books {
 	my $self   = shift;
+	my $set    = $self->param('set');
 	my $result = [];
 	my $books  = $self->dict->{book};
-	for
-	  my $key ( sort { $books->{$a}->[2] cmp $books->{$b}->[2] } keys %$books )
+	for my $key (
+		sort { $books->{$a}->[2] cmp $books->{$b}->[2] }
+		grep { $set =~ /$books->{$_}[4]/ } keys %$books
+	  )
 	{
 		push @$result,
-		  { id => $key, name => $books->{$key}[2] . '-' . $books->{$key}[1] };
+		  {
+			id   => $key,
+			name => $books->{$key}[2] . '-' . $books->{$key}[1],
+			set  => $books->{$key}[4]
+		  };
 	}
 
 	$self->render( json => $result );
@@ -271,6 +270,50 @@ sub cust_proto {
 	my $count      = $self->dbh->selectrow_hashref($p_sql);
 	$result = true if $count && $count->{count} == 1;
 	return $self->render( json => { success => $result } );
+}
+
+sub excel {
+	my $self = shift;
+	my $file = $self->param('file');
+	my $path = "${ZIXWEB_HOME}${file}";
+	if ( $file !~ /^\/var/ ) {
+		$self->render_file(
+			'filepath' => "${ZIXWEB_HOME}/var/没有访问权限.txt" );
+	}
+	if ( -e $path ) {
+		$self->render_file( 'filepath' => "${ZIXWEB_HOME}${file}" );
+	}
+	else {
+		$self->render_file(
+			'filename' => '${ZIXWEB_HOME}/var/文件不存在.txt' );
+	}
+}
+
+sub book_headers {
+	my $self    = shift;
+	my $headers = $self->configure->{headers};
+	my $data    = {};
+	for my $id ( keys %$headers ) {
+		my $source = { amt => '' };
+		for my $item ( @{ $headers->{$id} } ) {
+			$source->{$item} = '';
+		}
+		my $book_name = $self->dict->{book}{$id}[1];
+		$data->{$id} = JSON::XS->new->latin1->encode(
+			{
+				source    => $source,
+				book_name => $book_name
+			}
+		);
+	}
+	return $self->render( json => { success => $data } );
+}
+
+sub book_dim {
+	my $self = shift;
+	my $data = $self->dict->{dim};
+	$data->{amt} = '金额';
+	return $self->render( json => { success => $data } );
 }
 
 1;

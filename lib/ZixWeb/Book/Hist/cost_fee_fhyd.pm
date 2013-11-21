@@ -9,9 +9,9 @@ sub cost_fee_fhyd{
 	my $page  = $self->param('page');
 	my $limit = $self->param('limit');
 
-	my $id     = $self->param('id');
+	
 	my $params = {};
-	for (qw/ys_type ys_id j_from j_to d_from d_to period_from period_to fyw_type fhw_type /)
+	for (qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to fyw_type fhw_type /)
 	{
 		my $p = $self->param($_);
 		undef $p if $p eq '';
@@ -20,7 +20,7 @@ sub cost_fee_fhyd{
 	my $p->{condition} = '';
 	$p = $self->params(
 		{
-			id       => $id,
+			id       => $params->{id},
 			ys_type  => $params->{ys_type} && $self->quote( $params->{ys_type} ),
 			ys_id    => $params->{ys_id},
 			j        => [ 0, $params->{j_from}, $params->{j_to} ],
