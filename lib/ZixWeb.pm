@@ -208,7 +208,7 @@ sub set_route {
 		books zjbdtype wlzjtype fhwtype
 		fywtype fypacct fhydacct bi_dict
 		c fp cust_proto excel book_headers
-		book_dim
+		book_dim table_headers
 		/
 	  );
 
@@ -369,7 +369,7 @@ sub set_route {
 		yF0006 yF0007 yF0008 yF0009 yF0010
 		yF0011 yF0012 yF0013 yF0014 yF0015
 		yF0016 yF0017 yF0018 yF0019 yF0020
-        yF0021
+		yF0021
 
 		yF0022 yF0023 yF0024 yF0025 yF0026
 		yF0027 yF0028 yF0029 yF0030 yF0031

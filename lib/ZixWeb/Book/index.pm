@@ -50,12 +50,14 @@ sub get_books {
 	# 组织树结构
 	my $tree = {};
 	for my $book (@books) {
-		my $bn   = $books->{$book}->[0];
-		my $cls  = $books->{$book}->[3];
-		my $name = $books->{$book}->[1];
-		my $code = $books->{$book}->[2];
-		my $row  = $data->{$book};
 
+		my ( $bn, $name, $code, $cls ) = @{ $books->{$book} };
+
+		#		my $bn   = $books->{$book}->[0];
+		#		my $cls  = $books->{$book}->[3];
+		#		my $name = $books->{$book}->[1];
+		#		my $code = $books->{$book}->[2];
+		my $row = $data->{$book};
 		$total->{j}      += $row->{j};
 		$total->{d}      += $row->{d};
 		$tree->{$cls}{j} += $row->{j};
@@ -69,6 +71,7 @@ sub get_books {
 
 		if ( $#name == 0 ) {
 			$tree->{$cls}->{ $code[0] }->{url}  = $bn;
+			$tree->{$cls}->{ $code[0] }->{bid}  = $book;
 			$tree->{$cls}->{ $code[0] }->{leaf} = true;
 		}
 		if ( $#name > 0 ) {
@@ -78,12 +81,12 @@ sub get_books {
 			  join( '.', @code[ 0 .. 1 ] ) . '-' . $name[1];
 			if ( $#name == 1 ) {
 				$tree->{$cls}->{ $code[0] }->{ $code[1] }->{url}  = $bn;
+				$tree->{$cls}->{ $code[0] }->{ $code[1] }->{bid}  = $book;
 				$tree->{$cls}->{ $code[0] }->{ $code[1] }->{leaf} = true;
 			}
 		}
 		if ( $#name > 1 ) {
-			$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }
-			  ->{j} +=
+			$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }->{j} +=
 			  $row->{j};
 			$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }->{d} +=
 			  $row->{d};
@@ -92,6 +95,8 @@ sub get_books {
 			if ( $#name == 2 ) {
 				$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }->{url} =
 				  $bn;
+				$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }->{bid} =
+				  $book;
 				$tree->{$cls}->{ $code[0] }->{ $code[1] }->{ $code[2] }
 				  ->{leaf} = true;
 			}

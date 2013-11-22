@@ -624,6 +624,7 @@ sub _gen_file {
 	my $self   = shift;
 	my $sql    = shift;
 	my $header = shift;
+	my @hs     = keys %$header;
 	my $uuid;
 	my $filename;
 	UUID::generate($uuid);
@@ -642,9 +643,6 @@ sub _gen_file {
 	my $format = $workbook->add_format();
 	$format->set_align('center');
 	my ( $c, $r ) = ( 0, 0 );
-
-	# 表头（包含顺序）
-	my @hs = @{ $header->{headers} };
 
 	# 写入表头
 	for my $h (@hs) {

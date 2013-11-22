@@ -316,4 +316,31 @@ sub book_dim {
 	return $self->render( json => { success => $data } );
 }
 
+sub table_headers {
+	my $self = shift;
+	my $id   = $self->param('id');
+	my $type = $self->param('type');
+	my $data = [ { boxLabel => 'ID', name => 'ID', inputValue => 'id' } ];
+	my $dims = $self->dict->{dim};
+	if ( $type eq 'book' ) {
+		for my $dim ( @{ $self->configure->{headers}{$id} } ) {
+			my $item = {
+				boxLabel   => $dims->{$dim},
+				name       => $dims->{$dim},
+				inputValue => $dim
+			};
+			push @$data, $item;
+		}
+	}
+	for my $key ( keys %{ $self->configure->{extra_headers}{$type} } ) {
+		my $item = {
+			boxLabel   => $self->configure->{extra_headers}{$type}{$key},
+			name       => $self->configure->{extra_headers}{$type}{$key},
+			inputValue => $key
+		};
+		push @$data, $item;
+	}
+	return $self->render( json => $data );
+}
+
 1;
