@@ -1,15 +1,8 @@
 package ZixWeb::Task::Task0000;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 use JSON::XS;
 use boolean;
-use URI::Escape;
-use constant { DEBUG => $ENV{TASK_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 #
 #模块名称:特种调帐审核任务列表
@@ -198,7 +191,6 @@ sub detail {
 			push @{ $fl->{d_book} }, $property if $property;
 		}
 		$fl->{d_amt} = $self->nf( $d_book->{d} / 100 );
-		warn $self->dumper($fl);
 		push @$data, $fl;
 	}
 	$self->render( json => $data );
@@ -236,13 +228,6 @@ sub deny {
 	my $result = false;
 	my $res    = 1;
 
-	warn $self->dumper(
-		{
-			data => { id        => $id, },
-			svc  => "refuse_verify",
-			sys  => { oper_user => $self->session->{uid} },
-		}
-	);
 	$res = $self->ua->post(
 		$self->configure->{svc_url},
 		encode_json {

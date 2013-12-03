@@ -425,10 +425,12 @@ sub _transform {
 		ls_amt cwwf_bfee_1 cwwf_bfee_2 bfee_2_back bfee_3_back
 		cwwf_bfee_3 cwwf_bfee_1_back cwwf_bfee_2_back cwwf_bfee_3_back
 		zg_bfee_1_back zg_bfee_2_back zg_bfee_3_back bfee_1_back
-		cwwf_bfee_1 cwwf_bfee_2 cwwf_bfee_3 cc_bfee_1 cc_bfee_2 cc_bfee_3
+		cc_bfee_1 cc_bfee_2 cc_bfee_3
 		cc_bfee_1_back cc_bfee_2_back cc_bfee_3_back in_cost rb_cwwf_bfee
 		rb_cwwf_bfee_back bfee_4 bfee_5 cwwf_bfee_4 cwwf_bfee_5 zg_bfee_4 zg_bfee_5
-		tx_amt cj_amt chtx_amt mtx_amt income_amt back_amt entrust_amt yyws_amt ls_amt
+		cj_amt chtx_amt mtx_amt income_amt back_amt entrust_amt yyws_amt
+		lc_bfee_1 lc_bfee_2 lc_bfee_3 lc_bfee_4 lc_bfee_5 sc_bfee_1 sc_bfee_2
+		sc_bfee_3 sc_bfee_4 sc_bfee_5 sc_amt lc_amt
 		/
 	  )
 	{

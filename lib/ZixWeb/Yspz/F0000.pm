@@ -1,11 +1,11 @@
-package ZixWeb::Yspz::I0000;
+package ZixWeb::Yspz::F0000;
 
 use Mojo::Base 'Mojolicious::Controller';
 use JSON::XS;
 use boolean;
 use Encode qw/encode/;
 
-sub i0000 {
+sub f0000 {
 	my $self = shift;
 	my $res;
 	my $data = encode( 'utf8', $self->param('data') );
@@ -13,7 +13,7 @@ sub i0000 {
 	$res  = $self->ua->post(
 		$self->configure->{svc_url},
 		encode_json(
-			{                    # 添加特种调账审核信息
+			{             # 添加特种调账审核信息
 				data => {
 					type =>
 					  1,   # 审核类型（1.特种调账单  2.凭证撤销）

@@ -15,7 +15,7 @@ sub bamt_yhyf {
 		qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to zyzj_acct zjbd_type zjbd_date_from zjbd_date_to/
 	  )
 	{
-		my $p = $self->param($_);
+		my $p = $self->param($_) || '';
 		undef $p if $p eq '';
 		$params->{$_} = $p;
 	}

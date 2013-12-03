@@ -398,6 +398,12 @@ sub set_route {
 		  ->to( namespace => "ZixWeb::Yspz::\u$_", action => $_ );
 	}
 
+	# 凭证录入-富汇易达
+	for ( qw/f0000/ ) {
+		$r->any("/pzlr/$_")
+		  ->to( namespace => "ZixWeb::Yspz::\u$_", action => $_ );
+	}
+
 	# 凭证导入
 	$r->any("/pzlr/mission")
 	  ->to( namespace => "ZixWeb::Yspz::Mission", action => 'mission' );
@@ -405,6 +411,12 @@ sub set_route {
 	  ->to( namespace => "ZixWeb::Yspz::Action", action => 'action' );
 	$r->any("/pzlr/job")
 	  ->to( namespace => "ZixWeb::Yspz::Job", action => 'job' );
+
+	# 基础数据维护
+	for (qw/list check add edit/) {
+		$r->any("/jcsjwh/bfjacct/$_")
+		  ->to( namespace => "ZixWeb::Jcsjwh::bfjacct", action => $_ );
+	}
 }
 
 1;

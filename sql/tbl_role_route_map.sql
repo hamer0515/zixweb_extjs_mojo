@@ -264,4 +264,6 @@ insert into tbl_role_route_map(role_id, route_id) values
 (1, 674),
 (1, 675),
 (1, 676),
-(1, 677);
+(1, 677),
+(1, 678),
+(1, 679);
