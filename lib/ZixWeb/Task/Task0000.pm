@@ -26,8 +26,9 @@ sub list {
 	if ($id) {
 		$p = $self->params(
 			{
-				id   => $id,
-				type => 1
+				id      => $id,
+				type    => 1,
+				ys_type => [ 4, '0%' ]
 			}
 		);
 	}
@@ -42,7 +43,8 @@ sub list {
 				status => $params->{status},
 				c_user => $params->{c_user}
 				  && $self->uids->{ $params->{c_user} },
-				type => 1
+				type    => 1,
+				ys_type => [ 4, '0%' ]
 			}
 		);
 	}

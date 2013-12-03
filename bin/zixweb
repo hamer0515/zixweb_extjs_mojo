@@ -53,7 +53,7 @@ archive)
     if [ "x$2" = 'x' ]; then
         $2=master
     fi  
-    temp=v$2.tar
+    temp=zixweb.tar
     git archive $2 --format tar -o $ZIXWEB_HOME/tar/${temp}
     cd $ZIXWEB_HOME/tar
     tar -uf ${temp} ../public -h

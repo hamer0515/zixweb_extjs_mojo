@@ -1,15 +1,8 @@
 package ZixWeb::Task::Taskpzcx;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 use JSON::XS;
 use boolean;
-use URI::Escape;
-use constant { DEBUG => $ENV{TASK_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 #
 #模块名称:凭证撤销审核任务列表
@@ -33,15 +26,17 @@ sub list {
 	if ($id) {
 		$p = $self->params(
 			{
-				id   => $id,
-				type => 2
+				id      => $id,
+				type    => 2,
+				ys_type => [ 4, '0%' ]
 			}
 		);
 	}
 	else {
 		$p = $self->params(
 			{
-				ts_c => [
+				ys_type => [ 4, '0%' ],
+				ts_c    => [
 					0,
 					$params->{from} && $self->quote( $params->{from} ),
 					$params->{to}   && $self->quote( $params->{to} )

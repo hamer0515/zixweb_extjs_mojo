@@ -22,8 +22,9 @@ sub list {
 	my $p->{condition} = '';
 	$p = $self->params(
 		{
-			id   => $id,
-			ts_c => [
+			ys_type => [ 4, '0%' ],
+			id      => $id,
+			ts_c    => [
 				0,
 				$params->{from} && $self->quote( $params->{from} ),
 				$params->{to}   && $self->quote( $params->{to} )

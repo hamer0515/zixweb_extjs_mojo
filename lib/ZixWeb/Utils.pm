@@ -4,7 +4,7 @@ use base qw/Exporter/;
 use utf8;
 use strict;
 use warnings;
-use UUID;
+use DateTime;
 use Spreadsheet::WriteExcel;
 
 our @ISA = qw(Exporter);
@@ -610,6 +610,10 @@ sub _params {
 				$condition .= " and  $key=$data->[2]"  if ( $data->[1] == 1 );
 				$condition .= " and  $key<>$data->[2]" if ( $data->[1] == 2 );
 			}
+			elsif ( $data->[0] == 4 ) {    # a= b || a<>b
+				$condition .= " and  $key like \'$data->[1]\'"
+				  if $data->[1];
+			}
 		}
 		else {
 			if ( defined $params->{$key} && $params->{$key} ne '' ) {
@@ -629,9 +633,11 @@ sub _gen_file {
 	my @hs     = keys %$header;
 	my $uuid;
 	my $filename;
-	UUID::generate($uuid);
-	UUID::unparse( $uuid, $filename );
-	$filename = "${filename}.xls";
+	#UUID::generate($uuid);
+	#UUID::unparse( $uuid, $filename );
+	my $dt         = DateTime->now( time_zone => 'local' );
+	$filename = $dt->ymd.$dt->hms.".xls";
+	#$filename = "${filename}.xls";
 	my $path = "$ENV{ZIXWEB_HOME}/var/${filename}";
 	my $data = $self->select($sql);
 
