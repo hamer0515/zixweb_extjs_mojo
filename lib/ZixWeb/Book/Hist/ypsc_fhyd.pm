@@ -53,6 +53,7 @@ sub ypsc_fhyd_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -85,10 +86,10 @@ sub ypsc_fhyd_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, fyw_type, fyp_acct, fe_date,  ys_id, ys_type, j, d, period from book_ypsc_fhyd $p->{condition} order by id desc";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $fields = join ',', keys %$header;
+	my $sql    = "select $fields from book_ypsc_fhyd $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{success} = true;
 	$self->render( json => $data );
 }

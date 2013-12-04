@@ -630,13 +630,22 @@ sub _gen_file {
 	my $self   = shift;
 	my $sql    = shift;
 	my $header = shift;
-	my @hs     = keys %$header;
-	my $uuid;
+	my @hs;
+	if ( exists $header->{headers} ) {
+		@hs = @{ $header->{headers} };
+	}
+	else {
+		@hs = keys %$header;
+	}
+
+	#	my $uuid;
 	my $filename;
+
 	#UUID::generate($uuid);
 	#UUID::unparse( $uuid, $filename );
-	my $dt         = DateTime->now( time_zone => 'local' );
-	$filename = $dt->ymd.$dt->hms.".xls";
+	my $dt = DateTime->now( time_zone => 'local' );
+	$filename = $dt->ymd . $dt->hms . ".xls";
+
 	#$filename = "${filename}.xls";
 	my $path = "$ENV{ZIXWEB_HOME}/var/${filename}";
 	my $data = $self->select($sql);

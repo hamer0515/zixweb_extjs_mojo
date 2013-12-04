@@ -42,6 +42,7 @@ sub wlzj_yszy_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to/) {
@@ -63,8 +64,8 @@ sub wlzj_yszy_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, ys_id, ys_type, j, d, period from book_wlzj_yszy $p->{condition} order by id desc"
+	my $fields = join ',', keys %$header;
+	my $sql = "select $fields from book_wlzj_yszy $p->{condition}"
 	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};

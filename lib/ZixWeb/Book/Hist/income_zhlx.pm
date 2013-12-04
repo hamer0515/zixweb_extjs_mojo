@@ -46,6 +46,7 @@ sub income_zhlx_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -70,8 +71,10 @@ sub income_zhlx_excel {
 			]
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, acct, ys_id, ys_type, j, d, period from book_income_zhlx $p->{condition} order by id desc";
+	  "select $fields from book_income_zhlx $p->{condition}"
+	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

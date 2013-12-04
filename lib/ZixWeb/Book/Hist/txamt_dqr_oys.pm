@@ -53,6 +53,7 @@ sub txamt_dqr_oys_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -84,10 +85,10 @@ sub txamt_dqr_oys_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, bi, ys_id, ys_type, j, d, tx_date, period from book_txamt_dqr_oys $p->{condition} order by id desc";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $fields = join ',', keys %$header;
+	my $sql    = "select $fields from book_txamt_dqr_oys $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{file}    = "/var/$file";
 	$data->{success} = true;
 

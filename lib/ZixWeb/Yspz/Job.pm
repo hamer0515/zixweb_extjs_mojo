@@ -1,7 +1,6 @@
 package ZixWeb::Yspz::Job;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
 
 sub job {
 	my $self = shift;

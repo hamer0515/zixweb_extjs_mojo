@@ -35,7 +35,7 @@ sub wlzj_yfzy {
 		}
 	);
 	my $sql =
-"select id, wlzj_type, ys_id, ys_type, j, d, period from book_wlzj_yfzy $p->{condition} order by id desc";
+"select id, wlzj_type, ys_id, ys_type, j, d, period from book_wlzj_yfzy $p->{condition}";
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 
@@ -47,6 +47,8 @@ sub wlzj_yfzy_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
+
 	my $params = {};
 	for (
 		qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to wlzj_type/
@@ -71,8 +73,8 @@ sub wlzj_yfzy_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, wlzj_type, ys_id, ys_type, j, d, period from book_wlzj_yfzy $p->{condition} order by id desc"
+	my $fields = join ',', keys %$header;
+	my $sql = "select $fields from book_wlzj_yfzy $p->{condition}"
 	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};

@@ -45,6 +45,7 @@ sub bfj_cust_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to c /)
@@ -62,14 +63,16 @@ sub bfj_cust_excel {
 			ys_id   => $params->{ys_id},
 			j       => [ 0, $params->{j_from}, $params->{j_to} ],
 			d       => [ 0, $params->{d_from}, $params->{d_to} ],
-			period => [
+			period  => [
 				$self->quote( $params->{period_from} ),
 				$self->quote( $params->{period_to} ),
 			]
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, c, ys_id, ys_type, j, d, period from book_bfj_cust $p->{condition} order by id desc";
+	  "select $fields from book_bfj_cust $p->{condition}"
+	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

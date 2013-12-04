@@ -1,21 +1,110 @@
-package ZixWeb::Yspzq::Detail;
+package ZixWeb::Task::TaskFpzcx;
 
 use Mojo::Base 'Mojolicious::Controller';
 use JSON::XS;
 use boolean;
 
-sub detail {
+#
+#模块名称:凭证撤销审核任务列表
+#
+sub list {
+	my $self = shift;
 
+	my $page  = $self->param('page');
+	my $limit = $self->param('limit');
+
+	my $id = $self->param('id');
+
+	my $params = {};
+	for (qw/c_user from to status/) {
+		my $p = $self->param($_);
+		$p = undef if $p eq '';
+		$params->{$_} = $p;
+	}
+
+	my $p->{condition} = '';
+	if ($id) {
+		$p = $self->params(
+			{
+				id      => $id,
+				type    => 2,
+				ys_type => [ 4, 'F%' ]
+			}
+		);
+	}
+	else {
+		$p = $self->params(
+			{
+				ys_type => [ 4, 'F%' ],
+				ts_c => [
+					0,
+					$params->{from} && $self->quote( $params->{from} ),
+					$params->{to}   && $self->quote( $params->{to} )
+				],
+				status => $params->{status},
+				c_user => $params->{c_user}
+				  && $self->uids->{ $params->{c_user} },
+				type => 2
+			}
+		);
+	}
+
+	my $sql =
+"select id, content,ys_type, ys_id, c_user, ts_c, status as shstatus, rownumber() over(order by id desc) as rowid from verify $p->{condition}";
+	my $data = $self->page_data( $sql, $page, $limit );
+
+	for my $d ( @{ $data->{data} } ) {
+		my $content = decode_json delete $d->{content};
+		$d->{cause} = $content->{cause}        if $content->{cause};
+		$d->{cause} = $content->{revoke_cause} if $content->{revoke_cause};
+	}
+	$data->{success} = true;
+
+	$self->render( json => $data );
+}
+
+#
+#模块名称:凭证撤销审核任务详细
+#
+sub detail {
 	my $self   = shift;
 	my $data   = [];
 	my $detail = {};
+	my $verify = {};
 	$detail->{properties} = [];
 
+	#id
+	my $id = $self->param('id');    #参数1
+
 	#ys_type
-	my $ys_type = $self->param('ys_type');    #参数1
+	my $ys_type = $self->param('ys_type');    #参数2
 
 	#ys_id
-	my $ys_id = $self->param('ys_id');        #参数2
+	my $ys_id = $self->param('ys_id');        #参数3
+
+	#审核详细信息
+	my $ex_sql =
+"select id as shid, content, status as shstatus, v_user, v_ts,type as shtype, c_user, v_ts, ts_c from verify where id=$id";
+
+	my $ex = $self->select($ex_sql)->[0];
+	$ex->{content}      = decode_json $self->my_decode( $ex->{content} );
+	$verify->{isverify} = true;
+	$verify->{title} =
+	  $ys_type . $self->ys_type->{$ys_type} . "凭证撤销审核详细信息";
+	$verify->{revoke_cause} = $ex->{content}{revoke_cause};
+	$verify->{period}       = $ex->{content}{period};
+	$verify->{shid}         = $ex->{shid};
+	$verify->{shstatus}     = $ex->{shstatus};
+	$verify->{shtype}       = $ex->{shtype};
+	$verify->{c_user}       = $ex->{c_user_name};
+	$verify->{ts_c}         = $ex->{ts_c};
+	$verify->{v_user}       = $ex->{v_user_name};
+	$verify->{v_ts}         = $ex->{v_ts};
+
+	# 从我的任务菜单进入传入readonly参数
+	$verify->{rdonly} = $self->param('rdonly');
+
+	push @$data, $verify;
 
 	#该yspz非公共字段 {zyzj_acct=>"自有资金账户"}
 	my $yspz_zd = $self->dict->{types}->{ 'yspz_' . $ys_type };
@@ -77,7 +166,7 @@ sub detail {
 	push @$data, $detail;
 
 	my $jzpz_sql =
-"select * from jzpz where ys_type='$ys_type' and ys_id=$ys_id order by cast(left(fid,3) as float)";
+"select * from jzpz where ys_type=$ys_type and ys_id=$ys_id order by cast(left(fid,3) as float)";
 
 	#jzpz所有记录
 	my $jzpz = $self->select($jzpz_sql);
@@ -133,19 +222,7 @@ sub detail {
 				$property->{value} = $self->bi->{$co};
 			}
 			elsif ( $_ eq "acct" ) {
-				$property->{value} = $self->acct->{$co};
-			}
-			elsif ( $_ eq "fhw_type" ) {
-				$property->{value} = $self->fhw_type->{$co};
-			}
-			elsif ( $_ eq "fyw_type" ) {
-				$property->{value} = $self->dict->{types}{fyw_type}->{$co};
-			}
-			elsif ( $_ eq "fhyd_acct" ) {
-				$property->{value} = $self->fhyd_acct->{$co};
-			}
-			elsif ( $_ eq "fyp_acct" ) {
-				$property->{value} = $self->fyp_acct->{$co};
+				$property->{value} = $self->dict->{types}{acct}->{$co};
 			}
 			else {
 				$property->{value} = $co || "";
@@ -195,19 +272,7 @@ sub detail {
 				$property->{value} = $self->p->{$co};
 			}
 			elsif ( $_ eq "acct" ) {
-				$property->{value} = $self->acct->{$co};
-			}
-			elsif ( $_ eq "fhw_type" ) {
-				$property->{value} = $self->fhw_type->{$co};
-			}
-			elsif ( $_ eq "fyw_type" ) {
-				$property->{value} = $self->dict->{types}{fyw_type}->{$co};
-			}
-			elsif ( $_ eq "fhyd_acct" ) {
-				$property->{value} = $self->fhyd_acct->{$co};
-			}
-			elsif ( $_ eq "fyp_acct" ) {
-				$property->{value} = $self->fyp_acct->{$co};
+				$property->{value} = $self->dict->{types}{acct}{$co};
 			}
 			else {
 				$property->{value} = $co || "";
@@ -221,4 +286,49 @@ sub detail {
 	}
 	$self->render( json => $data );
 }
+
+#
+#模块名称: 凭证撤销审核任务审核通过
+#
+sub pass {
+	my $self   = shift;                 #参数1
+	my $id     = $self->param('id');    #参数2
+	my $result = false;
+	my $res    = 1;
+	$res = $self->ua->post(
+		$self->configure->{svc_url},
+		encode_json {
+			data => { id        => $id, },
+			svc  => "verify",
+			sys  => { oper_user => $self->session->{uid} },
+		}
+	)->res->json->{status};
+	if ( $res == 0 ) {
+		$result = true;
+	}
+	$self->render( json => { success => $result } );
+}
+
+#
+#模块名称: 凭证撤销审核任务审核不通过
+#
+sub deny {
+	my $self   = shift;                 #参数1
+	my $id     = $self->param('id');    #参数2
+	my $result = false;
+	my $res    = 1;
+	$res = $self->ua->post(
+		$self->configure->{svc_url},
+		encode_json {
+			data => { id        => $id, },
+			svc  => "refuse_verify",
+			sys  => { oper_user => $self->session->{uid} },
+		}
+	)->res->json->{status};
+	if ( $res == 0 ) {
+		$result = true;
+	}
+	$self->render( json => { success => $result } );
+}
+
 1;

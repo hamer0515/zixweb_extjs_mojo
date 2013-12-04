@@ -230,14 +230,29 @@ sub set_route {
 	  ->to( namespace => "ZixWeb::Task::Task0000", action => $_ )
 	  for (qw/list detail pass deny/);
 
+	# 特种调帐单录入审核-富汇易达
+	$r->any("/taskf0000/$_")
+	  ->to( namespace => "ZixWeb::Task::TaskF0000", action => $_ )
+	  for (qw/list detail pass deny/);
+
 	# 凭证撤销审核
 	$r->any("/taskpzcx/$_")
 	  ->to( namespace => "ZixWeb::Task::Taskpzcx", action => $_ )
 	  for (qw/list detail pass deny/);
 
+	# 凭证撤销审核-富汇易达
+	$r->any("/taskfpzcx/$_")
+	  ->to( namespace => "ZixWeb::Task::TaskFpzcx", action => $_ )
+	  for (qw/list detail pass deny/);
+
 	# 我的任务
 	$r->any("/taskmy/$_")
 	  ->to( namespace => "ZixWeb::Task::Taskmy", action => $_ )
+	  for (qw/list detail/);
+
+	# 我的任务-富汇易达
+	$r->any("/taskfmy/$_")
+	  ->to( namespace => "ZixWeb::Task::TaskFmy", action => $_ )
 	  for (qw/list detail/);
 
 	# 资金对账
@@ -399,7 +414,7 @@ sub set_route {
 	}
 
 	# 凭证录入-富汇易达
-	for ( qw/f0000/ ) {
+	for (qw/f0000/) {
 		$r->any("/pzlr/$_")
 		  ->to( namespace => "ZixWeb::Yspz::\u$_", action => $_ );
 	}

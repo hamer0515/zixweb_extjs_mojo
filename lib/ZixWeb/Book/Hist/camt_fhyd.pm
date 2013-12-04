@@ -53,6 +53,7 @@ sub camt_fhyd_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -85,8 +86,10 @@ sub camt_fhyd_excel {
 			]
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, fyw_type, fc, ftx_date,  ys_id, ys_type, j, d, period from book_camt_fhyd $p->{condition} order by id desc";
+	  "select $fields from book_camt_fhyd $p->{condition}"
+	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

@@ -54,6 +54,7 @@ sub bamt_yhyf_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -87,8 +88,10 @@ sub bamt_yhyf_excel {
 			]
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, zyzj_acct, zjbd_type, zjbd_date, ys_id, ys_type, j, d, period from book_bamt_yhyf $p->{condition} order by id desc";
+	  "select $fields from book_bamt_yhyf $p->{condition}"
+	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

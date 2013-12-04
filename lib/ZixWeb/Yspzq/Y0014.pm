@@ -1,14 +1,8 @@
 package ZixWeb::Yspzq::Y0014;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
+
 use boolean;
-
-use constant { DEBUG => $ENV{SOURCEDOC_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 sub y0014 {
 	my $self = shift;
@@ -21,7 +15,8 @@ sub y0014 {
 		$data->{$_} = $self->param($_);
 	}
 	if ( $data->{revoke_user} ) {
-		$data->{revoker} = $self->uids->{ $data->{revoke_user} } || -1;
+		$data->{revoker} = $self->uids->{ $data->{revoke_user} }
+		  || -1;
 	}
 	if ( $data->{ts_revoke} ) {
 		$data->{ts_revoke_from} = $data->{ts_revoke} . ' 00:00:00';
@@ -47,8 +42,7 @@ sub y0014 {
 		}
 	);
 	my $sql =
-"select  bfj_acct, zhlx_amt, id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0014 $p->{condition}"
-	  ;
+"select  bfj_acct, zhlx_amt, id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0014 $p->{condition}";
 
 	my $pager = $self->page_data( $sql, $page, $limit );
 

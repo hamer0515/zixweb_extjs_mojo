@@ -53,6 +53,7 @@ sub bfee_cwwf_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -84,8 +85,9 @@ sub bfee_cwwf_excel {
 			],
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, bi, ys_id, ys_type, j, d, period, tx_date from book_bfee_cwwf $p->{condition} order by id desc";
+	  "select $fields from book_bfee_cwwf $p->{condition}";
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

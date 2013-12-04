@@ -57,6 +57,7 @@ sub chamt_dgd_fhyd_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -93,8 +94,10 @@ sub chamt_dgd_fhyd_excel {
 			]
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, fyw_type, fc, ftx_date, fhw_type,f_ssn, fch_rate, ys_id, ys_type, j, d, period from book_chamt_dgd_fhyd $p->{condition} order by id desc";
+	  "select $fields from book_chamt_dgd_fhyd $p->{condition}"
+	  ;
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

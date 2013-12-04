@@ -47,6 +47,7 @@ sub yufamt_ch_fhyd_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -61,12 +62,14 @@ sub yufamt_ch_fhyd_excel {
 	$p = $self->params(
 		{
 			id      => $params->{id},
-			ys_type => $params->{ys_type} && $self->quote( $params->{ys_type} ),
-			ys_id   => $params->{ys_id},
-			j       => [ 0, $params->{j_from}, $params->{j_to} ],
-			d       => [ 0, $params->{d_from}, $params->{d_to} ],
+			ys_type => $params->{ys_type}
+			  && $self->quote( $params->{ys_type} ),
+			ys_id    => $params->{ys_id},
+			j        => [ 0, $params->{j_from}, $params->{j_to} ],
+			d        => [ 0, $params->{d_from}, $params->{d_to} ],
 			fyw_type => $params->{fyw_type},
-			fc       => $params->{fc} && $self->quote( $params->{fc} ),
+			fc       => $params->{fc}
+			  && $self->quote( $params->{fc} ),
 			fio_date => [
 				0,
 				$params->{fio_date_from}
@@ -79,10 +82,10 @@ sub yufamt_ch_fhyd_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, fyw_type, fc, fio_date,  ys_id, ys_type, j, d, period from book_yufamt_ch_fhyd $p->{condition} order by id desc";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $fields = join ',', keys %$header;
+	my $sql    = "select $fields from book_yufamt_ch_fhyd $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{success} = true;
 	$self->render( json => $data );
 }

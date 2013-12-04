@@ -47,6 +47,7 @@ sub wlzj_ysbfZ_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -72,10 +73,10 @@ sub wlzj_ysbfZ_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, wlzj_type, ys_id, ys_type, j, d, period from book_wlzj_ysbf $p->{condition} order by id desc";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $fields = join ',', keys %$header;
+	my $sql    = "select $fields from book_wlzj_ysbf $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{success} = true;
 
 	$self->render( json => $data );

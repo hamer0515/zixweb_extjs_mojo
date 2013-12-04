@@ -1,14 +1,8 @@
 package ZixWeb::Yspzq::Y0018;
 
 use Mojo::Base 'Mojolicious::Controller';
-use utf8;
+
 use boolean;
-
-use constant { DEBUG => $ENV{SOURCEDOC_DEBUG} || 0, };
-
-BEGIN {
-	require Data::Dump if DEBUG;
-}
 
 sub y0018 {
 	my $self = shift;

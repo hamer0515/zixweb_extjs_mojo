@@ -56,6 +56,7 @@ sub blc_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
 
 	my $params = {};
 	for (
@@ -72,9 +73,8 @@ sub blc_excel {
 			id        => $params->{id},
 			bfj_acct  => $params->{bfj_acct},
 			zjbd_type => $params->{zjbd_type},
-			ys_type   => $params->{ys_type}
-			  && $self->quote( $params->{ys_type} ),
-			ys_id  => $params->{ys_id},
+			ys_type => $params->{ys_type} && $self->quote( $params->{ys_type} ),
+			ys_id   => $params->{ys_id},
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			period => [
@@ -91,8 +91,9 @@ sub blc_excel {
 			],
 		}
 	);
+	my $fields = join ',', keys %$header;
 	my $sql =
-"select id, bfj_acct, ys_id, ys_type, j, d, period, zjbd_type, e_date from book_blc $p->{condition} order by id desc";
+	  "select $fields from book_blc $p->{condition}";
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

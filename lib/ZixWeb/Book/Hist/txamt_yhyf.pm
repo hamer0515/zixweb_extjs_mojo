@@ -54,6 +54,8 @@ sub txamt_yhyf_excel {
 
 	# Excel Header
 	my $header = decode_json $self->param('header');
+	$header = { reverse %$header };
+
 	my $params = {};
 	for (
 		qw/id ys_type ys_id j_from j_to d_from d_to period_from period_to bfj_acct zjbd_type zjbd_date_from zjbd_date_to/
@@ -86,10 +88,10 @@ sub txamt_yhyf_excel {
 			]
 		}
 	);
-	my $sql =
-"select id, bfj_acct, zjbd_type, zjbd_date, ys_id, ys_type, j, d, period from book_txamt_yhyf $p->{condition} order by id desc";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $fields = join ',', keys %$header;
+	my $sql    = "select $fields from book_txamt_yhyf $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{file}    = "/var/$file";
 	$data->{success} = true;
 	$self->render( json => $data );
