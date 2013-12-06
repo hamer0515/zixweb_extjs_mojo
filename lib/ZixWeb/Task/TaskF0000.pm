@@ -209,9 +209,9 @@ sub pass {
 	$res = $self->ua->post(
 		$self->configure->{svc_url},
 		encode_json {
-			data => { id        => $id, },
-			svc  => "verify",
-			sys  => { oper_user => $self->session->{uid} },
+			data => { id => $id, ys_type => 'F0000' },
+			svc => "verify",
+			sys => { oper_user => $self->session->{uid} },
 		}
 	)->res->json->{status};
 

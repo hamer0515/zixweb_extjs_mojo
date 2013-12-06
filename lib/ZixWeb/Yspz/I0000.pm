@@ -9,11 +9,12 @@ sub i0000 {
 	my $self = shift;
 	my $res;
 	my $data = encode( 'utf8', $self->param('data') );
-	$data = decode_json $data;
-	$res  = $self->ua->post(
+	$data            = decode_json $data;
+	$data->{ys_type} = '0000';
+	$res             = $self->ua->post(
 		$self->configure->{svc_url},
 		encode_json(
-			{                    # 添加特种调账审核信息
+			{                               # 添加特种调账审核信息
 				data => {
 					type =>
 					  1,   # 审核类型（1.特种调账单  2.凭证撤销）

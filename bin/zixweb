@@ -14,11 +14,11 @@ case $1 in
 start) 
     if [ -f "$memcached" ]; then
         $0 status
-        exit 0;
+        exit 1;
     fi
     if [ -f "$hypnotoad" ]; then
         $0 status
-        exit 0;
+        exit 1;
     fi
     # 启动memcached
     memcached -p $MEM_PORT -m 64m -P $ZIXWEB_HOME/script/memcached.pid -d
@@ -50,11 +50,8 @@ status)
     ;;
 archive)
     cd $ZIXWEB_HOME
-    if [ "x$2" = 'x' ]; then
-        $2=master
-    fi  
-    temp=zixweb.tar
-    git archive $2 --format tar -o $ZIXWEB_HOME/tar/${temp}
+    temp=${3:-zixweb}.tar
+    git archive ${2:-master} --format tar -o $ZIXWEB_HOME/tar/${temp}
     cd $ZIXWEB_HOME/tar
     tar -uf ${temp} ../public -h
     echo archive file succeed ${temp}
