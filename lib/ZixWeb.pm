@@ -257,7 +257,7 @@ sub set_route {
 
 	# 资金对账
 	$r->any("/zjdz/$_")->to( namespace => "ZixWeb::Zjdz::Zjdz", action => $_ )
-	  for (qw/bfj bfjcheck bfjcheckdone bfjgzcx/);
+	  for (qw/bfj bfjcheck bfjcheckdone bfjgzcx bfjrefresh_mqt/);
 
 	# 帐套查询
 	for (qw/all bfj zyzj fhyd/) {
@@ -428,10 +428,9 @@ sub set_route {
 	  ->to( namespace => "ZixWeb::Yspz::Job", action => 'job' );
 
 	# 基础数据维护
-	for (qw/list check add edit/) {
+	for (qw/list check add edit query/) {
 		$r->any("/jcsjwh/bfjacct/$_")
 		  ->to( namespace => "ZixWeb::Jcsjwh::bfjacct", action => $_ );
 	}
 }
-
 1;

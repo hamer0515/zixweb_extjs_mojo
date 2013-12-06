@@ -1,7 +1,6 @@
 package ZixWeb::Yspzq::Y0081;
 
 use Mojo::Base 'Mojolicious::Controller';
-
 use boolean;
 
 sub y0081 {
@@ -12,7 +11,7 @@ sub y0081 {
 
 	my $data = {};
 	for (
-		qw/id flag bi bfj_acct_bj p c wlzj_type tx_date_from tx_date_to period_from period_to revoke_user ts_revoke/
+		qw/id flag clear_date_from clear_date_to bi bfj_acct_bj p c wlzj_type tx_date_from tx_date_to period_from period_to revoke_user ts_revoke/
 	  )
 	{
 		$data->{$_} = $self->param($_);
@@ -29,6 +28,12 @@ sub y0081 {
 			period => [
 				$self->quote( $data->{period_from} ),
 				$self->quote( $data->{period_to} ),
+			],
+			clear_date => [
+				0,
+				$data->{clear_date_from}
+				  && $self->quote( $data->{clear_date_from} ),
+				$data->{clear_date_to} && $self->quote( $data->{clear_date_to} )
 			],
 			status      => 1,
 			id          => $data->{id},
@@ -53,7 +58,7 @@ sub y0081 {
 		}
 	);
 	my $sql =
-"select id, flag, period, bfj_acct_bj, p, tx_amt, rownumber() over(order by id desc) as rowid from yspz_0081 $p->{condition}";
+"select id, flag, period, clear_date, bfj_acct_bj, p, tx_amt, rownumber() over(order by id desc) as rowid from yspz_0081 $p->{condition}";
 
 	my $pager = $self->page_data( $sql, $page, $limit );
 

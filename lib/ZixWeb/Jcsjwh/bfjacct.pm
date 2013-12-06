@@ -99,4 +99,16 @@ sub edit {
 
 	$self->render( json => { success => true } );
 }
+
+sub query {
+	my $self   = shift;
+	my $bfj_id = $self->param('bfj_id');
+
+	my $data =
+	  $self->select("select memo from dim_bfj_acct where id = \'$bfj_id\' ");
+
+	$self->render( json => { success => true, data => $data } );
+
+}
+
 1;
