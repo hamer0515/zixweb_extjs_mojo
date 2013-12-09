@@ -52,28 +52,131 @@ sub detail {
 		group            => "原始凭证组ID"
 	};
 
-	#[id,status,flag]
-	my $public_item = [ keys %{$public} ];
-
-	#
-	#{备付金账户=>1,资金变动类型=>1]
-	#
-	for (@$yspz_item) {
+	#凭证详细第一部分
+	my @p1;
+	for (
+		qw/ssn period tx_type matcher bfee clear_date
+		tx_amt tx_date ftx_date e_data fe_date bfj_acct_bj
+		zjbd_date_in zjbd_date_bj bi zjbd_date_out zjbd_date_out_bj/
+	  )
+	{
+		next unless exists $ys_data->{$_};
 		my $property = {};
 		$property->{key}   = $yspz_zd->{$_};
-		$property->{value} = $ys_data->{$_};
-		push @{ $detail->{properties} }, $property;
+		$property->{value} = delete $ys_data->{$_};
+		push @p1, $property;
 	}
+	push @{ $detail->{properties} }, \@p1 if scalar(@p1) > 0;
 
-	#
-	#{撤销标志=>0,原始凭证id=>1]
-	#
-	for (@$public_item) {
+	#凭证详细第二部分
+	my @p2;
+	for (
+		qw/cwwf_bfee cwwf_bfee_1 bfee bfee_1
+		cwwf_bfee_2 bfee_2
+		cwwf_bfee_3 bfee_3
+		cwwf_bfee_4 bfee_4
+		cwwf_bfee_5 bfee_5/
+	  )
+	{
+		next unless exists $ys_data->{$_};
+		my $property = {};
+		$property->{key}   = $yspz_zd->{$_};
+		$property->{value} = delete $ys_data->{$_};
+		push @p2, $property;
+	}
+	push @{ $detail->{properties} }, \@p2 if scalar(@p2) > 0;
+
+	#凭证详细第三部分
+	my @p3;
+	for (
+		qw/zg_bfee zg_bfee_1 fp fp_1 zg_bfee_1_back
+		zg_bfee_2 fp_2 zg_bfee_2_back
+		zg_bfee_3 fp_3 zg_bfee_3_back
+		zg_bfee_4 fp_4 zg_bfee_4_back
+		zg_bfee_5 fp_5 zg_bfee_5_back/
+	  )
+	{
+		next unless exists $ys_data->{$_};
+		my $property = {};
+		$property->{key}   = $yspz_zd->{$_};
+		$property->{value} = delete $ys_data->{$_};
+		push @p3, $property;
+	}
+	push @{ $detail->{properties} }, \@p3 if scalar(@p3) > 0;
+
+	#凭证详细第四部分
+	my @p4;
+	for (
+		qw/cwwf_bfee_1_back bfee_back bfee_1_back
+		cwwf_bfee_2_back bfee_2_back
+		cwwf_bfee_3_back bfee_3_back
+		cwwf_bfee_4_back bfee_4_back
+		cwwf_bfee_5_back bfee_5_back/
+	  )
+	{
+		next unless exists $ys_data->{$_};
+		my $property = {};
+		$property->{key}   = $yspz_zd->{$_};
+		$property->{value} = delete $ys_data->{$_};
+		push @p4, $property;
+	}
+	push @{ $detail->{properties} }, \@p4 if scalar(@p4) > 0;
+
+	#凭证详细第五部分
+	my @p5;
+	for (
+		qw/bfj_acct bfj_acct_1 zjbd_date_out zjbd_date_out_1 zjbd_date_in zjbd_date_in_1
+		bfj_acct_2 zjbd_date_out_2 zjbd_date_in_2
+		bfj_acct_3 zjbd_date_out_3 zjbd_date_in_3
+		bfj_acct_4 zjbd_date_out_4 zjbd_date_in_4
+		bfj_acct_5 zjbd_date_out_5 zjbd_date_in_5/
+	  )
+	{
+		next unless exists $ys_data->{$_};
+		my $property = {};
+		$property->{key}   = $yspz_zd->{$_};
+		$property->{value} = delete $ys_data->{$_};
+		push @p5, $property;
+	}
+	push @{ $detail->{properties} }, \@p5 if scalar(@p5) > 0;
+
+	#凭证详细第五部分
+	my @p6;
+	for (
+		qw/rb_cwwf_bfee rb_cwwf_bfee_back cfee cwws_cfee
+		cfee_back cwws_cfee_back ls_amt in_cost
+		c sp_c fc cust_proto sp_cust_proto wqr_c p p1 p2 wlzj_type/
+	  )
+	{
+		next unless exists $ys_data->{$_};
+		my $property = {};
+		$property->{key}   = $yspz_zd->{$_};
+		$property->{value} = delete $ys_data->{$_};
+		push @p6, $property;
+	}
+	push @{ $detail->{properties} }, \@p6 if scalar(@p6) > 0;
+
+	#凭证详细公共字段部分
+	my @public;
+	for (qw/group id status crt_id_name flag revoke_user_name ts_revoke ts_c/) {
 		my $property = {};
 		$property->{key}   = $public->{$_};
-		$property->{value} = $ys_data->{$_};
-		push @{ $detail->{properties} }, $property;
+		$property->{value} = delete $ys_data->{$_};
+		push @public, $property;
 	}
+
+	#其他字段
+	my @other;
+	for ( sort @$yspz_item ) {
+		next unless exists $ys_data->{$_};
+		my $property = {};
+		$property->{key}   = $yspz_zd->{$_};
+		$property->{value} = delete $ys_data->{$_};
+		push @other, $property;
+	}
+	push @{ $detail->{properties} }, \@other;
+	push @{ $detail->{properties} }, \@public;
+
 	push @$data, $detail;
 
 	my $jzpz_sql =

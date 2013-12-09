@@ -274,6 +274,7 @@ sub set_route {
 	# 科目历史  详细查询
 	for (
 		qw/
+		adjust_qc adjust_qc_excel
 		deposit_bfj deposit_bfj_excel
 		deposit_fhyd deposit_fhyd_excel
 		deposit_zyzj deposit_zyzj_excel
