@@ -36,7 +36,7 @@ sub list {
 		$p = $self->params(
 			{
 				ys_type => [ 4, 'F%' ],
-				ts_c => [
+				ts_c    => [
 					0,
 					$params->{from} && $self->quote( $params->{from} ),
 					$params->{to}   && $self->quote( $params->{to} )
@@ -291,44 +291,72 @@ sub detail {
 #模块名称: 凭证撤销审核任务审核通过
 #
 sub pass {
-	my $self   = shift;                 #参数1
-	my $id     = $self->param('id');    #参数2
-	my $result = false;
-	my $res    = 1;
-	$res = $self->ua->post(
-		$self->configure->{svc_url},
-		encode_json {
-			data => { id        => $id, },
-			svc  => "verify",
-			sys  => { oper_user => $self->session->{uid} },
-		}
-	)->res->json->{status};
-	if ( $res == 0 ) {
-		$result = true;
-	}
-	$self->render( json => { success => $result } );
+	my $self = shift;
+	my $id   = $self->param('id');
+
+	#	my $result = false;
+	#	my $res    = 1;
+	#	$res = $self->ua->post(
+	#		$self->configure->{svc_url},
+	#		encode_json {
+	#			data => { id        => $id, },
+	#			svc  => "verify",
+	#			sys  => { oper_user => $self->session->{uid} },
+	#		}
+	#	)->res->json->{status};
+	#	if ( $res == 0 ) {
+	#		$result = true;
+	#	}
+	#	$self->render( json => { success => $result } );
+
+	$self->render(
+		json => $self->post_url(
+			$self->configure->{svc_url},
+			encode_json(
+				{
+					data => { id        => $id, },
+					svc  => "verify",
+					sys  => { oper_user => $self->session->{uid} },
+				}
+			)
+		)
+	);
 }
 
 #
 #模块名称: 凭证撤销审核任务审核不通过
 #
 sub deny {
-	my $self   = shift;                 #参数1
-	my $id     = $self->param('id');    #参数2
-	my $result = false;
-	my $res    = 1;
-	$res = $self->ua->post(
-		$self->configure->{svc_url},
-		encode_json {
-			data => { id        => $id, },
-			svc  => "refuse_verify",
-			sys  => { oper_user => $self->session->{uid} },
-		}
-	)->res->json->{status};
-	if ( $res == 0 ) {
-		$result = true;
-	}
-	$self->render( json => { success => $result } );
+	my $self = shift;
+	my $id   = $self->param('id');
+
+	#	my $result = false;
+	#	my $res    = 1;
+	#	$res = $self->ua->post(
+	#		$self->configure->{svc_url},
+	#		encode_json {
+	#			data => { id        => $id, },
+	#			svc  => "refuse_verify",
+	#			sys  => { oper_user => $self->session->{uid} },
+	#		}
+	#	)->res->json->{status};
+	#	if ( $res == 0 ) {
+	#		$result = true;
+	#	}
+	#	$self->render( json => { success => $result } );
+
+	$self->render(
+		json => $self->post_url(
+			$self->configure->{svc_url},
+			encode_json(
+				{
+					data => { id        => $id, },
+					svc  => "refuse_verify",
+					sys  => { oper_user => $self->session->{uid} },
+				}
+			)
+		)
+	);
 }
 
 1;

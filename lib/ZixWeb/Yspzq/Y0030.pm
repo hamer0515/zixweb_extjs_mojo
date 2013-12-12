@@ -30,12 +30,14 @@ sub y0030 {
 				$self->quote( $data->{period_from} ),
 				$self->quote( $data->{period_to} ),
 			],
-			status       => 1,
-			id           => $data->{id},
-			bi           => $data->{bi},
-			bfj_acct_bj  => $data->{bfj_acct_bj},
-			c            => $data->{c},
-			ssn          => $data->{ssn},
+			status      => 1,
+			id          => $data->{id},
+			bi          => $data->{bi},
+			bfj_acct_bj => $data->{bfj_acct_bj},
+			c           => $data->{c}
+			  && $self->quote( $data->{c} ),
+			ssn => $data->{ssn}
+			  && $self->quote( $data->{ssn} ),
 			zjbd_date_in => [
 				0,
 				$data->{zjbd_date_in_from}

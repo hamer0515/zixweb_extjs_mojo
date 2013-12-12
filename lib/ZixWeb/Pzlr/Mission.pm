@@ -1,4 +1,4 @@
-package ZixWeb::Yspz::Mission;
+package ZixWeb::Pzlr::Mission;
 
 use Mojo::Base 'Mojolicious::Controller';
 use boolean;

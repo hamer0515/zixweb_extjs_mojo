@@ -331,22 +331,33 @@ sub bfjcheckdone {
 		$data->{zjbd_type}->{$_}->{ch_d} = int( $c_d * 100 );
 	}
 
-	my $user = $self->session->{uid};
-	my $res  = $self->ua->post(
-		$self->configure->{svc_url},
-		encode_json {
-			"svc"  => 'zjdz',
-			"data" => $data,
-			'sys'  => { 'oper_user' => $user, },
-		}
-	)->res->json->{status};
-	if ( $res == 0 ) {
-		$r->{success} = true;
-	}
-	else {
-		$r->{success} = false;
-	}
-	$self->render( json => $r );
+	#	my $user = $self->session->{uid};
+	#
+	#	my $res = $self->ua->post(
+	#		$self->configure->{svc_url},
+	#		encode_json {
+	#			"svc"  => 'zjdz',
+	#			"data" => $data,
+	#			'sys'  => { 'oper_user' => $user, },
+	#		}
+	#	)->res->json->{status};
+	#	if ( $res == 0 ) {
+	#		$r->{success} = true;
+	#	}
+	#	else {
+	#		$r->{success} = false;
+	#	}
+	#	$self->render( json => $r );
+	$self->render(
+		json => $self->post_url(
+			$self->configure->{svc_url},
+			encode_json {
+				"svc"  => 'zjdz',
+				"data" => $data,
+				'sys'  => { 'oper_user' => $self->session->{uid}, },
+			}
+		)
+	);
 }
 
 #方法名称:总计
@@ -480,13 +491,11 @@ sub bfjgzcx {
 
 sub bfjrefresh_mqt {
 	my $self = shift;
-	my $res;
-	$res = $self->ua->post( $self->configure->{svc_url},
-		encode_json( { svc => "refresh_mqt" } ) )->res->json->{status};
-	my $result->{success} = false;
-	if ( defined $res && $res == 0 ) {
-		$result->{success} = true;
-	}
-	$self->render( json => $result );
+	$self->render(
+		json => $self->post_url(
+			$self->configure->{svc_url},
+			encode_json( { svc => "refresh_mqt" } )
+		)
+	);
 }
 1;

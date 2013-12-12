@@ -254,9 +254,9 @@ sub c {
 	my $c      = $self->param('name');
 	my @arr    = split( '\.', $c );
 	my $cid    = $arr[0];
-	my $c_sql  = "select count(*) as count from dict_dept where id= $cid";
-	my $count  = $self->dbh->selectrow_hashref($c_sql);
-	$result = true if $count && $count->{count} == 1;
+	my $c_sql  = "select * from dict_dept where id= $cid";
+	my $count  = $self->select($c_sql);
+	$result = true if $count;
 	return $self->render( json => { success => $result } );
 }
 
@@ -266,9 +266,9 @@ sub cust_proto {
 	my $cust_proto = $self->param('name');
 	my @arr        = split( '\_', $cust_proto );
 	my $pid        = $arr[0];
-	my $p_sql      = "select count(*) from dim_p where id= $pid";
-	my $count      = $self->dbh->selectrow_hashref($p_sql);
-	$result = true if $count && $count->{count} == 1;
+	my $p_sql      = "select * from dim_p where id= $pid";
+	my $count      = $self->select($p_sql);
+	$result = true if $count;
 	return $self->render( json => { success => $result } );
 }
 

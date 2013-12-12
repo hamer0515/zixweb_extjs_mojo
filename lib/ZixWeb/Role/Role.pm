@@ -33,11 +33,12 @@ sub add {
 	my $dt         = DateTime->now( time_zone => 'local' );
 	my $oper_date  = $dt->ymd('-');
 	my $oper_staff = $self->session->{uid};
-	my $rid        = $self->dbh->selectall_arrayref(
-		"select count(*) from tbl_role_inf where role_name=\'$role_name\'");
+	my $rid        = $self->select(
+		"select * from tbl_role_inf where role_name=\'$role_name\'");
 
-	if ( $rid->[0]->[0] ) {
-		$self->render( json => { success => false } );
+	if ($rid) {
+		$self->render(
+			json => { success => false, msg => '角色名已存在' } );
 		return 1;
 	}
 	$self->dbh->begin_work;
@@ -46,17 +47,35 @@ sub add {
 "insert into tbl_role_inf(role_id, role_name, remark, oper_staff, oper_date, status)
 values(nextval for seq_role_id, \'$role_name\', \'$memo\', $oper_staff, \'$oper_date\', 1 )"
 	  ;
-	$self->dbh->do($role_sql)
-	  or $self->errhandle($role_sql)
-	  and $self->dbh->rollback;
-	my $role_id = $self->dbh->selectall_arrayref(
+
+	#差错处理
+	unless ( $self->dbh->do($role_sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($role_sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
+	my $role_id = $self->select(
 		"select role_id from tbl_role_inf where role_name=\'$role_name\'");
 	for my $limit (@limits) {
 		my $sql =
-"insert into tbl_role_route_map(role_id, route_id) values($role_id->[0]->[0], $limit)";
-		$self->dbh->do($sql)
-		  or $self->errhandle($sql)
-		  and $self->dbh->rollback;
+"insert into tbl_role_route_map(role_id, route_id) values($role_id->[0]{role_id}, $limit)";
+
+		#差错处理
+		unless ( $self->dbh->do($sql) ) {
+			$self->render(
+				json => {
+					success => false,
+					msg     => $self->errhandle($sql),
+				}
+			);
+			$self->dbh->rollback;
+			return;
+		}
 	}
 	$self->dbh->commit;
 	$self->updateRoutes;
@@ -65,13 +84,13 @@ values(nextval for seq_role_id, \'$role_name\', \'$memo\', $oper_staff, \'$oper_
 
 sub check {
 	my $self   = shift;
-	my $name   = $self->param(' name ');
-	my $id     = $self->param(' id ');
+	my $name   = $self->param('name');
+	my $id     = $self->param('id');
 	my $result = false;
 	my $sql =
-"select count(*) as count from tbl_role_inf where role_name=\'$name\' and role_id <> $id";
-	my $key = $self->dbh->selectrow_hashref($sql);
-	$result = true if $key->{count} == 0;
+	  "select * from tbl_role_inf where role_name=\'$name\' and role_id <> $id";
+	my $key = $self->select($sql);
+	$result = true unless $key;
 	$self->render( json => { success => $result } );
 }
 
@@ -86,21 +105,47 @@ sub update {
 	$self->dbh->begin_work;
 	my $role_sql =
 "update tbl_role_inf set role_name=\'$role_name\', remark = \'$memo\' where role_id = $role_id";
-	$self->dbh->do($role_sql)
-	  or $self->errhandle($role_sql)
-	  and $self->dbh->rollback;
+
+	#差错处理
+	unless ( $self->dbh->do($role_sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($role_sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 
 	my $sql = "delete from tbl_role_route_map where role_id = $role_id";
-	$self->dbh->do($sql)
-	  or $self->errhandle($sql)
-	  and $self->dbh->rollback;
 
+	#差错处理
+	unless ( $self->dbh->do($sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 	for my $limit (@limits) {
 		my $sql =
 "insert into tbl_role_route_map(role_id, route_id) values($role_id, $limit)";
-		$self->dbh->do($sql)
-		  or $self->errhandle($sql)
-		  and $self->dbh->rollback;
+
+		#差错处理
+		unless ( $self->dbh->do($sql) ) {
+			$self->render(
+				json => {
+					success => false,
+					msg     => $self->errhandle($sql),
+				}
+			);
+			$self->dbh->rollback;
+			return;
+		}
 	}
 	$self->dbh->commit;
 	$self->updateRoutes;
@@ -113,11 +158,30 @@ sub delete {
 	my $sql  = "delete from tbl_role_route_map where role_id=$id";
 	my $sql_ = "delete from tbl_role_inf where role_id = $id";
 	$self->dbh->begin_work;
-	$self->dbh->do($sql)
-	  or $self->errhandle($sql)
-	  and $self->dbh->rollback;
-	$self->dbh->do($sql_)
-	  or $self->errhandle($sql_) and $self->dbh->rollback;
+
+	#差错处理
+	unless ( $self->dbh->do($sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
+
+	#差错处理
+	unless ( $self->dbh->do($sql_) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql_),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }

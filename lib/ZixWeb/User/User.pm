@@ -21,7 +21,7 @@ sub list {
 	my $sql =
 "select user_id, username, status, pwd_chg_date, rownumber() over($s_str) as rowid from tbl_user_inf";
 	my $data = $self->page_data( $sql, $page, $limit, $sort );
-	$data->{success} = 1;
+	$data->{success} = true;
 	$self->render( json => $data );
 }
 
@@ -32,30 +32,48 @@ sub add {
 	my $password = $self->param('password');
 	$password = Digest::MD5->new->add($password)->hexdigest;
 	my @roles = split ',', $self->param('roles');
-	my $dt        = DateTime->now( time_zone => 'local' );
+	my $dt = DateTime->now( time_zone => 'local' );
 	my $oper_date = $dt->ymd('-');
-	my $uid       = $self->dbh->selectall_arrayref(
-		"select count(*) from tbl_user_inf where username=\'$username\'");
+	my $uid =
+	  $self->select("select * from tbl_user_inf where username=\'$username\'");
 
-	if ( $uid->[0]->[0] ) {
-		$self->render( json => { success => false } );
+	if ($uid) {
+		$self->render(
+			json => { success => false, msg => '用户名已存在' } );
 		return;
 	}
 	$self->dbh->begin_work;
 	my $user_sql =
 "insert into tbl_user_inf(user_id, username, user_pwd, pwd_chg_date, status) values (nextval for seq_user_id, \'$username\', \'$password\', \'$oper_date\', 1)";
-	$self->dbh->do($user_sql)
-	  or $self->errhandle($user_sql)
-	  and $self->dbh->rollback;
-	my $user_id = $self->dbh->selectall_arrayref(
-		"select user_id from tbl_user_inf where username=\'$username\'");
 
+	#差错处理
+	unless ( $self->dbh->do($user_sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($user_sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
+	my $user_id = $self->select(
+		"select user_id from tbl_user_inf where username=\'$username\'");
 	for my $role (@roles) {
 		my $sql =
-"insert into tbl_user_role_map(user_id, role_id) values($user_id->[0]->[0], $role)";
-		$self->dbh->do($sql)
-		  or $self->errhandle($sql)
-		  and $self->dbh->rollback;
+"insert into tbl_user_role_map(user_id, role_id) values($user_id->[0]{user_id}, $role)";
+
+		#差错处理
+		unless ( $self->dbh->do($sql) ) {
+			$self->render(
+				json => {
+					success => false,
+					msg     => $self->errhandle($sql),
+				}
+			);
+			$self->dbh->rollback;
+			return;
+		}
 	}
 	$self->dbh->commit;
 	$self->updateUsers;
@@ -68,9 +86,9 @@ sub check {
 	my $id     = $self->param('id');
 	my $result = false;
 	my $sql =
-"select count(*) as count from tbl_user_inf where username=\'$name\' and user_id <> $id";
-	my $key = $self->dbh->selectrow_hashref($sql);
-	$result = true if $key->{count} == 0;
+	  "select * from tbl_user_inf where username=\'$name\' and user_id <> $id";
+	my $key = $self->select($sql);
+	$result = true unless $key;
 	$self->render( json => { success => $result } );
 }
 
@@ -94,19 +112,48 @@ sub update {
 		$user_sql =
 "update tbl_user_inf set username = \'$username\', user_pwd = \'$password\', status = \'$status\' where user_id = $user_id";
 	}
-	$self->dbh->do($user_sql)
-	  or $self->errhandle($user_sql)
-	  and $self->dbh->rollback;
+
+	#差错处理
+	unless ( $self->dbh->do($user_sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($user_sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 
 	my $sql = "delete from tbl_user_role_map where user_id = $user_id";
-	$self->dbh->do($sql)
-	  or $self->err_handle and $self->dbh->rollback;
+
+	#差错处理
+	unless ( $self->dbh->do($sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 
 	for my $role (@roles) {
 		my $sql =
 "insert into tbl_user_role_map(user_id, role_id) values($user_id, $role)";
-		$self->dbh->do($sql)
-		  or $self->errhandle($sql) and $self->dbh->rollback;
+
+		#差错处理
+		unless ( $self->dbh->do($sql) ) {
+			$self->render(
+				json => {
+					success => false,
+					msg     => $self->errhandle($sql),
+				}
+			);
+			$self->dbh->rollback;
+			return;
+		}
 	}
 	$self->dbh->commit;
 	$self->updateUsers;

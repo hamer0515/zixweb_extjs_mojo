@@ -35,7 +35,8 @@ sub y0029 {
 			bi          => $data->{bi},
 			bfj_acct_bj => $data->{bfj_acct_bj},
 			p           => $data->{p},
-			c           => $data->{c},
+			c           => $data->{c}
+			  && $self->quote( $data->{c} ),
 			flag        => $data->{flag},
 			revoke_user => $data->{revoker},
 			ts_revoke   => [

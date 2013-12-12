@@ -20,8 +20,8 @@ sub list {
 
 	$p = $self->params(
 		{
-			id => $params->{bfj_acct} && $self->quote( $params->{bfj_acct} ),
-			valid => $params->{status},
+			id    => $params->{bfj_acct},
+			valid => $params->{status} && $self->quote( $params->{status} ),
 		}
 	);
 
@@ -38,10 +38,9 @@ sub check {
 	my $self     = shift;
 	my $bfj_acct = $self->param('name');
 	my $result   = false;
-	my $sql =
-"select count(*) as count from dim_bfj_acct where b_acct = \'$bfj_acct'\ ";
-	my $key = $self->dbh->selectrow_hashref($sql);
-	$result = true if $key->{count} == 0;
+	my $sql      = "select * from dim_bfj_acct where b_acct = \'$bfj_acct'\ ";
+	my $key      = $self->select($sql);
+	$result = true unless $key;
 	$self->render( json => { success => $result } );
 }
 
@@ -55,19 +54,29 @@ sub add {
 	my $status    = $self->param('status');
 	my $memo      = $self->param('memo');
 
-	my $uid = $self->dbh->selectall_arrayref(
-		"select count(*) from dim_bfj_acct where b_acct= \'$bfj_acct'\ ");
-	if ( $uid->[0]->[0] ) {
-		$self->render( json => { success => false } );
+	my $uid =
+	  $self->select("select * from dim_bfj_acct where b_acct= \'$bfj_acct'\ ");
+	if ($uid) {
+		$self->render(
+			json => { success => false, msg => '账户信息已存在' } );
 		return;
 	}
 	$self->dbh->begin_work;
 	my $sql =
 "insert into dim_bfj_acct(b_acct, b_name, acct_name,valid, memo) values(\'$bfj_acct\',\'$b_name\',\'$acct_name\',\'$status\',\'$memo\')";
 
-	$self->dbh->do($sql)
-	  or $self->errhandle($sql)
-	  and $self->dbh->rollback;
+	#差错处理
+	unless ( $self->dbh->do($sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
+
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }
@@ -81,22 +90,33 @@ sub edit {
 	my $status    = $self->param('status');
 	my $memo      = $self->param('memo');
 
-	my $uid = $self->dbh->selectall_arrayref(
-		"select count(*) from dim_bfj_acct where id= $bfj_id ");
+	my $uid =
+	  $self->select("select * from dim_bfj_acct where id= $bfj_id ");
 
-	unless ( $uid->[0]->[0] ) {
-		$self->render( json => { success => false } );
+	unless ($uid) {
+		$self->render(
+			json => { success => false },
+			msg  => '账户信息已存在'
+		);
 		return;
 	}
 	$self->dbh->begin_work;
 	my $sql =
 "update dim_bfj_acct set b_name = \'$b_name\',acct_name = \'$acct_name\',valid = \'$status\',memo = \'$memo\' where id = \'$bfj_id\'";
 
-	$self->dbh->do($sql)
-	  or $self->errhandle($sql)
-	  and $self->dbh->rollback;
-	$self->dbh->commit;
+	#差错处理
+	unless ( $self->dbh->do($sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 
+	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }
 

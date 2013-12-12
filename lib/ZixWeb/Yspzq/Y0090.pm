@@ -41,7 +41,8 @@ sub y0090 {
 			bi          => $data->{bi},
 			bfj_acct_bj => $data->{bfj_acct_bj},
 			p           => $data->{p},
-			c           => $data->{c},
+			c           => $data->{c}
+			  && $self->quote( $data->{c} ),
 			wlzj_type   => $data->{wlzj_type},
 			revoke_user => $data->{revoker},
 			tx_date     => [

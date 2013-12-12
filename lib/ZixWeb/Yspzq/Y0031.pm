@@ -35,8 +35,9 @@ sub y0031 {
 			bi       => $data->{bi},
 			bfj_acct => $data->{bfj_acct},
 			p        => $data->{p},
-			c        => $data->{c},
-			tx_date  => [
+			c        => $data->{c}
+			  && $self->quote( $data->{c} ),
+			tx_date => [
 				0,
 				$data->{tx_date_from} && $self->quote( $data->{tx_date_from} ),
 				$data->{tx_date_to}   && $self->quote( $data->{tx_date_to} )

@@ -53,10 +53,6 @@ sub get_books {
 
 		my ( $bn, $name, $code, $cls ) = @{ $books->{$book} };
 
-		#		my $bn   = $books->{$book}->[0];
-		#		my $cls  = $books->{$book}->[3];
-		#		my $name = $books->{$book}->[1];
-		#		my $code = $books->{$book}->[2];
 		my $row = $data->{$book};
 		$total->{j}      += $row->{j};
 		$total->{d}      += $row->{d};

@@ -7,7 +7,7 @@ use Encode qw/decode/;
 use Cache::Memcached;
 use JSON::XS;
 use ZixWeb::Utils
-  qw/_gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
+  qw/_post_url _gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
 
 # This method will run once at server start
 sub startup {
@@ -30,19 +30,6 @@ sub startup {
 
 	# 设置session过期时间
 	$self->session( expiration => $config->{expire} );
-
-	# 日志目录
-	my $logdir = "$ZIXWEB_HOME/log";
-	unless ( -e $logdir && -d $logdir ) {
-		`mkdir $logdir`;
-	}
-	my $logfile = "$ZIXWEB_HOME/log/zixweb.log";
-	unless ( -e $logfile ) {
-		`touch $logfile`;
-	}
-	my $log =
-	  Mojo::Log->new( path => "$ZIXWEB_HOME/log/zixweb.log", level => 'info' );
-
 	# hypnoload
 	$self->config(
 		hypnotoad => { listen => [ 'http://*:' . $config->{port} ] } );
@@ -60,7 +47,6 @@ sub startup {
 		}
 	);
 	$self->helper( memd         => sub { return $memd; } );
-	$self->helper( log          => sub { return $log; } );
 	$self->helper( configure    => sub { return $config; } );
 	$self->helper( header       => sub { return $config->{header}; } );
 	$self->helper( quote        => sub { return $self->dbh->quote( $_[1] ); } );
@@ -70,12 +56,12 @@ sub startup {
 	$self->helper( decode_ch    => sub { &_decode_ch(@_); } );
 	$self->helper( page_data    => sub { &_page_data(@_); } );
 	$self->helper( select       => sub { &_select(@_); } );
-	$self->helper( update       => sub { &_update(@_); } );
 	$self->helper( errhandle    => sub { &_errhandle(@_); } );
 	$self->helper( uf           => sub { &_uf( $_[1] ); } );
 	$self->helper( nf           => sub { &_nf( $_[1] ); } );
 	$self->helper( params       => sub { &_params(@_); } );
 	$self->helper( gen_file     => sub { $self->_gen_file( @_[ 1 .. 2 ] ); } );
+	$self->helper( post_url     => sub { $self->_post_url( @_[ 1 .. 2 ] ); } );
 	$self->helper( updateUsers  => sub { $self->_updateUsers; } );
 	$self->helper( updateRoutes => sub { $self->_updateRoutes; } );
 	$self->helper( updateP      => sub { $self->_updateP; } );
@@ -401,7 +387,7 @@ sub set_route {
 
 	# 凭证撤销
 	$r->any("/yspz/revoke")
-	  ->to( namespace => "ZixWeb::Yspz::Revoke", action => 'revoke' );
+	  ->to( namespace => "ZixWeb::Pzlr::Revoke", action => 'revoke' );
 
 	# 凭证录入
 	for (
@@ -411,22 +397,22 @@ sub set_route {
 	  )
 	{
 		$r->any("/pzlr/$_")
-		  ->to( namespace => "ZixWeb::Yspz::\u$_", action => $_ );
+		  ->to( namespace => "ZixWeb::Pzlr::\u$_", action => $_ );
 	}
 
 	# 凭证录入-富汇易达
 	for (qw/f0000/) {
 		$r->any("/pzlr/$_")
-		  ->to( namespace => "ZixWeb::Yspz::\u$_", action => $_ );
+		  ->to( namespace => "ZixWeb::Pzlr::\u$_", action => $_ );
 	}
 
 	# 凭证导入
 	$r->any("/pzlr/mission")
-	  ->to( namespace => "ZixWeb::Yspz::Mission", action => 'mission' );
+	  ->to( namespace => "ZixWeb::Pzlr::Mission", action => 'mission' );
 	$r->any("/pzlr/action")
-	  ->to( namespace => "ZixWeb::Yspz::Action", action => 'action' );
+	  ->to( namespace => "ZixWeb::Pzlr::Action", action => 'action' );
 	$r->any("/pzlr/job")
-	  ->to( namespace => "ZixWeb::Yspz::Job", action => 'job' );
+	  ->to( namespace => "ZixWeb::Pzlr::Job", action => 'job' );
 
 	# 基础数据维护
 	for (qw/list check add edit query/) {

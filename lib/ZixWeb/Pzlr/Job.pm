@@ -1,4 +1,4 @@
-package ZixWeb::Yspz::Job;
+package ZixWeb::Pzlr::Job;
 
 use Mojo::Base 'Mojolicious::Controller';
 

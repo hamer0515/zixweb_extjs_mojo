@@ -8,12 +8,13 @@ use boolean;
 sub login {
 	my $self      = shift;
 	my $username  = $self->param('username') || '';
-	my $user_data = $self->dbh->selectrow_hashref(
+	my $user_data = $self->select(
 		"select * from tbl_user_inf where status=1 and username=\'$username\'");
 	unless ($user_data) {
 		$self->render( json => { success => false } );
 	}
 	else {
+		$user_data = $user_data->[0];
 		my $pwd = $self->param('password');
 		$pwd = Digest::MD5->new->add($pwd)->hexdigest;
 		if ( $user_data->{user_pwd} eq $pwd ) {
@@ -76,9 +77,9 @@ sub passwordreset {
 	$old_password = Digest::MD5->new->add($old_password)->hexdigest;
 	my $sql =
 "select * from tbl_user_inf where user_id=$uid and user_pwd=\'$old_password\'";
-	my $user_data = $self->dbh->selectall_arrayref($sql);
+	my $user_data = $self->select($sql);
 
-	unless ( scalar @$user_data ) {
+	unless ($user_data) {
 		$self->render(
 			json => { success => false, msg => '旧密码不正确' } );
 		return 1;
@@ -89,8 +90,18 @@ sub passwordreset {
 	my $oper_date = $dt->ymd('-');
 	$sql =
 "update tbl_user_inf set pwd_chg_date = \'$oper_date\', user_pwd = \'$new_password\' where user_id = $uid";
-	$self->dbh->do($sql)
-	  or $self->errhandle($sql) and $self->dbh->rollback;
+
+	#差错处理
+	unless ( $self->dbh->do($sql) ) {
+		$self->render(
+			json => {
+				success => false,
+				msg     => $self->errhandle($sql),
+			}
+		);
+		$self->dbh->rollback;
+		return;
+	}
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }

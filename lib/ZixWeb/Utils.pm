@@ -4,12 +4,13 @@ use base qw/Exporter/;
 use utf8;
 use strict;
 use warnings;
+use boolean;
 use DateTime;
 use Spreadsheet::WriteExcel;
 
 our @ISA = qw(Exporter);
 our @EXPORT =
-  qw(_gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
+  qw(_post_url _gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
   ;    #要输出给外部调用的函数或者变量，以空格分隔
 
 sub _uf {
@@ -511,14 +512,16 @@ sub _page_data {
 	my $dh        = $dbh->prepare($sql_data);
 	my $ch        = $dbh->prepare($sql_count);
 
-	$dh->execute;
+	$self->log->error( "can't do [$sql_data]:[" . $dh->errstr . "]" )
+	  unless $dh->execute;
 	while ( my $row = $dh->fetchrow_hashref ) {
 		$self->decode_ch($row);
 		push @data, $row;
 	}
 	$dh->finish;
 
-	$ch->execute;
+	$self->log->error( "can't do [$sql_count]:[" . $ch->errstr . "]" )
+	  unless $ch->execute;
 	my $count = $ch->fetchrow_arrayref->[0];
 
 	return {
@@ -531,31 +534,23 @@ sub _select {
 	my $self = shift;
 	my $sql  = shift;
 	my $data;
-	$sql = $self->dbh->prepare($sql);
-	$sql->execute;
-	while ( my $row = $sql->fetchrow_hashref ) {
+	my $dh = $self->dbh->prepare($sql);
+	$self->log->error( "can't execute [$sql]:[" . $dh->errstr . "]" )
+	  unless $dh->execute;
+	while ( my $row = $dh->fetchrow_hashref ) {
 		$self->decode_ch($row);
 		push @$data, $row;
 	}
-	$sql->finish;
+	$dh->finish;
 	return $data;
 }
 
-sub _update {
-	my $self = shift;
-	my $sql  = shift;
-	$self->dbh->do($sql) or $self->errhandle($sql);
-	$self->dbh->commit;
-	return 0;
-}
-
 sub _errhandle {
-	my $self = shift;
-	my $sql  = shift;
-
-	#	$self->dbh->rollback;
-	$self->log->error("can't do [$sql]:[$self->dbh->errstr]");
-	return 0;
+	my $self   = shift;
+	my $sql    = shift;
+	my $errstr = "can't do [$sql]:[" . $self->dbh->errstr . "]";
+	$self->log->error($errstr);
+	return $errstr;
 }
 
 sub _params {
@@ -564,10 +559,10 @@ sub _params {
 	my $condition = '';
 	if ( exists $params->{period} && ( ref $params->{period} ) eq 'ARRAY' ) {
 		my $data = delete $params->{period};
-		if ( $data->[0] ) {
+		unless ( $data->[0] eq "''" ) {
 			$condition .= " and period>=$data->[0]";
 		}
-		if ( $data->[1] ) {
+		unless ( $data->[1] eq "''" ) {
 			$condition .= " and period<=$data->[1]";
 		}
 	}
@@ -623,7 +618,7 @@ sub _params {
 	}
 	$condition =~ s/^ and // if $condition;
 	$condition = ' where ' . $condition if $condition;
-	return { condition => $condition };
+	return { condition => $condition || '' };
 }
 
 sub _gen_file {
@@ -677,6 +672,28 @@ sub _gen_file {
 		$r++;
 	}
 	return $filename;
+}
+
+sub _post_url {
+	my $self = shift;
+	my $url  = shift;
+	my $data = shift;
+	my $json = shift || false;
+	my $res  = $self->ua->post( $url, $data )->res;
+	my $result;
+	my $err = $res->error;
+
+	# 交互出错处理
+	if ($err) {
+		$result->{msg}     = $err;
+		$result->{success} = false;
+		$self->log->error("post [$data] to [$url] error[$err]");
+		return $result;
+	}
+	else {
+		$json ? $result = $res->json : $result->{success} = true;
+	}
+	return $result;
 }
 
 1;

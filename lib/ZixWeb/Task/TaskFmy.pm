@@ -36,7 +36,7 @@ sub list {
 	);
 
 	my $sql =
-"select type as shtype, ys_type, ys_id, content, ts_c, status as shstatus, rownumber() over(order by id desc) as rowid from verify $p->{condition}";
+"select id, type as shtype, ys_type, ys_id, content, ts_c, status as shstatus, rownumber() over(order by id desc) as rowid from verify $p->{condition}";
 	my $data = $self->page_data( $sql, $page, $limit );
 
 	for my $d ( @{ $data->{data} } ) {
