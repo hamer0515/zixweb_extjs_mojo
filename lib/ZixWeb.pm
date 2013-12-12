@@ -6,12 +6,17 @@ use Env qw/ZIXWEB_HOME/;
 use Encode qw/decode/;
 use Cache::Memcached;
 use JSON::XS;
-use ZixWeb::Utils
-  qw/_post_url _gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params/;
+use Mojo::Log;
+use ZixWeb::Utils qw/_post_url _gen_file _updateAcct _transform _updateBfjacct
+  _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
+  _updateYstype _updateBi _updateP _updateUsers _updateRoutes
+  _uf _nf _initDict _decode_ch _page_data _select _update
+  _errhandle _params/;
 
 # This method will run once at server start
 sub startup {
 	my $self   = shift;
+	my $log    = $self->log;
 	my $dict   = {};
 	my $config = do "$ZIXWEB_HOME/conf/conf.pl";
 	my $dbh    = $self->connect_db($config);
@@ -30,6 +35,7 @@ sub startup {
 
 	# 设置session过期时间
 	$self->session( expiration => $config->{expire} );
+
 	# hypnoload
 	$self->config(
 		hypnotoad => { listen => [ 'http://*:' . $config->{port} ] } );
@@ -46,9 +52,10 @@ sub startup {
 			return $dbh;
 		}
 	);
-	$self->helper( memd         => sub { return $memd; } );
-	$self->helper( configure    => sub { return $config; } );
-	$self->helper( header       => sub { return $config->{header}; } );
+	$self->helper( log       => sub { return $log; } );
+	$self->helper( memd      => sub { return $memd; } );
+	$self->helper( configure => sub { return $config; } );
+	$self->helper( header    => sub { return $config->{header}; } );
 	$self->helper( quote        => sub { return $self->dbh->quote( $_[1] ); } );
 	$self->helper( dict         => sub { return $dict; } );
 	$self->helper( transform    => sub { &_transform(@_); } );

@@ -63,7 +63,7 @@ sub add {
 	}
 	$self->dbh->begin_work;
 	my $sql =
-"insert into dim_bfj_acct(b_acct, b_name, acct_name,valid, memo) values(\'$bfj_acct\',\'$b_name\',\'$acct_name\',\'$status\',\'$memo\')";
+"insert into dim_bfj_acct(id, b_acct, b_name, acct_name, valid, memo) values(nextval for seq_bfj_acct, \'$bfj_acct\',\'$b_name\',\'$acct_name\',\'$status\',\'$memo\')";
 
 	#差错处理
 	unless ( $self->dbh->do($sql) ) {

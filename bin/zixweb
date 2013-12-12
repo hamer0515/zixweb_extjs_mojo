@@ -62,8 +62,16 @@ restart)
     $0 start
     exit 0
     ;;
+clearlog)
+    rm -fr $ZIXWEB_HOME/log/*
+    exit 0
+    ;;
+clear)
+    rm -fr $ZIXWEB_HOME/var/*.xls
+    exit 0
+    ;;
 *)
-    echo "Usage: $0 {start|stop|restart|status|archive}"
+    echo "Usage: $0 {start|stop|restart|status|archive|clearlog|clear}"
     exit 0
 esac
 

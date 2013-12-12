@@ -1,17 +1,16 @@
 package ZixWeb::Utils;
 
-use base qw/Exporter/;
-use utf8;
-use strict;
-use warnings;
+use Mojo::Base 'Exporter';
 use boolean;
 use DateTime;
 use Spreadsheet::WriteExcel;
 
-our @ISA = qw(Exporter);
 our @EXPORT =
-  qw(_post_url _gen_file _updateAcct _transform _updateBfjacct _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct _updateYstype _updateBi _updateP _updateUsers _updateRoutes _uf _nf _initDict _decode_ch _page_data _select _update _errhandle _params)
-  ;    #要输出给外部调用的函数或者变量，以空格分隔
+  qw(_post_url _gen_file _updateAcct _transform _updateBfjacct
+  _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
+  _updateYstype _updateBi _updateP _updateUsers _updateRoutes
+  _uf _nf _initDict _decode_ch _page_data _select _update _errhandle
+  _params);
 
 sub _uf {
 	my $number = shift;
@@ -511,9 +510,9 @@ sub _page_data {
 	my $dbh       = $self->dbh;
 	my $dh        = $dbh->prepare($sql_data);
 	my $ch        = $dbh->prepare($sql_count);
-
 	$self->log->error( "can't do [$sql_data]:[" . $dh->errstr . "]" )
 	  unless $dh->execute;
+
 	while ( my $row = $dh->fetchrow_hashref ) {
 		$self->decode_ch($row);
 		push @data, $row;
