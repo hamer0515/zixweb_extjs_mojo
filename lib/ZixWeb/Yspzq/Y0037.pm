@@ -11,7 +11,7 @@ sub y0037 {
 
 	my $data = {};
 	for (
-		qw/id flag clear_date_from clear_date_to period_from period_to revoke_user ts_revoke/
+		qw/id bi flag clear_date_from clear_date_to period_from period_to revoke_user ts_revoke/
 	  )
 	{
 		$data->{$_} = $self->param($_);
@@ -35,6 +35,7 @@ sub y0037 {
 				  && $self->quote( $data->{clear_date_from} ),
 				$data->{clear_date_to} && $self->quote( $data->{clear_date_to} )
 			],
+			bi          => $data->{bi},
 			status      => 1,
 			id          => $data->{id},
 			flag        => $data->{flag},
@@ -48,8 +49,7 @@ sub y0037 {
 		}
 	);
 	my $sql =
-"select id, flag, period, clear_date, rownumber() over(order by id desc) as rowid from yspz_0037 $p->{condition}";
-
+"select id, bi, tx_amt, flag, period, clear_date, rownumber() over(order by id desc) as rowid from yspz_0037 $p->{condition}";
 	my $pager = $self->page_data( $sql, $page, $limit );
 
 	$pager->{success} = true;
