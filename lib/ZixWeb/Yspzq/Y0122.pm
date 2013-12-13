@@ -4,7 +4,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use boolean;
 
-sub y0121 {
+sub y0122 {
 	my $self = shift;
 
 	my $page  = $self->param('page');
@@ -40,8 +40,7 @@ sub y0121 {
 		}
 	);
 	my $sql =
-"select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0121 $p->{condition}";
-
+"select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0122 $p->{condition}";
 	my $pager = $self->page_data( $sql, $page, $limit );
 
 	$pager->{success} = true;

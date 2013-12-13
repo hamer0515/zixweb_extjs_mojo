@@ -25,7 +25,7 @@ FROM
         SELECT
             bfj_acct,
             e_date,
-            SUM(j) - SUM(d) AS amt
+            SUM(d) - SUM(j) AS amt
         FROM
             sum_blc
         GROUP BY
@@ -36,7 +36,7 @@ FULL JOIN
         SELECT
             bfj_acct,
             e_date,
-            SUM(d) - SUM(j) AS amt
+            SUM(j) - SUM(d) AS amt
         FROM
             sum_bsc
         GROUP BY
@@ -44,4 +44,4 @@ FULL JOIN
             bfj_acct ) bsc
 ON
     blc.e_date = bsc.e_date
-AND blc.bfj_acct = bsc.bfj_acct
+AND blc.bfj_acct = bsc.bfj_acct;
