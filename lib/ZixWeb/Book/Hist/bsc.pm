@@ -25,8 +25,9 @@ sub bsc {
 			id        => $params->{id},
 			bfj_acct  => $params->{bfj_acct},
 			zjbd_type => $params->{zjbd_type},
-			ys_type => $params->{ys_type} && $self->quote( $params->{ys_type} ),
-			ys_id   => $params->{ys_id},
+			ys_type   => $params->{ys_type}
+			  && $self->quote( $params->{ys_type} ),
+			ys_id  => $params->{ys_id},
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			e_date => [
@@ -36,10 +37,8 @@ sub bsc {
 				$params->{e_date_to} && $self->quote( $params->{e_date_to} ),
 			],
 			period => [
-				0,
-				$params->{period_from}
-				  && $self->quote( $params->{period_from} ),
-				$params->{period_to} && $self->quote( $params->{period_to} )
+				$self->quote( $params->{period_from} || '' ),
+				$self->quote( $params->{period_to}   || '' )
 			]
 		}
 	);
@@ -92,9 +91,9 @@ sub bsc_excel {
 		}
 	);
 	my $fields = join ',', keys %$header;
-	my $sql  = "select $fields from book_bsc $p->{condition}";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $sql    = "select $fields from book_bsc $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{file}    = "/var/$file";
 	$data->{success} = true;
 

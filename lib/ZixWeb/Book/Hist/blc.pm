@@ -30,10 +30,8 @@ sub blc {
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			period => [
-				0,
-				$params->{period_from}
-				  && $self->quote( $params->{period_from} ),
-				$params->{period_to} && $self->quote( $params->{period_to} )
+				$self->quote( $params->{period_from} || '' ),
+				$self->quote( $params->{period_to}   || '' )
 			],
 			e_date => [
 				0,
@@ -92,10 +90,9 @@ sub blc_excel {
 		}
 	);
 	my $fields = join ',', keys %$header;
-	my $sql =
-	  "select $fields from book_blc $p->{condition}";
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $sql    = "select $fields from book_blc $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{file}    = "/var/$file";
 	$data->{success} = true;
 

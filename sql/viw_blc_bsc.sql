@@ -11,12 +11,14 @@ SELECT
     blc.amt AS blc,
     bsc.amt AS bsc,
     CASE
-        WHEN blc.bfj_acct IS NULL
-        THEN bsc.bfj_acct
+        WHEN blc.bfj_acct IS NOT NULL
+        THEN blc.bfj_acct
+        ELSE bsc.bfj_acct
     END AS bfj_acct,
     CASE
-        WHEN blc.e_date IS NULL
-        THEN bsc.e_date
+        WHEN blc.e_date IS NOT NULL
+        THEN blc.e_date
+        ELSE bsc.e_date
     END AS e_date
 FROM
     (
@@ -42,4 +44,4 @@ FULL JOIN
             bfj_acct ) bsc
 ON
     blc.e_date = bsc.e_date
-AND blc.bfj_acct = blc.bfj_acct;
+AND blc.bfj_acct = bsc.bfj_acct

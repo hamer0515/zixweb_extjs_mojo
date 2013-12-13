@@ -5,8 +5,7 @@ use boolean;
 use DateTime;
 use Spreadsheet::WriteExcel;
 
-our @EXPORT =
-  qw(_post_url _gen_file _updateAcct _transform _updateBfjacct
+our @EXPORT = qw(_post_url _gen_file _updateAcct _transform _updateBfjacct
   _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
   _updateYstype _updateBi _updateP _updateUsers _updateRoutes
   _uf _nf _initDict _decode_ch _page_data _select _update _errhandle
@@ -558,10 +557,10 @@ sub _params {
 	my $condition = '';
 	if ( exists $params->{period} && ( ref $params->{period} ) eq 'ARRAY' ) {
 		my $data = delete $params->{period};
-		unless ( $data->[0] eq "''" ) {
+		if ( defined $data->[0] && $data->[0] ne "''" ) {
 			$condition .= " and period>=$data->[0]";
 		}
-		unless ( $data->[1] eq "''" ) {
+		if ( defined $data->[1] && $data->[1] ne "''" ) {
 			$condition .= " and period<=$data->[1]";
 		}
 	}
@@ -601,8 +600,10 @@ sub _params {
 				$condition .= " and $key<=$data->[2]" if $data->[2];
 			}
 			elsif ( $data->[0] == 3 ) {    # a= b || a<>b
-				$condition .= " and  $key=$data->[2]"  if ( $data->[1] == 1 );
-				$condition .= " and  $key<>$data->[2]" if ( $data->[1] == 2 );
+				$condition .= " and  $key=$data->[2]"
+				  if ( $data->[1] == 1 );
+				$condition .= " and  $key<>$data->[2]"
+				  if ( $data->[1] == 2 );
 			}
 			elsif ( $data->[0] == 4 ) {    # a= b || a<>b
 				$condition .= " and  $key like \'$data->[1]\'"
