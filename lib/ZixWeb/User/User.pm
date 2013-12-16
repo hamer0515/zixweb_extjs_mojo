@@ -75,6 +75,10 @@ sub add {
 			return;
 		}
 	}
+	$self->log->info( $self->whois
+		  . "[add user] with sql[$user_sql] with roles["
+		  . join( ',', @roles )
+		  . ']' );
 	$self->dbh->commit;
 	$self->updateUsers;
 	$self->render( json => { success => true } );
@@ -155,6 +159,10 @@ sub update {
 			return;
 		}
 	}
+	$self->log->info( $self->whois
+		  . "[update user] with sql[$user_sql] with roles["
+		  . join( ',', @roles )
+		  . ']' );
 	$self->dbh->commit;
 	$self->updateUsers;
 	$self->render( json => { success => true } );

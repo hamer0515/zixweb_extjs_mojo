@@ -77,6 +77,10 @@ values(nextval for seq_role_id, \'$role_name\', \'$memo\', $oper_staff, \'$oper_
 			return;
 		}
 	}
+	$self->log->info( $self->whois
+		  . "[add role] with sql[$role_sql] with limits["
+		  . join( ',', @limits )
+		  . ']' );
 	$self->dbh->commit;
 	$self->updateRoutes;
 	$self->render( json => { success => true } );
@@ -147,6 +151,11 @@ sub update {
 			return;
 		}
 	}
+	$self->log->info(
+		$self->whois
+		  . "[update role] with sql[$role_sql] with limits["
+		  . join( ',', @limits ) . ']'
+	);
 	$self->dbh->commit;
 	$self->updateRoutes;
 	$self->render( json => { success => true } );
@@ -182,6 +191,7 @@ sub delete {
 		$self->dbh->rollback;
 		return;
 	}
+	$self->log->info( $self->whois . "[delete role] with sql[$sql_][$sql] " );
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }

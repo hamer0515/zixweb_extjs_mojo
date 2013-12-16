@@ -18,6 +18,9 @@ sub login {
 		my $pwd = $self->param('password');
 		$pwd = Digest::MD5->new->add($pwd)->hexdigest;
 		if ( $user_data->{user_pwd} eq $pwd ) {
+
+			# 记录登录日志
+			$self->log->info( "user[$username] login by " . $self->whois );
 			$self->session->{uid} = $user_data->{user_id};
 			$self->render( json => { success => true } );
 		}
@@ -102,14 +105,24 @@ sub passwordreset {
 		$self->dbh->rollback;
 		return;
 	}
+
+	# 记录日志
+	$self->log->info(
+		$self->whois
+		  . "[change password] [$old_password]=>[$new_password] "
+	);
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }
 
 sub logout {
 	my $self = shift;
-	delete $self->session->{uid};
+	my $uid  = delete $self->session->{uid};
 	delete $self->session->{sid};
+	my $username = $self->users->{$uid};
+
+	# 记录登出日志
+	$self->log->info( "user[$username] logout by " . $self->whois );
 	$self->render( json => { success => true } );
 }
 

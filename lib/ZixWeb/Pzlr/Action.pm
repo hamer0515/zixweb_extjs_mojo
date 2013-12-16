@@ -42,11 +42,11 @@ sub action {
 		#			}
 		#		)->res;
 		if ( $opt eq 'get_log' ) {
-			if ( exists $res->{success} ) {
-				$self->render( json => $res );
-				return;
-			}
-			$res = $res->json;
+
+			#			if ( exists $res->{success} ) {
+			#				$self->render( json => $res );
+			#				return;
+			#			}
 			my $r = "";
 			$r .= "$res->{errmsg} <br/>" if $res->{errmsg};
 			$r .= join "<br/>", @{ $res->{ret} };
@@ -54,7 +54,13 @@ sub action {
 			return;
 		}
 		else {
-			$res = $res->{status};
+			my $status = $res->{status};
+			if ( $status == 0 ) {
+				$res = { success => true };
+			}
+			else {
+				$res = { success => false };
+			}
 		}
 	}
 	else {

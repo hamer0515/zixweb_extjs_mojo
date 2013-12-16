@@ -52,10 +52,18 @@ sub startup {
 			return $dbh;
 		}
 	);
-	$self->helper( log       => sub { return $log; } );
-	$self->helper( memd      => sub { return $memd; } );
-	$self->helper( configure => sub { return $config; } );
-	$self->helper( header    => sub { return $config->{header}; } );
+	$self->helper(
+		whois => sub {
+			my $self  = shift;
+			my $agent = $self->req->headers->user_agent || 'Anonymous';
+			my $ip    = $self->tx->remote_address;
+			return "$agent ($ip)";
+		}
+	);
+	$self->helper( log          => sub { return $log; } );
+	$self->helper( memd         => sub { return $memd; } );
+	$self->helper( configure    => sub { return $config; } );
+	$self->helper( header       => sub { return $config->{header}; } );
 	$self->helper( quote        => sub { return $self->dbh->quote( $_[1] ); } );
 	$self->helper( dict         => sub { return $dict; } );
 	$self->helper( transform    => sub { &_transform(@_); } );
@@ -68,7 +76,7 @@ sub startup {
 	$self->helper( nf           => sub { &_nf( $_[1] ); } );
 	$self->helper( params       => sub { &_params(@_); } );
 	$self->helper( gen_file     => sub { $self->_gen_file( @_[ 1 .. 2 ] ); } );
-	$self->helper( post_url     => sub { $self->_post_url( @_[ 1 .. 2 ] ); } );
+	$self->helper( post_url     => sub { $self->_post_url( @_[ 1 .. 3 ] ); } );
 	$self->helper( updateUsers  => sub { $self->_updateUsers; } );
 	$self->helper( updateRoutes => sub { $self->_updateRoutes; } );
 	$self->helper( updateP      => sub { $self->_updateP; } );
@@ -80,29 +88,29 @@ sub startup {
 	$self->helper( updateFypacct  => sub { $self->_updateFypacct; } );
 	$self->helper( updateFhydacct => sub { $self->_updateFhydacct; } );
 	$self->helper( updateFhwtype  => sub { $self->_updateFhwtype; } );
-	$self->helper( routes         => sub { $self->memd->get('routes'); } );
-	$self->helper( users          => sub { $self->memd->get('users'); } );
-	$self->helper( usernames      => sub { $self->memd->get('usernames'); } );
-	$self->helper( uids           => sub { $self->memd->get('uids'); } );
-	$self->helper( p              => sub { $self->memd->get('p'); } );
-	$self->helper( p_id           => sub { $self->memd->get('p_id'); } );
-	$self->helper( zjbd_type      => sub { $self->memd->get('zjbd_type'); } );
-	$self->helper( zjbd_id        => sub { $self->memd->get('zjbd_id'); } );
-	$self->helper( bi             => sub { $self->memd->get('bi'); } );
-	$self->helper( bi_id          => sub { $self->memd->get('bi_id'); } );
-	$self->helper( ys_type        => sub { $self->memd->get('ys_type'); } );
-	$self->helper( bfj_acct       => sub { $self->memd->get('bfj_acct'); } );
-	$self->helper( bfj_id         => sub { $self->memd->get('bfj_id'); } );
-	$self->helper( zyzj_acct      => sub { $self->memd->get('zyzj_acct'); } );
-	$self->helper( zyzj_id        => sub { $self->memd->get('zyzj_id'); } );
-	$self->helper( acct           => sub { $self->memd->get('acct'); } );
-	$self->helper( acct_id        => sub { $self->memd->get('acct_id'); } );
-	$self->helper( fyp_acct       => sub { $self->memd->get('fyp_acct'); } );
-	$self->helper( fyp_id         => sub { $self->memd->get('fyp_id'); } );
-	$self->helper( fhyd_acct      => sub { $self->memd->get('fhyd_acct'); } );
-	$self->helper( fhyd_id        => sub { $self->memd->get('fhyd_id'); } );
-	$self->helper( fhw_type       => sub { $self->memd->get('fhw_type'); } );
-	$self->helper( fhw_id         => sub { $self->memd->get('fhw_id'); } );
+	$self->helper( routes    => sub { $self->memd->get('routes'); } );
+	$self->helper( users     => sub { $self->memd->get('users'); } );
+	$self->helper( usernames => sub { $self->memd->get('usernames'); } );
+	$self->helper( uids      => sub { $self->memd->get('uids'); } );
+	$self->helper( p         => sub { $self->memd->get('p'); } );
+	$self->helper( p_id      => sub { $self->memd->get('p_id'); } );
+	$self->helper( zjbd_type => sub { $self->memd->get('zjbd_type'); } );
+	$self->helper( zjbd_id   => sub { $self->memd->get('zjbd_id'); } );
+	$self->helper( bi        => sub { $self->memd->get('bi'); } );
+	$self->helper( bi_id     => sub { $self->memd->get('bi_id'); } );
+	$self->helper( ys_type   => sub { $self->memd->get('ys_type'); } );
+	$self->helper( bfj_acct  => sub { $self->memd->get('bfj_acct'); } );
+	$self->helper( bfj_id    => sub { $self->memd->get('bfj_id'); } );
+	$self->helper( zyzj_acct => sub { $self->memd->get('zyzj_acct'); } );
+	$self->helper( zyzj_id   => sub { $self->memd->get('zyzj_id'); } );
+	$self->helper( acct      => sub { $self->memd->get('acct'); } );
+	$self->helper( acct_id   => sub { $self->memd->get('acct_id'); } );
+	$self->helper( fyp_acct  => sub { $self->memd->get('fyp_acct'); } );
+	$self->helper( fyp_id    => sub { $self->memd->get('fyp_id'); } );
+	$self->helper( fhyd_acct => sub { $self->memd->get('fhyd_acct'); } );
+	$self->helper( fhyd_id   => sub { $self->memd->get('fhyd_id'); } );
+	$self->helper( fhw_type  => sub { $self->memd->get('fhw_type'); } );
+	$self->helper( fhw_id    => sub { $self->memd->get('fhw_id'); } );
 
 	# hook
 	$self->hook( before_dispatch => \&_before_dispatch );
@@ -326,6 +334,7 @@ sub set_route {
 		cost_in cost_in_excel
 		income_zhlx income_zhlx_excel
 		fee_jrjg fee_jrjg_excel
+		income_add income_add_excel
 		/
 	  )
 	{
@@ -373,6 +382,7 @@ sub set_route {
 		y0110 y0111 y0112 y0113 y0114
 		y0115 y0116 y0117 y0118 y0119
 		y0120 y0121 y0122 y0123 y0124
+		y0143 y0144 y0145
 
 		yF0001 yF0002 yF0003 yF0004 yF0005
 		yF0006 yF0007 yF0008 yF0009 yF0010

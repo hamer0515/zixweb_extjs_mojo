@@ -679,7 +679,9 @@ sub _post_url {
 	my $url  = shift;
 	my $data = shift;
 	my $json = shift || false;
-	my $res  = $self->ua->post( $url, $data )->res;
+
+	$self->log->info("post [$data] to [$url]");
+	my $res = $self->ua->post( $url, $data )->res;
 	my $result;
 	my $err = $res->error;
 
@@ -691,7 +693,7 @@ sub _post_url {
 		return $result;
 	}
 	else {
-		$json ? $result = $res->json : $result->{success} = true;
+		$result = $json ? $res->json : { success => true };
 	}
 	return $result;
 }

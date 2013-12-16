@@ -11,7 +11,7 @@ sub list {
 	my $limit = $self->param('limit');
 
 	my $params = {};
-	for (qw/bfj_acct status/) {
+	for (qw/id valid/) {
 		my $p = $self->param($_);
 		undef $p if $p eq '';
 		$params->{$_} = $p;
@@ -20,13 +20,13 @@ sub list {
 
 	$p = $self->params(
 		{
-			id    => $params->{bfj_acct},
-			valid => $params->{status} && $self->quote( $params->{status} ),
+			id    => $params->{id},
+			valid => $params->{valid} && $self->quote( $params->{valid} ),
 		}
 	);
 
 	my $sql =
-"select id as bfj_id, b_acct as bfj_acct, acct_name, b_name,valid as status ,memo , rownumber() over(order by id asc) as rowid from dim_bfj_acct $p->{condition}";
+"select id, b_acct, acct_name, b_name, valid ,memo , rownumber() over(order by id) as rowid from dim_bfj_acct $p->{condition}";
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 
@@ -35,11 +35,11 @@ sub list {
 
 #检查账户信息是否已存在
 sub check {
-	my $self     = shift;
-	my $bfj_acct = $self->param('name');
-	my $result   = false;
-	my $sql      = "select * from dim_bfj_acct where b_acct = \'$bfj_acct'\ ";
-	my $key      = $self->select($sql);
+	my $self   = shift;
+	my $b_acct = $self->param('name');
+	my $result = false;
+	my $sql    = "select * from dim_bfj_acct where b_acct = \'$b_acct\'";
+	my $key    = $self->select($sql);
 	$result = true unless $key;
 	$self->render( json => { success => $result } );
 }
@@ -48,14 +48,14 @@ sub check {
 sub add {
 	my $self = shift;
 	my $data;
-	my $bfj_acct  = $self->param('bfj_acct');
+	my $b_acct    = $self->param('b_acct');
 	my $b_name    = $self->param('b_name');
 	my $acct_name = $self->param('acct_name');
-	my $status    = $self->param('status');
+	my $valid     = $self->param('valid');
 	my $memo      = $self->param('memo');
 
 	my $uid =
-	  $self->select("select * from dim_bfj_acct where b_acct= \'$bfj_acct'\ ");
+	  $self->select("select * from dim_bfj_acct where b_acct= \'$b_acct\'");
 	if ($uid) {
 		$self->render(
 			json => { success => false, msg => '账户信息已存在' } );
@@ -63,7 +63,7 @@ sub add {
 	}
 	$self->dbh->begin_work;
 	my $sql =
-"insert into dim_bfj_acct(id, b_acct, b_name, acct_name, valid, memo) values(nextval for seq_bfj_acct, \'$bfj_acct\',\'$b_name\',\'$acct_name\',\'$status\',\'$memo\')";
+"insert into dim_bfj_acct(id, b_acct, b_name, acct_name, valid, memo) values(nextval for seq_bfj_acct, \'$b_acct\',\'$b_name\',\'$acct_name\',\'$valid\',\'$memo\')";
 
 	#差错处理
 	unless ( $self->dbh->do($sql) ) {
@@ -84,14 +84,13 @@ sub add {
 sub edit {
 	my $self = shift;
 	my $data;
-	my $bfj_id    = $self->param('bfj_id');
+	my $id        = $self->param('id');
 	my $b_name    = $self->param('b_name');
 	my $acct_name = $self->param('acct_name');
-	my $status    = $self->param('status');
+	my $valid     = $self->param('valid');
 	my $memo      = $self->param('memo');
 
-	my $uid =
-	  $self->select("select * from dim_bfj_acct where id= $bfj_id ");
+	my $uid = $self->select("select * from dim_bfj_acct where id= $id ");
 
 	unless ($uid) {
 		$self->render(
@@ -102,7 +101,8 @@ sub edit {
 	}
 	$self->dbh->begin_work;
 	my $sql =
-"update dim_bfj_acct set b_name = \'$b_name\',acct_name = \'$acct_name\',valid = \'$status\',memo = \'$memo\' where id = \'$bfj_id\'";
+"update dim_bfj_acct set b_name = \'$b_name\', acct_name = \'$acct_name\', 
+valid = \'$valid\', memo = \'$memo\' where id = \'$id\'";
 
 	#差错处理
 	unless ( $self->dbh->do($sql) ) {
@@ -126,7 +126,6 @@ sub query {
 
 	my $data =
 	  $self->select("select memo from dim_bfj_acct where id = \'$bfj_id\' ");
-
 	$self->render( json => { success => true, data => $data } );
 
 }

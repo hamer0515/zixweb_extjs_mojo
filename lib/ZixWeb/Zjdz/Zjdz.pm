@@ -331,6 +331,7 @@ sub bfjcheckdone {
 		$data->{zjbd_type}->{$_}->{ch_d} = ( sprintf "%.2f", $c_d ) * 100;
 	}
 	$data->{real_bank_ch} = $self->uf( $self->param('real_bank_ch') ) * 100;
+
 	#	my $user = $self->session->{uid};
 	#
 	#	my $res = $self->ua->post(
@@ -349,19 +350,6 @@ sub bfjcheckdone {
 	#	}
 	#	$self->render( json => $r );
 
-	$self->log->info(
-		    'to[' 
-		  . $self->configure->{svc_url} 
-		  . ']data['
-		  . $self->dumper(
-			encode_json {
-				"svc"  => 'zjdz',
-				"data" => $data,
-				'sys'  => { 'oper_user' => $self->session->{uid}, },
-			}
-		  )
-		  . ']'
-	);
 	$self->render(
 		json => $self->post_url(
 			$self->configure->{svc_url},
