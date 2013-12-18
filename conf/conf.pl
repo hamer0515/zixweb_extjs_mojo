@@ -67,6 +67,7 @@ use utf8;
 		'34'  => [ 'c',  'p' ],
 		'35'  => [ 'bi', 'tx_date' ],
 		'36'  => [],
+		'37'  => ['p'],
 		'201' => ['fhyd_acct'],
 		'202' => [ 'fc',       'fyw_type', 'ftx_date' ],
 		'203' => [ 'fyp_acct', 'fyw_type', 'fe_date' ],

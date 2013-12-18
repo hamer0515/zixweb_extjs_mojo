@@ -52,8 +52,7 @@ sub txamt_yhys {
 	my $condition = $p->{condition};
 
 	my $sql =
-"select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_txamt_yhys $condition group by $fields"
-	  ;
+"select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_txamt_yhys $condition group by $fields";
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 	$self->render( json => $data );

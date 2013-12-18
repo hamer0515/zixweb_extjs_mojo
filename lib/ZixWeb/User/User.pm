@@ -87,7 +87,7 @@ sub add {
 sub check {
 	my $self   = shift;
 	my $name   = $self->param('name');
-	my $id     = $self->param('id');
+	my $id     = $self->param('id') || -1;
 	my $result = false;
 	my $sql =
 	  "select * from tbl_user_inf where username=\'$name\' and user_id <> $id";

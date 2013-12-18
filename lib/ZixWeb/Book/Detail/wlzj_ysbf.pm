@@ -61,7 +61,7 @@ sub wlzj_ysbf_excel {
 		$fir = 'wlzj_type';
 		$sec = 'period';
 	}
-	my $fields = join ',', grep { $_ } ( $fir, $sec );
+	my $fields = join ', ', grep { $_ } ( $fir, $sec );
 	my $p = $self->params(
 		{
 			wlzj_type => $wlzj_type,
@@ -71,7 +71,7 @@ sub wlzj_ysbf_excel {
 	my $condition = $p->{condition};
 
 	my $sql =
-"select $fields, sum(j) as j, sum(d) as d sum_wlzj_ysbf $condition group by $fields order by $fields";
+"select $fields, sum(j) as j, sum(d) as d from sum_wlzj_ysbf $condition group by $fields order by $fields";
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{file}    = "/var/$file";

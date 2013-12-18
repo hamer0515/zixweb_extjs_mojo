@@ -76,7 +76,7 @@ sub add {
 		$self->dbh->rollback;
 		return;
 	}
-
+	$self->log->info( $self->whois . "[add bfj_acct] with sql[$sql]" );
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }
@@ -115,7 +115,7 @@ valid = \'$valid\', memo = \'$memo\' where id = \'$id\'";
 		$self->dbh->rollback;
 		return;
 	}
-
+	$self->log->info( $self->whois . "[update bfj_acct] with sql[$sql]" );
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }

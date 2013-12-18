@@ -89,7 +89,7 @@ values(nextval for seq_role_id, \'$role_name\', \'$memo\', $oper_staff, \'$oper_
 sub check {
 	my $self   = shift;
 	my $name   = $self->param('name');
-	my $id     = $self->param('id');
+	my $id     = $self->param('id') || -1;
 	my $result = false;
 	my $sql =
 	  "select * from tbl_role_inf where role_name=\'$name\' and role_id <> $id";
@@ -151,11 +151,10 @@ sub update {
 			return;
 		}
 	}
-	$self->log->info(
-		$self->whois
+	$self->log->info( $self->whois
 		  . "[update role] with sql[$role_sql] with limits["
-		  . join( ',', @limits ) . ']'
-	);
+		  . join( ',', @limits )
+		  . ']' );
 	$self->dbh->commit;
 	$self->updateRoutes;
 	$self->render( json => { success => true } );

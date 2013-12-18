@@ -444,19 +444,22 @@ sub _transform {
 		qw/bfj_acct bfj_acct_1 bfj_acct_2 bfj_acct_3 bfj_acct_in bfj_acct_out bfj_acct_bj bfj_acct_bfee/
 	  )
 	{
-		$row->{$_} = $self->bfj_acct->{ $row->{$_} }
-		  if $row->{$_} && $self->bfj_acct->{ $row->{$_} };
+		$row->{$_} = $self->bfj_acct->{ $row->{$_} } || $row->{$_}
+		  if $row->{$_};
 	}
 	$row->{zyzj_acct} = $self->zyzj_acct->{ $row->{zyzj_acct} }
+	  || $row->{zyzj_acct}
 	  if $row->{zyzj_acct};
 
 	$row->{fyp_acct} = $self->fyp_acct->{ $row->{fyp_acct} }
+	  || $row->{fyp_acct}
 	  if $row->{fyp_acct};
 
 	$row->{fhyd_acct} = $self->fhyd_acct->{ $row->{fhyd_acct} }
+	  || $row->{fhyd_acct}
 	  if $row->{fhyd_acct};
 
-	$row->{fhw_type} = $self->fhw_type->{ $row->{fhw_type} }
+	$row->{fhw_type} = $self->fhw_type->{ $row->{fhw_type} } || $row->{fhw_type}
 	  if $row->{fhw_type};
 
 	for (
@@ -464,16 +467,21 @@ sub _transform {
 	  )
 	{
 		$row->{$_} = $self->dict->{types}->{$_}{ $row->{$_} }
+		  || $row->{$_}
 		  if defined $row->{$_};
 	}
 	for (qw/pack_status user_role_status/) {
-		$row->{ $_ . '_name' } = $self->dict->{types}{$_}{ $row->{$_} }
+		$row->{ $_ . '_name' } =
+		  $self->dict->{types}{$_}{ $row->{$_} }
+		  || $row->{$_}
 		  if defined $row->{$_};
 	}
 
 	# memcached
-	$row->{bi} = $self->bi->{ $row->{bi} } if defined $row->{bi};
-	$row->{p}  = $self->p->{ $row->{p} }   if defined $row->{p};
+	$row->{bi} = $self->bi->{ $row->{bi} } || $row->{bi}
+	  if defined $row->{bi};
+	$row->{p} = $self->p->{ $row->{p} } || $row->{p}
+	  if defined $row->{p};
 
 	if ( defined $row->{crt_id} ) {
 		if ( $row->{crt_id} == 0 ) {
@@ -486,12 +494,15 @@ sub _transform {
 	}
 	for (qw/bjhf_period round/) {
 		$row->{ $_ . "_trans" } =
-		  $self->dict->{types}->{ 'im_' . $_ }->{ $row->{$_} }
+		     $self->dict->{types}->{ 'im_' . $_ }->{ $row->{$_} }
+		  || $row->{$_}
 		  if defined $row->{$_};
 	}
 	$row->{bjhf_acct_trans} = $self->bfj_acct->{ $row->{bjhf_acct} }
+	  || $row->{bjhf_acct}
 	  if defined $row->{bjhf_acct};
-	$row->{im_bi_trans} = $self->bi->{ $row->{im_bi} } if defined $row->{im_bi};
+	$row->{im_bi_trans} = $self->bi->{ $row->{im_bi} } || $row->{im_bi}
+	  if defined $row->{im_bi};
 }
 
 sub _page_data {
@@ -639,7 +650,7 @@ sub _gen_file {
 	#UUID::generate($uuid);
 	#UUID::unparse( $uuid, $filename );
 	my $dt = DateTime->now( time_zone => 'local' );
-	$filename = $dt->ymd . $dt->hms . ".xls";
+	$filename = $dt->ymd . ' ' . $dt->hms . ".xls";
 
 	#$filename = "${filename}.xls";
 	my $path = "$ENV{ZIXWEB_HOME}/var/${filename}";
