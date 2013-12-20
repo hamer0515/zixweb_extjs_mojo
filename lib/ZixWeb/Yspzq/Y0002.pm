@@ -1,16 +1,19 @@
 package ZixWeb::Yspzq::Y0002;
 
 use Mojo::Base 'Mojolicious::Controller';
-
 use boolean;
 
 sub y0002 {
 	my $self = shift;
+
 	my $page  = $self->param('page');
 	my $limit = $self->param('limit');
 
 	my $data = {};
-	for (qw/id flag period_from period_to revoke_user ts_revoke/) {
+	for (
+		qw/id bi bfj_acct_bj flag clear_date_from clear_date_to period_from period_to revoke_user ts_revoke/
+	  )
+	{
 		$data->{$_} = $self->param($_);
 	}
 	if ( $data->{revoke_user} ) {
@@ -26,10 +29,18 @@ sub y0002 {
 				$self->quote( $data->{period_from} ),
 				$self->quote( $data->{period_to} ),
 			],
+			clear_date => [
+				0,
+				$data->{clear_date_from}
+				  && $self->quote( $data->{clear_date_from} ),
+				$data->{clear_date_to} && $self->quote( $data->{clear_date_to} )
+			],
 			status      => 1,
 			id          => $data->{id},
 			flag        => $data->{flag},
 			revoke_user => $data->{revoker},
+			bi          => $data->{bi},
+			bfj_acct_bj => $data->{bfj_acct_bj},
 			ts_revoke   => [
 				0,
 				$data->{ts_revoke_from}
@@ -39,8 +50,8 @@ sub y0002 {
 		}
 	);
 	my $sql =
-"select id, flag, period, rownumber() over(order by id desc) as rowid from yspz_0002 $p->{condition}";
-
+"select id, bi, bfj_acct_bj, tx_amt, flag, period, clear_date, rownumber() over(order by id desc) as rowid from yspz_0002 $p->{condition}"
+	  ;
 	my $pager = $self->page_data( $sql, $page, $limit );
 
 	$pager->{success} = true;

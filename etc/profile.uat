@@ -22,4 +22,6 @@ export MEM_IP=localhost
 export MEM_PORT=11222
 export MEM_SERVER=$MEM_IP:$MEM_PORT
 
+export MOJO_INACTIVITY_TIMEOUT=90
+
 alias dbc='db2 connect to $DB_NAME user $DB_USER using $DB_PASS'
