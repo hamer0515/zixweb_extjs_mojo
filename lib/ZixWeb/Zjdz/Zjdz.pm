@@ -323,9 +323,9 @@ sub bfjcheckdone {
 			$c_j = $self->uf( $self->param( $self->zjbd_type->{$_} . "_j" ) )
 			  || 0;               #参数4
 			$c_d = $self->uf( $self->param( $self->zjbd_type->{$_} . "_d" ) )
-			  || 0;               #参数5
+			  || 0;                               #参数5
 			$data->{zjbd_type}->{$_}->{memo} =
-			  $self->param( $self->zjbd_type->{$_} . 'memo' ) || '';
+			  $self->param( $self->zjbd_type->{$_} . '_memo' ) || '';
 		}
 		$data->{zjbd_type}->{$_}->{ch_j} = ( sprintf "%.2f", $c_j ) * 100;
 		$data->{zjbd_type}->{$_}->{ch_d} = ( sprintf "%.2f", $c_d ) * 100;
