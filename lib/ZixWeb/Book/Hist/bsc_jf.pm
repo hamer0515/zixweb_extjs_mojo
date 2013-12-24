@@ -1,10 +1,10 @@
-package ZixWeb::Book::Hist::bsc;
+package ZixWeb::Book::Hist::bsc_jf;
 
 use Mojo::Base 'Mojolicious::Controller';
 use boolean;
 use JSON::XS;
 
-sub bsc {
+sub bsc_jf {
 	my $self = shift;
 
 	my $page  = $self->param('page');
@@ -42,14 +42,14 @@ sub bsc {
 		}
 	);
 	my $sql =
-"select id, bfj_acct, zjbd_type, ys_id, ys_type, j, d, e_date, period, rownumber() over(order by id desc) as rowid from book_bsc $p->{condition}";
+"select id, bfj_acct, zjbd_type, ys_id, ys_type, j, d, e_date, period, rownumber() over(order by id desc) as rowid from book_bsc_jf $p->{condition}";
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 
 	$self->render( json => $data );
 }
 
-sub bsc_excel {
+sub bsc_jf_excel {
 	my $self = shift;
 
 	# Excel Header
@@ -71,8 +71,9 @@ sub bsc_excel {
 			id        => $params->{id},
 			bfj_acct  => $params->{bfj_acct},
 			zjbd_type => $params->{zjbd_type},
-			ys_type => $params->{ys_type} && $self->quote( $params->{ys_type} ),
-			ys_id   => $params->{ys_id},
+			ys_type   => $params->{ys_type}
+			  && $self->quote( $params->{ys_type} ),
+			ys_id  => $params->{ys_id},
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			e_date => [
@@ -88,7 +89,7 @@ sub bsc_excel {
 		}
 	);
 	my $fields = join ',', keys %$header;
-	my $sql    = "select $fields from book_bsc $p->{condition}";
+	my $sql    = "select $fields from book_bsc_jf $p->{condition}";
 	my $file   = $self->gen_file( $sql, $header );
 	my $data   = {};
 	$data->{file}    = "/var/$file";
