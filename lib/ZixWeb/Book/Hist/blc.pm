@@ -19,6 +19,7 @@ sub blc {
 		undef $p if $p eq '';
 		$params->{$_} = $p;
 	}
+	warn $self->dumper($params);
 	my $p->{condition} = '';
 	$p = $self->params(
 		{
@@ -30,8 +31,8 @@ sub blc {
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			period => [
-				$self->quote( $params->{period_from} ),
-				$self->quote( $params->{period_to} )
+				$self->quote( $params->{period_from} || '' ),
+				$self->quote( $params->{period_to}   || '' )
 			],
 			e_date => [
 				0,
@@ -41,8 +42,10 @@ sub blc {
 			],
 		}
 	);
+
 	my $sql =
 "select id, bfj_acct, ys_id, ys_type, j, d, period, zjbd_type, e_date, rownumber() over(order by id desc) as rowid from book_blc $p->{condition}";
+	warn $sql;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 
@@ -71,9 +74,8 @@ sub blc_excel {
 			id        => $params->{id},
 			bfj_acct  => $params->{bfj_acct},
 			zjbd_type => $params->{zjbd_type},
-			ys_type   => $params->{ys_type}
-			  && $self->quote( $params->{ys_type} ),
-			ys_id  => $params->{ys_id},
+			ys_type => $params->{ys_type} && $self->quote( $params->{ys_type} ),
+			ys_id   => $params->{ys_id},
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			period => [
