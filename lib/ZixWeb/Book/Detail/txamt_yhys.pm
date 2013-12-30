@@ -50,7 +50,6 @@ sub txamt_yhys {
 		}
 	);
 	my $condition = $p->{condition};
-
 	my $sql =
 "select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_txamt_yhys $condition group by $fields";
 	my $data = $self->page_data( $sql, $page, $limit );
@@ -75,7 +74,7 @@ sub txamt_yhys_excel {
 	my $period_to   = $self->param('period_to');
 
 	#zjbd_date
-	my $zjbd_date_from = $self->param('zjbd_date_form') || '';
+	my $zjbd_date_from = $self->param('zjbd_date_from') || '';
 	my $zjbd_date_to   = $self->param('zjbd_date_to')   || '';
 
 	my ( $fir, $sec, $thi, $fou );

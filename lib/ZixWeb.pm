@@ -88,29 +88,29 @@ sub startup {
 	$self->helper( updateFypacct  => sub { $self->_updateFypacct; } );
 	$self->helper( updateFhydacct => sub { $self->_updateFhydacct; } );
 	$self->helper( updateFhwtype  => sub { $self->_updateFhwtype; } );
-	$self->helper( routes    => sub { $self->memd->get('routes'); } );
-	$self->helper( users     => sub { $self->memd->get('users'); } );
-	$self->helper( usernames => sub { $self->memd->get('usernames'); } );
-	$self->helper( uids      => sub { $self->memd->get('uids'); } );
-	$self->helper( p         => sub { $self->memd->get('p'); } );
-	$self->helper( p_id      => sub { $self->memd->get('p_id'); } );
-	$self->helper( zjbd_type => sub { $self->memd->get('zjbd_type'); } );
-	$self->helper( zjbd_id   => sub { $self->memd->get('zjbd_id'); } );
-	$self->helper( bi        => sub { $self->memd->get('bi'); } );
-	$self->helper( bi_id     => sub { $self->memd->get('bi_id'); } );
-	$self->helper( ys_type   => sub { $self->memd->get('ys_type'); } );
-	$self->helper( bfj_acct  => sub { $self->memd->get('bfj_acct'); } );
-	$self->helper( bfj_id    => sub { $self->memd->get('bfj_id'); } );
-	$self->helper( zyzj_acct => sub { $self->memd->get('zyzj_acct'); } );
-	$self->helper( zyzj_id   => sub { $self->memd->get('zyzj_id'); } );
-	$self->helper( acct      => sub { $self->memd->get('acct'); } );
-	$self->helper( acct_id   => sub { $self->memd->get('acct_id'); } );
-	$self->helper( fyp_acct  => sub { $self->memd->get('fyp_acct'); } );
-	$self->helper( fyp_id    => sub { $self->memd->get('fyp_id'); } );
-	$self->helper( fhyd_acct => sub { $self->memd->get('fhyd_acct'); } );
-	$self->helper( fhyd_id   => sub { $self->memd->get('fhyd_id'); } );
-	$self->helper( fhw_type  => sub { $self->memd->get('fhw_type'); } );
-	$self->helper( fhw_id    => sub { $self->memd->get('fhw_id'); } );
+	$self->helper( routes         => sub { $self->memd->get('routes'); } );
+	$self->helper( users          => sub { $self->memd->get('users'); } );
+	$self->helper( usernames      => sub { $self->memd->get('usernames'); } );
+	$self->helper( uids           => sub { $self->memd->get('uids'); } );
+	$self->helper( p              => sub { $self->memd->get('p'); } );
+	$self->helper( p_id           => sub { $self->memd->get('p_id'); } );
+	$self->helper( zjbd_type      => sub { $self->memd->get('zjbd_type'); } );
+	$self->helper( zjbd_id        => sub { $self->memd->get('zjbd_id'); } );
+	$self->helper( bi             => sub { $self->memd->get('bi'); } );
+	$self->helper( bi_id          => sub { $self->memd->get('bi_id'); } );
+	$self->helper( ys_type        => sub { $self->memd->get('ys_type'); } );
+	$self->helper( bfj_acct       => sub { $self->memd->get('bfj_acct'); } );
+	$self->helper( bfj_id         => sub { $self->memd->get('bfj_id'); } );
+	$self->helper( zyzj_acct      => sub { $self->memd->get('zyzj_acct'); } );
+	$self->helper( zyzj_id        => sub { $self->memd->get('zyzj_id'); } );
+	$self->helper( acct           => sub { $self->memd->get('acct'); } );
+	$self->helper( acct_id        => sub { $self->memd->get('acct_id'); } );
+	$self->helper( fyp_acct       => sub { $self->memd->get('fyp_acct'); } );
+	$self->helper( fyp_id         => sub { $self->memd->get('fyp_id'); } );
+	$self->helper( fhyd_acct      => sub { $self->memd->get('fhyd_acct'); } );
+	$self->helper( fhyd_id        => sub { $self->memd->get('fhyd_id'); } );
+	$self->helper( fhw_type       => sub { $self->memd->get('fhw_type'); } );
+	$self->helper( fhw_id         => sub { $self->memd->get('fhw_id'); } );
 
 	# hook
 	$self->hook( before_dispatch => \&_before_dispatch );
@@ -287,6 +287,7 @@ sub set_route {
 		cfee_dqhf cfee_dqhf_excel
 		lfee_psp lfee_psp_excel
 		bsc bsc_excel
+		bsc_jf bsc_jf_excel
 		bsc_zyzj bsc_zyzj_excel
 		bfee_rb bfee_rb_excel
 		ypsc_fhyd ypsc_fhyd_excel

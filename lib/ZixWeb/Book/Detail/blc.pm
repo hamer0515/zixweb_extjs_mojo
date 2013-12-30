@@ -21,7 +21,7 @@ sub blc {
 	my $period_to   = $self->param('period_to');
 
 	#e_date
-	my $e_date_from = $self->param('e_date_form') || '';
+	my $e_date_from = $self->param('e_date_from') || '';
 	my $e_date_to   = $self->param('e_date_to')   || '';
 
 	my ( $fir, $sec, $thi, $fou );
@@ -53,7 +53,7 @@ sub blc {
 
 	my $sql =
 "select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_blc $condition group by $fields";
-
+	warn $sql;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 
@@ -77,7 +77,7 @@ sub blc_excel {
 	my $period_to   = $self->param('period_to');
 
 	#e_date
-	my $e_date_from = $self->param('e_date_form') || '';
+	my $e_date_from = $self->param('e_date_from') || '';
 	my $e_date_to   = $self->param('e_date_to')   || '';
 
 	my ( $fir, $sec, $thi, $fou );

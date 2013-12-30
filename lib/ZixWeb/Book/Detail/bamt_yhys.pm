@@ -21,7 +21,7 @@ sub bamt_yhys {
 	my $period_to   = $self->param('period_to');
 
 	#zjbd_date
-	my $zjbd_date_from = $self->param('zjbd_date_form') || '';
+	my $zjbd_date_from = $self->param('zjbd_date_from') || '';
 	my $zjbd_date_to   = $self->param('zjbd_date_to')   || '';
 
 	my ( $fir, $sec, $thi, $fou );
@@ -76,7 +76,7 @@ sub bamt_yhys_excel {
 	my $period_to   = $self->param('period_to');
 
 	#zjbd_date
-	my $zjbd_date_from = $self->param('zjbd_date_form') || '';
+	my $zjbd_date_from = $self->param('zjbd_date_from') || '';
 	my $zjbd_date_to   = $self->param('zjbd_date_to')   || '';
 
 	my ( $fir, $sec, $thi, $fou );

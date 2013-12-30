@@ -18,7 +18,7 @@ sub blc_zyzj {
 	my $period_to   = $self->param('period_to');
 
 	#e_date
-	my $e_date_from = $self->param('e_date_form') || '';
+	my $e_date_from = $self->param('e_date_from') || '';
 	my $e_date_to   = $self->param('e_date_to')   || '';
 
 	my ( $fir, $sec, $thi, );
@@ -67,7 +67,7 @@ sub blc_zyzj_excel {
 	my $period_to   = $self->param('period_to');
 
 	#e_date
-	my $e_date_from = $self->param('e_date_form') || '';
+	my $e_date_from = $self->param('e_date_from') || '';
 	my $e_date_to   = $self->param('e_date_to')   || '';
 
 	my ( $fir, $sec, $thi, );
