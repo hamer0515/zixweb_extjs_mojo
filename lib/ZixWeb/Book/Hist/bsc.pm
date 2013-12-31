@@ -37,6 +37,8 @@ sub bsc {
 				$params->{e_date_to} && $self->quote( $params->{e_date_to} ),
 			],
 			period => [
+
+				# 会计期间为非必填字段时，确保undefined转化为''
 				$self->quote( $params->{period_from} || '' ),
 				$self->quote( $params->{period_to}   || '' )
 			]
@@ -72,8 +74,9 @@ sub bsc_excel {
 			id        => $params->{id},
 			bfj_acct  => $params->{bfj_acct},
 			zjbd_type => $params->{zjbd_type},
-			ys_type => $params->{ys_type} && $self->quote( $params->{ys_type} ),
-			ys_id   => $params->{ys_id},
+			ys_type   => $params->{ys_type}
+			  && $self->quote( $params->{ys_type} ),
+			ys_id  => $params->{ys_id},
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			e_date => [
@@ -83,8 +86,10 @@ sub bsc_excel {
 				$params->{e_date_to} && $self->quote( $params->{e_date_to} ),
 			],
 			period => [
-				$self->quote( $params->{period_from} ),
-				$self->quote( $params->{period_to} )
+
+				# 会计期间为非必填字段时，确保undefined转化为''
+				$self->quote( $params->{period_from} || '' ),
+				$self->quote( $params->{period_to}   || '' )
 			]
 		}
 	);
@@ -94,7 +99,6 @@ sub bsc_excel {
 	my $data   = {};
 	$data->{file}    = "/var/$file";
 	$data->{success} = true;
-
 	$self->render( json => $data );
 }
 

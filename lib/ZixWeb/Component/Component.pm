@@ -320,14 +320,17 @@ sub table_headers {
 	my $self = shift;
 	my $id   = $self->param('id');
 	my $type = $self->param('type');
-	my $data = [ { boxLabel => 'ID', name => 'ID', inputValue => 'id' } ];
+	my $data =
+	  [ { boxLabel => 'ID', name => 'ID', inputValue => 'id', checked => true }
+	  ];
 	my $dims = $self->dict->{dim};
 	if ( $type eq 'book' ) {
 		for my $dim ( @{ $self->configure->{headers}{$id} } ) {
 			my $item = {
 				boxLabel   => $dims->{$dim},
 				name       => $dims->{$dim},
-				inputValue => $dim
+				inputValue => $dim,
+				checked    => true
 			};
 			push @$data, $item;
 		}
@@ -336,6 +339,7 @@ sub table_headers {
 		my $item = {
 			boxLabel   => $self->configure->{extra_headers}{$type}{$key},
 			name       => $self->configure->{extra_headers}{$type}{$key},
+			checked    => true,
 			inputValue => $key
 		};
 		push @$data, $item;

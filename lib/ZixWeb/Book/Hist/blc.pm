@@ -31,6 +31,8 @@ sub blc {
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			period => [
+
+				# 会计期间为非必填字段时，确保undefined转化为''
 				$self->quote( $params->{period_from} || '' ),
 				$self->quote( $params->{period_to}   || '' )
 			],
@@ -79,8 +81,10 @@ sub blc_excel {
 			j      => [ 0, $params->{j_from}, $params->{j_to} ],
 			d      => [ 0, $params->{d_from}, $params->{d_to} ],
 			period => [
-				$self->quote( $params->{period_from} ),
-				$self->quote( $params->{period_to} )
+
+				# 会计期间为非必填字段时，确保undefined转化为''
+				$self->quote( $params->{period_from} || '' ),
+				$self->quote( $params->{period_to}   || '' )
 			],
 			e_date => [
 				0,

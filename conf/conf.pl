@@ -97,6 +97,7 @@ use utf8;
 	},
 	extra_headers => {
 		book => {
+			period  => '会计期间',
 			j       => '借方金额',
 			d       => '贷方金额',
 			ys_type => '原始凭证类型',
