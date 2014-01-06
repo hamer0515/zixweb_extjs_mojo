@@ -53,7 +53,6 @@ sub blc {
 
 	my $sql =
 "select $fields, sum(j) as j, sum(d) as d, rownumber() over(order by $fields) as rowid from sum_blc $condition group by $fields";
-	warn $sql;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 

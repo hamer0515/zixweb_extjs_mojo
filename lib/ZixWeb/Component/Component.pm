@@ -290,7 +290,7 @@ sub excel {
 }
 
 sub book_headers {
-	my $self    = shift;
+	my $self = shift;
 	my $headers = $self->configure->{headers};
 	my $data    = {};
 	for my $id ( keys %$headers ) {

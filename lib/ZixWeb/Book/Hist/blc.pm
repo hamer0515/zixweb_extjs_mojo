@@ -19,7 +19,6 @@ sub blc {
 		undef $p if $p eq '';
 		$params->{$_} = $p;
 	}
-	warn $self->dumper($params);
 	my $p->{condition} = '';
 	$p = $self->params(
 		{
@@ -47,7 +46,6 @@ sub blc {
 
 	my $sql =
 "select id, bfj_acct, ys_id, ys_type, j, d, period, zjbd_type, e_date, rownumber() over(order by id desc) as rowid from book_blc $p->{condition}";
-	warn $sql;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 

@@ -35,7 +35,8 @@ sub wlzj_yfzy {
 		}
 	);
 	my $sql =
-"select id, wlzj_type, ys_id, ys_type, j, d, period from book_wlzj_yfzy $p->{condition}";
+"select id, wlzj_type, ys_id, ys_type, j, d, period, rownumber() over(order by id desc) as rowid from book_wlzj_yfzy $p->{condition}"
+	  ;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 
@@ -74,10 +75,9 @@ sub wlzj_yfzy_excel {
 		}
 	);
 	my $fields = join ',', keys %$header;
-	my $sql = "select $fields from book_wlzj_yfzy $p->{condition}"
-	  ;
-	my $file = $self->gen_file( $sql, $header );
-	my $data = {};
+	my $sql    = "select $fields from book_wlzj_yfzy $p->{condition}";
+	my $file   = $self->gen_file( $sql, $header );
+	my $data   = {};
 	$data->{success} = true;
 
 	$self->render( json => $data );

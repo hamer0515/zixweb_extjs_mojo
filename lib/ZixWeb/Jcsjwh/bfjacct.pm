@@ -12,7 +12,7 @@ sub list {
 
 	my $params = {};
 	for (qw/id valid/) {
-		my $p = $self->param($_);
+		my $p = $self->param($_) || '';
 		undef $p if $p eq '';
 		$params->{$_} = $p;
 	}

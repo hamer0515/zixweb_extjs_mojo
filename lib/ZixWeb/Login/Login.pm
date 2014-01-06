@@ -108,9 +108,7 @@ sub passwordreset {
 
 	# 记录日志
 	$self->log->info(
-		$self->whois
-		  . "[change password] [$old_password]=>[$new_password] "
-	);
+		$self->whois . "[change password] [$old_password]=>[$new_password] " );
 	$self->dbh->commit;
 	$self->render( json => { success => true } );
 }

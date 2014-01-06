@@ -34,6 +34,7 @@ sub get_books {
 		  grep { $books->{$_}[4] == 2 }
 		  sort { $books->{$a}[2] cmp $books->{$b}[2] } keys %$books;
 	}
+
 	# 从数据库里面获得数据
 	for my $book (@books) {
 		my $d = $self->select(
