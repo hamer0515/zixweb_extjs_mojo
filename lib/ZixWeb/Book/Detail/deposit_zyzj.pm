@@ -14,8 +14,8 @@ sub deposit_zyzj {
 	my $zyzj_acct = $self->param('zyzj_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');
@@ -51,8 +51,8 @@ sub deposit_zyzj_excel {
 	my $zyzj_acct = $self->param('zyzj_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');

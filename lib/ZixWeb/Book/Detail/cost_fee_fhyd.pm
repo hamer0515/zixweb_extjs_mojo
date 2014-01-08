@@ -14,8 +14,8 @@ sub cost_fee_fhyd {
 	my $fyw_type = $self->param('fyw_type');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# fhw_type
 	my $fhw_type = $self->param('fhw_type');
@@ -57,8 +57,8 @@ sub cost_fee_fhyd_excel {
 	my $fyw_type = $self->param('fyw_type');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# fhw_type
 	my $fhw_type = $self->param('fhw_type');

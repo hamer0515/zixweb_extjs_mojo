@@ -18,8 +18,8 @@ sub yfamt_m_fhyd {
 	my $fcg_date_to   = $self->param('fcg_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, );
 	$fir = $self->param('fir');
@@ -66,8 +66,8 @@ sub yfamt_m_fhyd_excel {
 	my $fcg_date_to   = $self->param('fcg_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, );
 	$fir = $self->param('fir');

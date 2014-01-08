@@ -17,8 +17,8 @@ sub bfee_zqqr {
 	my $fp = $self->param('fp');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	#tx_date
 	my $tx_date_from = $self->param('tx_date_from') || '';
@@ -74,8 +74,8 @@ sub bfee_zqqr_excel {
 	my $fp = $self->param('fp');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	#tx_date
 	my $tx_date_from = $self->param('tx_date_from') || '';

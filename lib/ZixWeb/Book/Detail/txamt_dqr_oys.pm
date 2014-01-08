@@ -18,8 +18,8 @@ sub txamt_dqr_oys {
 	my $tx_date_to   = $self->param('tx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, );
 	$fir = $self->param('fir');
@@ -66,8 +66,8 @@ sub txamt_dqr_oys_excel {
 	my $tx_date_to   = $self->param('tx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, );
 	$fir = $self->param('fir');

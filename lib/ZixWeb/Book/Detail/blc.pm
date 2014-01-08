@@ -17,8 +17,8 @@ sub blc {
 	my $zjbd_type = $self->param('zjbd_type');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	#e_date
 	my $e_date_from = $self->param('e_date_from') || '';
@@ -72,8 +72,8 @@ sub blc_excel {
 	my $zjbd_type = $self->param('zjbd_type');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	#e_date
 	my $e_date_from = $self->param('e_date_from') || '';

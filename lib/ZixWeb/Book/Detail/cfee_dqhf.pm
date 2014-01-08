@@ -21,8 +21,8 @@ sub cfee_dqhf {
 	my $tx_date_to   = $self->param('tx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');
@@ -75,8 +75,8 @@ sub cfee_dqhf_excel {
 	my $tx_date_to   = $self->param('tx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');

@@ -11,8 +11,8 @@ sub wlzj_yszy {
 	my $limit = $self->param('limit');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ($fir);
 	$fir = $self->param('fir');
@@ -40,8 +40,8 @@ sub wlzj_yszy_excel {
 	my $header = decode_json $self->param('header');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ($fir);
 	$fir = $self->param('fir');

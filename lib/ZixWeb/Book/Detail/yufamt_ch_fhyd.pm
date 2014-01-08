@@ -17,8 +17,8 @@ sub yufamt_ch_fhyd {
 	my $fc = $self->param('fc');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi );
 	$fir = $self->param('fir');
@@ -65,8 +65,8 @@ sub yufamt_ch_fhyd_excel {
 	my $fio_date_to   = $self->param('fio_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');

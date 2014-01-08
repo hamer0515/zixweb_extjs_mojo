@@ -205,22 +205,6 @@ sub pass {
 	my $self = shift;
 	my $id   = $self->param('id');
 
-	#	my $result = false;
-	#	my $res    = 1;
-	#	$res = $self->ua->post(
-	#		$self->configure->{svc_url},
-	#		encode_json {
-	#			data => { id => $id, ys_type => '0000' },
-	#			svc  => "verify",
-	#			sys => { oper_user => $self->session->{uid} },
-	#		}
-	#	)->res->json->{status};
-	#
-	#	if ( $res == 0 ) {
-	#		$result = true;
-	#	}
-	#	$self->render( json => { success => $result } );
-
 	$self->render(
 		json => $self->post_url(
 			$self->configure->{svc_url},
@@ -241,23 +225,6 @@ sub pass {
 sub deny {
 	my $self = shift;
 	my $id   = $self->param('id');
-
-	#	my $result = false;
-	#	my $res    = 1;
-	#
-	#	$res = $self->ua->post(
-	#		$self->configure->{svc_url},
-	#		encode_json {
-	#			data => { id        => $id, },
-	#			svc  => "refuse_verify",
-	#			sys  => { oper_user => $self->session->{uid} },
-	#		}
-	#	)->res->json->{status};
-	#	if ( $res == 0 ) {
-	#		$result = true;
-	#	}
-	#	$self->render( json => { success => $result } );
-
 	$self->render(
 		json => $self->post_url(
 			$self->configure->{svc_url},

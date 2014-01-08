@@ -266,8 +266,9 @@ sub cust_proto {
 	my $cust_proto = $self->param('name');
 	my @arr        = split( '\_', $cust_proto );
 	my $pid        = $arr[0];
-	my $p_sql      = "select * from dim_p where id= $pid";
-	my $count      = $self->select($p_sql);
+	sleep 30;
+	my $p_sql = "select * from dim_p where id= $pid";
+	my $count = $self->select($p_sql);
 	$result = true if $count;
 	return $self->render( json => { success => $result } );
 }
@@ -290,7 +291,7 @@ sub excel {
 }
 
 sub book_headers {
-	my $self = shift;
+	my $self    = shift;
 	my $headers = $self->configure->{headers};
 	my $data    = {};
 	for my $id ( keys %$headers ) {

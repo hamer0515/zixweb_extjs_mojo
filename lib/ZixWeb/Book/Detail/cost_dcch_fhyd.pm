@@ -20,8 +20,8 @@ sub cost_dcch_fhyd {
 	my $f_dcn = $self->param('f_dcn');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, );
 	$fir = $self->param('fir');
@@ -69,8 +69,8 @@ sub cost_dcch_fhyd_excel {
 	my $f_dcn = $self->param('f_dcn');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, );
 	$fir = $self->param('fir');

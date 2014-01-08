@@ -323,7 +323,7 @@ sub bfjcheckdone {
 			$c_j = $self->uf( $self->param( $self->zjbd_type->{$_} . "_j" ) )
 			  || 0;               #参数4
 			$c_d = $self->uf( $self->param( $self->zjbd_type->{$_} . "_d" ) )
-			  || 0;                               #参数5
+			  || 0;               #参数5
 			$data->{zjbd_type}->{$_}->{memo} =
 			  $self->param( $self->zjbd_type->{$_} . '_memo' ) || '';
 		}
@@ -331,25 +331,6 @@ sub bfjcheckdone {
 		$data->{zjbd_type}->{$_}->{ch_d} = ( sprintf "%.2f", $c_d ) * 100;
 	}
 	$data->{real_bank_ch} = $self->uf( $self->param('real_bank_ch') ) * 100;
-
-	#	my $user = $self->session->{uid};
-	#
-	#	my $res = $self->ua->post(
-	#		$self->configure->{svc_url},
-	#		encode_json {
-	#			"svc"  => 'zjdz',
-	#			"data" => $data,
-	#			'sys'  => { 'oper_user' => $user, },
-	#		}
-	#	)->res->json->{status};
-	#	if ( $res == 0 ) {
-	#		$r->{success} = true;
-	#	}
-	#	else {
-	#		$r->{success} = false;
-	#	}
-	#	$self->render( json => $r );
-
 	$self->render(
 		json => $self->post_url(
 			$self->configure->{svc_url},
@@ -463,29 +444,52 @@ sub bfjgzcx {
 	my $page  = $self->param('page');
 	my $limit = $self->param('limit');
 
-	my $params = {};
-	for (qw/from to bfj_acct/) {
-		my $p = $self->param($_);
-		$p = undef if $p eq '';
-		$params->{$_} = $p;
+	# bfj_acct
+	my $bfj_acct = $self->param('bfj_acct');
+
+	# zjbd_type
+	my $zjbd_type = $self->param('zjbd_type');
+
+	#period
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to')   || '';
+
+	#e_date
+	my $e_date_from = $self->param('e_date_from') || '';
+	my $e_date_to   = $self->param('e_date_to')   || '';
+
+	my ( $fir, $sec, $thi, $fou );
+	$fir = $self->param('fir');
+	$sec = $self->param('sec');
+	$thi = $self->param('thi');
+	$fou = $self->param('fou');
+	unless ( $fir || $sec || $thi || $fou ) {
+		$fir = 'bfj_acct';
+		$sec = 'zjbd_type';
+		$thi = 'e_date';
+		$fou = 'period';
 	}
-	my $p->{condition} = '';
-	$p = $self->params(
+	my $fields = join ',', grep { $_ } ( $fir, $sec, $thi, $fou );
+
+	my $p = $self->params(
 		{
-			bfj_acct => $params->{bfj_acct},
-			e_date   => [
+			bfj_acct  => $bfj_acct,
+			zjbd_type => $zjbd_type,
+			period => [ $self->quote($period_from), $self->quote($period_to) ],
+			e_date => [
 				0,
-				$params->{from} && $self->quote( $params->{from} ),
-				$params->{to}   && $self->quote( $params->{to} ),
-			  ]
+				$e_date_from && $self->quote($e_date_from),
+				$e_date_to   && $self->quote($e_date_to)
+			],
 
 		}
 	);
-
-	my $sql = qq/
-		select bfj_acct, e_date, blc, bsc, rownumber() over(order by e_date desc) as rowid
+	my $condition = $p->{condition};
+	my $sql       = qq/
+		select $fields,sum(blc) as blc,sum(bsc) as bsc,rownumber() over() as rowid
 		from viw_blc_bsc
-		$p->{condition} /;
+		$p->{condition} group by $fields/;
+	warn $sql;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 	$self->render( json => $data );

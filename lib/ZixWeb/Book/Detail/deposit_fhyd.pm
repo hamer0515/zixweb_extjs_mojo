@@ -14,8 +14,8 @@ sub deposit_fhyd {
 	my $fhyd_acct = $self->param('fhyd_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');
@@ -50,8 +50,8 @@ sub deposit_fhyd_excel {
 	my $fhyd_acct = $self->param('fhyd_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');

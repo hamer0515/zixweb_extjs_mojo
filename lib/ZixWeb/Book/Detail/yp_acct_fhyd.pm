@@ -18,8 +18,8 @@ sub yp_acct_fhyd {
 	my $fio_date_to   = $self->param('fio_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi );
 	$fir = $self->param('fir');
@@ -67,8 +67,8 @@ sub yp_acct_fhyd_excel {
 	my $fio_date_to   = $self->param('fio_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi );
 	$fir = $self->param('fir');

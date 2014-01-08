@@ -14,8 +14,8 @@ sub deposit_bfj {
 	my $bfj_acct = $self->param('bfj_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');
@@ -51,8 +51,8 @@ sub deposit_bfj_excel {
 	my $bfj_acct = $self->param('bfj_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');

@@ -27,8 +27,8 @@ sub cost_bfee_zg {
 	my $tx_date_to   = $self->param('tx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, $fiv, $six );
 	$fir = $self->param('fir');
@@ -92,8 +92,8 @@ sub cost_bfee_zg_excel {
 	my $tx_date_to   = $self->param('tx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, $fiv, $six );
 	$fir = $self->param('fir');

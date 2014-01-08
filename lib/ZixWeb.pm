@@ -132,17 +132,27 @@ sub _before_dispatch {
 
 	# 可以访问主页
 	return 1 if $path =~ /^\/$/;
-	return 1
-	  if $path =~ /(js|jpg|gif|css|png|ico)$/;    # 静态文件可以访问
+
+	# 静态文件可以访问
+	if ( $path =~ /(js|jpg|gif|css|png|ico)$/ ) {
+
+		#静态文件启用缓存
+		$self->res->headers->cache_control('public');
+		return 1;
+	}
+
+	#	return 1 if $path =~ /(js|jpg|gif|css|png|ico)$/;
 
 	# 可以进行登录操作
 	return 1 if $path =~ /^\/login\/login$/;
 
 	my $sess = $self->session;
 	my $uid  = $sess->{uid};
-
 	unless ($uid) {
-		$self->render( json => { success => 'forbidden' } );
+
+		#		$self->res->headers->status('403 Forbidden');
+		#		$self->render( json => { success => 'forbidden' } );
+		$self->rendered(403);
 		return 0;
 	}
 

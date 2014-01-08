@@ -14,8 +14,8 @@ sub cost_ncss_fhyd {
 	my $fc = $self->param('fc');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# fhw_type
 	my $fhw_type = $self->param('fhw_type');
@@ -63,8 +63,8 @@ sub cost_ncss_fhyd_excel {
 	my $fc = $self->param('fc');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# fhw_type
 	my $fhw_type = $self->param('fhw_type');

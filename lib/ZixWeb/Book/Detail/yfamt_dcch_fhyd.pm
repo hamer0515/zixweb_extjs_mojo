@@ -24,8 +24,8 @@ sub yfamt_dcch_fhyd {
 	my $ftx_date_to   = $self->param('ftx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, $fiv, $six );
 	$fir = $self->param('fir');
@@ -84,8 +84,8 @@ sub yfamt_dcch_fhyd_excel {
 	my $ftx_date_to   = $self->param('ftx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, $fiv, $six );
 	$fir = $self->param('fir');

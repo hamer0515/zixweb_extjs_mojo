@@ -14,8 +14,8 @@ sub fee_jrjg {
 	my $acct = $self->param('acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');
@@ -51,8 +51,8 @@ sub fee_jrjg_excel {
 	my $acct = $self->param('acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec );
 	$fir = $self->param('fir');

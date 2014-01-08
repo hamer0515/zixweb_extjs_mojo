@@ -14,8 +14,8 @@ sub bfee_cwwf {
 	my $bi = $self->param('bi');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	#tx_date
 	my $tx_date_from = $self->param('tx_date_from') || '';
@@ -64,8 +64,8 @@ sub bfee_cwwf_excel {
 	my $bi = $self->param('bi');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	#tx_date
 	my $tx_date_from = $self->param('tx_date_from') || '';

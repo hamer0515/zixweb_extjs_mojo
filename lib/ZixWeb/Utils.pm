@@ -568,6 +568,7 @@ sub _params {
 	my $condition = '';
 	if ( exists $params->{period} && ( ref $params->{period} ) eq 'ARRAY' ) {
 		my $data = delete $params->{period};
+		warn $self->dumper($data);
 		if ( defined $data->[0] && $data->[0] ne "''" ) {
 			$condition .= " and period>=$data->[0]";
 		}

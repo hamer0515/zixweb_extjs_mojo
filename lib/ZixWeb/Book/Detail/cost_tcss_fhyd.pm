@@ -20,8 +20,8 @@ sub cost_tcss_fhyd {
 	my $fch_ssn = $self->param('fch_ssn');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, );
 	$fir = $self->param('fir');
@@ -69,8 +69,8 @@ sub cost_tcss_fhyd_excel {
 	my $fch_ssn = $self->param('fch_ssn');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou, );
 	$fir = $self->param('fir');

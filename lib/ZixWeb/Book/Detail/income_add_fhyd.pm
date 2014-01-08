@@ -17,8 +17,8 @@ sub income_add_fhyd {
 	my $fhw_type = $self->param('fhw_type');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');
@@ -60,8 +60,8 @@ sub income_add_fhyd_excel {
 	my $fhw_type = $self->param('fhw_type');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');

@@ -21,8 +21,8 @@ sub ypsc_fhyd {
 	my $fe_date_to   = $self->param('fe_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');
@@ -76,8 +76,8 @@ sub ypsc_fhyd_excel {
 	my $fe_date_to   = $self->param('fe_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi, $fou );
 	$fir = $self->param('fir');

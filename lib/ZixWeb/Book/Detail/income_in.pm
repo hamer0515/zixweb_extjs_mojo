@@ -17,8 +17,8 @@ sub income_in {
 	my $p = $self->param('p');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi );
 	$fir = $self->param('fir');
@@ -60,8 +60,8 @@ sub income_in_excel {
 	my $p = $self->param('p');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	my ( $fir, $sec, $thi );
 	$fir = $self->param('fir');

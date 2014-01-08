@@ -21,8 +21,8 @@ sub camt_dgd_fhyd {
 	my $ftx_date_to   = $self->param('ftx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# fhw_type
 	my $fhw_type = $self->param('fhw_type');
@@ -95,8 +95,8 @@ sub camt_dgd_fhyd_excel {
 	my $ftx_date_to   = $self->param('ftx_date_to');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# fhw_type
 	my $fhw_type = $self->param('fhw_type');

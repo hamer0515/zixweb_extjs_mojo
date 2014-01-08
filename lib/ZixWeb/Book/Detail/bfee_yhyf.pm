@@ -13,8 +13,8 @@ sub bfee_yhyf {
 	my $bfj_acct = $self->param('bfj_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# zjbd_date
 	my $zjbd_date_from = $self->param('zjbd_date_from');
@@ -67,8 +67,8 @@ sub bfee_yhyf_excel {
 	my $bfj_acct = $self->param('bfj_acct');
 
 	#period
-	my $period_from = $self->param('period_from');
-	my $period_to   = $self->param('period_to');
+	my $period_from = $self->param('period_from') || '';
+	my $period_to   = $self->param('period_to') || '';
 
 	# zjbd_date
 	my $zjbd_date_from = $self->param('zjbd_date_from');
