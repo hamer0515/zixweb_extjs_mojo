@@ -489,7 +489,6 @@ sub bfjgzcx {
 		select $fields,sum(blc) as blc,sum(bsc) as bsc,rownumber() over() as rowid
 		from viw_blc_bsc
 		$p->{condition} group by $fields/;
-	warn $sql;
 	my $data = $self->page_data( $sql, $page, $limit );
 	$data->{success} = true;
 	$self->render( json => $data );

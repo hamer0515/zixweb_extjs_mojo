@@ -471,8 +471,7 @@ sub _transform {
 		  if defined $row->{$_};
 	}
 	for (qw/pack_status user_role_status/) {
-		$row->{ $_ . '_name' } =
-		  $self->dict->{types}{$_}{ $row->{$_} }
+		$row->{ $_ . '_name' } = $self->dict->{types}{$_}{ $row->{$_} }
 		  || $row->{$_}
 		  if defined $row->{$_};
 	}
@@ -568,7 +567,6 @@ sub _params {
 	my $condition = '';
 	if ( exists $params->{period} && ( ref $params->{period} ) eq 'ARRAY' ) {
 		my $data = delete $params->{period};
-		warn $self->dumper($data);
 		if ( defined $data->[0] && $data->[0] ne "''" ) {
 			$condition .= " and period>=$data->[0]";
 		}
@@ -698,14 +696,48 @@ sub _post_url {
 	my $err = $res->error;
 
 	# 交互出错处理
+
+	# 返回值status：
+	#	-1：通用错误
+	#	-2：不能影响已对账数据
+	#	-3：任务审核人为任务提交者
 	if ($err) {
 		$result->{msg}     = $err;
 		$result->{success} = false;
 		$self->log->error("post [$data] to [$url] error[$err]");
 		return $result;
 	}
+	if ($json) {
+		return $res->json;
+	}
+	$result = $res->json;
+	my $status = $result->{status};
+	if ( $status == 0 ) {
+		return { success => true };
+	}
+	elsif ( $status == -1 ) {
+		return {
+			success => false,
+			msg     => '操作失败'
+		};
+	}
+	elsif ( $status == -2 ) {
+		return {
+			success => false,
+			msg     => '与对账完成有冲突'
+		};
+	}
+	elsif ( $status == -3 ) {
+		return {
+			success => false,
+			msg     => '不允许审核自己的任务'
+		};
+	}
 	else {
-		$result = $json ? $res->json : { success => true };
+		return {
+			success => false,
+			msg     => '操作失败，后台错误码:' . $status
+		};
 	}
 	return $result;
 }

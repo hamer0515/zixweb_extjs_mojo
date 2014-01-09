@@ -257,6 +257,7 @@ sub c {
 	my $c_sql  = "select * from dict_dept where id= $cid";
 	my $count  = $self->select($c_sql);
 	$result = true if $count;
+	sleep 30;
 	return $self->render( json => { success => $result } );
 }
 
@@ -266,9 +267,8 @@ sub cust_proto {
 	my $cust_proto = $self->param('name');
 	my @arr        = split( '\_', $cust_proto );
 	my $pid        = $arr[0];
-	sleep 30;
-	my $p_sql = "select * from dim_p where id= $pid";
-	my $count = $self->select($p_sql);
+	my $p_sql      = "select * from dim_p where id= $pid";
+	my $count      = $self->select($p_sql);
 	$result = true if $count;
 	return $self->render( json => { success => $result } );
 }
