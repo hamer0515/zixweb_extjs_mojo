@@ -11,7 +11,7 @@ use ZixWeb::Utils qw/_post_url _gen_file _updateAcct _transform _updateBfjacct
   _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
   _updateYstype _updateBi _updateP _updateUsers _updateRoutes
   _uf _nf _initDict _decode_ch _page_data _select _update
-  _errhandle _params/;
+  _errhandle _params _updateFch/;
 
 # This method will run once at server start
 sub startup {
@@ -88,6 +88,7 @@ sub startup {
 	$self->helper( updateFypacct  => sub { $self->_updateFypacct; } );
 	$self->helper( updateFhydacct => sub { $self->_updateFhydacct; } );
 	$self->helper( updateFhwtype  => sub { $self->_updateFhwtype; } );
+	$self->helper( updateFch      => sub { $self->_updateFch; } );
 	$self->helper( routes         => sub { $self->memd->get('routes'); } );
 	$self->helper( users          => sub { $self->memd->get('users'); } );
 	$self->helper( usernames      => sub { $self->memd->get('usernames'); } );
@@ -111,6 +112,8 @@ sub startup {
 	$self->helper( fhyd_id        => sub { $self->memd->get('fhyd_id'); } );
 	$self->helper( fhw_type       => sub { $self->memd->get('fhw_type'); } );
 	$self->helper( fhw_id         => sub { $self->memd->get('fhw_id'); } );
+	$self->helper( fch            => sub { $self->memd->get('fch'); } );
+    $self->helper( fch_id         => sub { $self->memd->get('fch_id'); } );
 
 	# hook
 	$self->hook( before_dispatch => \&_before_dispatch );
@@ -146,12 +149,17 @@ sub _before_dispatch {
 	# 可以进行登录操作
 	return 1 if $path =~ /^\/login\/login$/;
 
+	# 可以进行登出操作
+	return 1 if $path =~ /^\/login\/logout$/;
+
 	my $sess = $self->session;
 	my $uid  = $sess->{uid};
-	unless ($uid) {
 
-		#		$self->res->headers->status('403 Forbidden');
-		#		$self->render( json => { success => 'forbidden' } );
+	#	$self->render( json => { success => 'forbidden' } );
+
+	#	$self->rendered(403);
+	#	return 0;
+	unless ($uid) {
 		$self->rendered(403);
 		return 0;
 	}
@@ -216,7 +224,7 @@ sub set_route {
 		qw/
 		routes roles allroles account
 		bfjacct zyzjacct product ystype
-		books zjbdtype wlzjtype fhwtype
+		books zjbdtype wlzjtype fhwtype fch_c
 		fywtype fypacct fhydacct bi_dict
 		c fp cust_proto excel book_headers
 		book_dim table_headers
@@ -268,7 +276,17 @@ sub set_route {
 
 	# 资金对账
 	$r->any("/zjdz/$_")->to( namespace => "ZixWeb::Zjdz::Zjdz", action => $_ )
-	  for (qw/bfj bfjcheck bfjcheckdone bfjgzcx bfjrefresh_mqt/);
+	  for (qw/bfj bfjcheck bfjcheckdone bfjgzcx bfjrefresh_mqt bfjresult/);
+
+	# 富汇易达渠道方对账
+	$r->any("/zjdz/$_")
+	  ->to( namespace => "ZixWeb::Zjdz::Zjdz_qd", action => $_ )
+	  for (qw/qd qdcheck qdcheckdone qdgzcx/);
+
+	# 富汇易达易宝中间帐号对账
+	$r->any("/zjdz/$_")
+	  ->to( namespace => "ZixWeb::Zjdz::Zjdz_fyp", action => $_ )
+	  for (qw/fyp fypcheck fypcheckdone fypgzcx/);
 
 	# 帐套查询
 	for (qw/all bfj zyzj fhyd/) {
@@ -346,6 +364,8 @@ sub set_route {
 		income_zhlx income_zhlx_excel
 		fee_jrjg fee_jrjg_excel
 		income_add income_add_excel
+		qdlc_fhyd qdlc_fhyd_excel
+		qdsc_fhyd qdsc_fhyd_excel
 		/
 	  )
 	{
@@ -393,19 +413,20 @@ sub set_route {
 		y0110 y0111 y0112 y0113 y0114
 		y0115 y0116 y0117 y0118 y0119
 		y0120 y0121 y0122 y0123 y0124
-		y0143 y0144 y0145
+		y0143 y0144 y0145 y0146 y0147
+		y0148 y0149
 
 		yF0001 yF0002 yF0003 yF0004 yF0005
 		yF0006 yF0007 yF0008 yF0009 yF0010
 		yF0011 yF0012 yF0013 yF0014 yF0015
 		yF0016 yF0017 yF0018 yF0019 yF0020
-		yF0021
+		yF0021 yF0000
 
 		yF0022 yF0023 yF0024 yF0025 yF0026
 		yF0027 yF0028 yF0029 yF0030 yF0031
 		yF0032 yF0033 yF0034 yF0035 yF0036
 		yF0037 yF0038 yF0039 yF0040 yF0041
-		yF0042 yF0043 yF0044
+		yF0042 yF0043 yF0044 yF0045 yF0047
 		detail/
 	  )
 	{
@@ -421,6 +442,7 @@ sub set_route {
 	for (
 		qw/i0000 i0001 i0006 i0008 i0009 i0013
 		i0014 i0015 i0018 i0028 i0029 i0054 i0101
+		i0148 i0149
 		/
 	  )
 	{

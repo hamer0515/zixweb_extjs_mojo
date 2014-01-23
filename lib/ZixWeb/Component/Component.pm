@@ -178,6 +178,21 @@ sub fhwtype {
 	$self->render( json => $result );
 }
 
+sub fch_c {
+	my $self   = shift;
+	my $result = [];
+	my $fch    = $self->fch;
+	for my $key (
+		sort { $fch->{$a} cmp $fch->{$b} }
+		keys %$fch
+	  )
+	{
+		push @$result, { id => $key, name => $fch->{$key} };
+	}
+
+	$self->render( json => $result );
+}
+
 sub fypacct {
 	my $self     = shift;
 	my $result   = [];

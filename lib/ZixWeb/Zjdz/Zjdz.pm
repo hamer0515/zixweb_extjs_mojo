@@ -15,7 +15,7 @@ sub bfj {
 
 	my $params = {};
 	for (qw/from to b_acct/) {
-		my $p = $self->param($_);
+		my $p = $self->param($_) || '';
 		$p = undef if $p eq '';
 		$params->{$_} = $p;
 	}
@@ -502,5 +502,39 @@ sub bfjrefresh_mqt {
 			encode_json( { svc => "refresh_mqt" } )
 		)
 	);
+}
+
+sub bfjresult {
+	my $self = shift;
+
+	my $page  = $self->param('page');
+	my $limit = $self->param('limit');
+
+	my $params = {};
+	for (qw/bfj_acct flag dz_date_from dz_date_to zjbd_type/) {
+		my $p = $self->param($_);
+		undef $p if $p eq '';
+		$params->{$_} = $p;
+	}
+	my $p->{condition} = '';
+	$p = $self->params(
+		{
+			bfj_acct  => $params->{bfj_acct},
+			zjbd_type => $params->{zjbd_type},
+			flag      => $params->{flag},
+			dz_date   => [
+				0,
+				$params->{dz_date_from}
+				  && $self->quote( $params->{dz_date_from} ),
+				$params->{dz_date_to} && $self->quote( $params->{dz_date_to} )
+			]
+		}
+	);
+	my $sql =
+"select bfj_acct, dz_date, group, id, ys_type, zjbd_type, flag, rownumber() over(order by dz_date desc, bfj_acct, zjbd_type, ys_type) as rowid from viw_zjdz_bfj_result $p->{condition}";
+	my $data = $self->page_data( $sql, $page, $limit );
+	$data->{success} = true;
+
+	$self->render( json => $data );
 }
 1;

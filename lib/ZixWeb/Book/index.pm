@@ -108,8 +108,9 @@ sub get_books {
 sub all {
 	my $self = shift;
 	my $data = $self->get_books('all');
-
-	$self->render( json => $data->{children} );
+	$self->render(
+		json => $data->{children}
+	);
 }
 
 sub bfj {

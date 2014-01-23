@@ -9,7 +9,7 @@ our @EXPORT = qw(_post_url _gen_file _updateAcct _transform _updateBfjacct
   _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
   _updateYstype _updateBi _updateP _updateUsers _updateRoutes
   _uf _nf _initDict _decode_ch _page_data _select _update _errhandle
-  _params);
+  _params _updateFch);
 
 sub _uf {
 	my $number = shift;
@@ -179,6 +179,7 @@ sub _initDict {
 	$self->updateFypacct;
 	$self->updateFhydacct;
 	$self->updateFhwtype;
+	$self->updateFch;
 }
 
 # 更新角色路由信息
@@ -198,6 +199,20 @@ sub _updateRoutes {
 		  if $row->{route_regex} ne '';
 	}
 	$self->memd->set( 'routes', $routes );
+}
+
+# 更新富汇易达渠道方客户编号字典信息
+sub _updateFch {
+	my $self   = shift;
+	my $fch    = {};
+	my $fch_id = {};
+	my $data   = $self->select("select id, name from dim_fch");
+	for my $row (@$data) {
+		$fch->{ $row->{id} }      = $row->{name};
+		$fch_id->{ $row->{name} } = $row->{id};
+	}
+	$self->memd->set( 'fch',    $fch );
+	$self->memd->set( 'fch_id', $fch_id );
 }
 
 # 更新用户角色信息
@@ -329,7 +344,7 @@ sub _updateFypacct {
 	my $self     = shift;
 	my $fyp_acct = {};
 	my $fyp_id   = {};
-	my $data     = $self->select("select id, acct, name from dim_fyp_acct");
+	my $data     = $self->select("select id, name from dim_fyp_acct");
 	for my $row (@$data) {
 		$fyp_acct->{ $row->{id} } = $row->{name} . "-" . $row->{acct};
 		$fyp_id->{ $row->{name} . "-" . $row->{acct} } = $row->{id};
@@ -689,11 +704,19 @@ sub _post_url {
 	my $url  = shift;
 	my $data = shift;
 	my $json = shift || false;
-
 	$self->log->info("post [$data] to [$url]");
-	my $res = $self->ua->post( $url, $data )->res;
-	my $result;
-	my $err = $res->error;
+	my $tx = $self->ua->post( $url, $data );
+	my ( $res, $result );
+	unless ( $res = $tx->success ) {
+		my ( $err, $code ) = $tx->error;
+		$result->{msg} = $code ? "$code $err" : "Connection error: $err";
+		$result->{success} = false;
+		$self->log->error("post [$data] to [$url] error[$code $err]");
+		if ($json) {
+			$result->{status} = -1;
+		}
+		return $result;
+	}
 
 	# 交互出错处理
 
@@ -701,12 +724,7 @@ sub _post_url {
 	#	-1：通用错误
 	#	-2：不能影响已对账数据
 	#	-3：任务审核人为任务提交者
-	if ($err) {
-		$result->{msg}     = $err;
-		$result->{success} = false;
-		$self->log->error("post [$data] to [$url] error[$err]");
-		return $result;
-	}
+
 	if ($json) {
 		return $res->json;
 	}
@@ -736,7 +754,7 @@ sub _post_url {
 	else {
 		return {
 			success => false,
-			msg     => '操作失败，后台错误码:' . $status
+			msg     => "$status $res->{errmsg}"
 		};
 	}
 	return $result;

@@ -28,38 +28,19 @@ sub action {
 			),
 			true
 		);
-
-		#		$res = $self->ua->post(
-		#			$self->configure->{mgr_url},
-		#			encode_json {
-		#				action => $opt,
-		#				param  => {
-		#					job_id    => $id,
-		#					date      => $date,
-		#					type      => $type,
-		#					oper_user => $self->session->{uid},
-		#				}
-		#			}
-		#		)->res;
 		if ( $opt eq 'get_log' ) {
-
-			#			if ( exists $res->{success} ) {
-			#				$self->render( json => $res );
-			#				return;
-			#			}
-			my $r = "";
-			$r .= "$res->{errmsg} <br/>" if $res->{errmsg};
-			$r .= join "<br/>", @{ $res->{ret} };
-			$self->render( json => { text => $self->my_decode($r) } );
-			return;
+			if ( delete $res->{status} == 0 ) {
+				my $r = "";
+				$r .= "$res->{errmsg} <br/>" if $res->{errmsg};
+				$r .= join "<br/>", @{ $res->{ret} };
+				$self->render(
+					json => { text => $self->my_decode($r), success => true } );
+				return;
+			}
 		}
 		else {
-			my $status = $res->{status};
-			if ( $status == 0 ) {
+			if ( delete $res->{status} == 0 ) {
 				$res = { success => true };
-			}
-			else {
-				$res = { success => false };
 			}
 		}
 	}
@@ -78,19 +59,6 @@ sub action {
 				}
 			)
 		);
-
-		#		$res = $self->ua->post(
-		#			$self->configure->{mgr_url},
-		#			encode_json {
-		#				action => $opt,
-		#				param  => {
-		#					mission_id => $id,
-		#					date       => $date,
-		#					type       => $type,
-		#					oper_user  => $self->session->{uid},
-		#				}
-		#			}
-		#		)->res->json->{status};
 	}
 	$self->render( json => $res );
 }

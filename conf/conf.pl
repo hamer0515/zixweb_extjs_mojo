@@ -75,25 +75,27 @@ use utf8;
 		'204' =>
 		  [ 'fc', 'fhw_type', 'f_ssn', 'fs_rate', 'fyw_type', 'ftx_date' ],
 		'205' => [ 'fyp_acct', 'fio_date' ],
-		'206' => [ 'fc',       'fyw_type' ],
+		'206' => [ 'fch',      'fyw_type' ],
 		'207' => [ 'fc',       'fhw_type', 'f_ssn', 'fs_rate', 'ftx_date' ],
-		'208' => [ 'fc',       'fhw_type', 'fch_ssn', 'f_rate', 'ftx_date' ],
+		'208' => [ 'fch',      'fhw_type', 'fch_ssn', 'f_rate', 'ftx_date' ],
 		'209' => [ 'fyp_acct', 'fyw_type', 'fe_date' ],
 		'210' => [ 'f_ssn',    'fs_rate',  'fhw_type', 'fyw_type', 'ftx_date' ],
 		'211' => [ 'fm', 'fcg_date' ],
 		'212' =>
-		  [ 'fc', 'fhw_type', 'f_ssn', 'fch_rate', 'fyw_type', 'ftx_date' ],
-		'213' => [ 'fc',       'fyw_type', 'ftx_date' ],
-		'214' => [ 'f_dcn',    'fm',       'fyw_type', 'ftx_date' ],
-		'215' => [ 'fc',       'fhw_type', 'fyw_type' ],
-		'216' => [ 'fc',       'fhw_type', 'fch_ssn', 'fs_rate', 'ftx_date' ],
-		'217' => [ 'fc',       'fhw_type', 'f_ssn', 'f_rate', 'ftx_date' ],
-		'218' => [ 'fyw_type', 'fm',       'fhw_type' ],
+		  [ 'fch', 'fhw_type', 'f_ssn', 'fch_rate', 'fyw_type', 'ftx_date' ],
+		'213' => [ 'fch',   'fyw_type', 'ftx_date' ],
+		'214' => [ 'f_dcn', 'fm',       'fyw_type', 'ftx_date' ],
+		'215' => [ 'fc',    'fhw_type', 'fyw_type' ],
+		'216' => [ 'fc',    'fhw_type', 'fch_ssn', 'fs_rate', 'ftx_date' ],
+		'217' => [ 'fch', 'fhw_type', 'f_ssn', 'f_rate', 'ftx_date' ],
+		'218' => [ 'fyw_type', 'fm', 'fhw_type' ],
 		'219' => [ 'fyw_type', 'fhw_type' ],
 		'220' => [ 'fyw_type', 'fhw_type' ],
 		'221' => [ 'fhw_type', 'fc', 'f_ssn' ],
 		'222' => [ 'fhw_type', 'fc', 'fch_ssn' ],
-		'223' => [ 'f_dcn',    'fm', 'fyw_type' ]
+		'223' => [ 'f_dcn',    'fm', 'fyw_type' ],
+		'224' => [ 'fch',      'fe_date', 'fyw_type' ],
+		'225' => [ 'fch',      'fe_date', 'fyw_type' ]
 	},
 	extra_headers => {
 		book => {
