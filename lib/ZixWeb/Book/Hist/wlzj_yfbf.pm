@@ -71,6 +71,7 @@ sub wlzj_yfbf_excel {
 	my $file = $self->gen_file( $sql, $header );
 	my $data = {};
 	$data->{success} = true;
+	$data->{file}    = "/var/$file";
 
 	$self->render( json => $data );
 }

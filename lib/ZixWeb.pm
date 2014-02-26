@@ -113,7 +113,7 @@ sub startup {
 	$self->helper( fhw_type       => sub { $self->memd->get('fhw_type'); } );
 	$self->helper( fhw_id         => sub { $self->memd->get('fhw_id'); } );
 	$self->helper( fch            => sub { $self->memd->get('fch'); } );
-    $self->helper( fch_id         => sub { $self->memd->get('fch_id'); } );
+	$self->helper( fch_id         => sub { $self->memd->get('fch_id'); } );
 
 	# hook
 	$self->hook( before_dispatch => \&_before_dispatch );
@@ -304,68 +304,86 @@ sub set_route {
 	for (
 		qw/
 		adjust_qc adjust_qc_excel
-		deposit_bfj deposit_bfj_excel
-		deposit_fhyd deposit_fhyd_excel
-		deposit_zyzj deposit_zyzj_excel
-		txamt_dgd txamt_dgd_excel
-		txamt_yhys txamt_yhys_excel
+		bamt_yhyf bamt_yhyf_excel
 		bamt_yhys bamt_yhys_excel
+		bfee_cwwf bfee_cwwf_excel
+		bfee_rb bfee_rb_excel
+		bfee_yhyf bfee_yhyf_excel
 		bfee_yhys bfee_yhys_excel
-		camt_fhyd camt_fhyd_excel
-		cfee_dqhf cfee_dqhf_excel
-		lfee_psp lfee_psp_excel
+		bfee_zqqr bfee_zqqr_excel
+		bfee_zqqr_zg bfee_zqqr_zg_excel
+		bfj_cust bfj_cust_excel
+		blc blc_excel
+		blc_zyzj blc_zyzj_excel
 		bsc bsc_excel
 		bsc_jf bsc_jf_excel
 		bsc_zyzj bsc_zyzj_excel
-		bfee_rb bfee_rb_excel
-		ypsc_fhyd ypsc_fhyd_excel
-		camt_dgd_fhyd camt_dgd_fhyd_excel
-		yp_acct_fhyd yp_acct_fhyd_excel
-		yufamt_ch_fhyd yufamt_ch_fhyd_excel
-		txamt_dqr_oys txamt_dqr_oys_excel
-		nctxamt_dqr_oys_fhyd nctxamt_dqr_oys_fhyd_excel
-		tctxamt_dqr_oys_fhyd tctxamt_dqr_oys_fhyd_excel
-		txamt_yhyf txamt_yhyf_excel
-		bamt_yhyf bamt_yhyf_excel
-		bfee_yhyf bfee_yhyf_excel
-		txamt_dqr_byf txamt_dqr_byf_excel
-		yplc_fhyd yplc_fhyd_excel
-		blc blc_excel
-		blc_zyzj blc_zyzj_excel
-		bfee_cwwf bfee_cwwf_excel
-		bfee_zqqr_zg bfee_zqqr_zg_excel
-		bfee_zqqr bfee_zqqr_excel
-		ckrsp_fhyd ckrsp_fhyd_excel
-		yfamt_m_fhyd yfamt_m_fhyd_excel
-		chamt_dgd_fhyd chamt_dgd_fhyd_excel
-		yfamt_ch_fhyd yfamt_ch_fhyd_excel
-		yfamt_dcch_fhyd yfamt_dcch_fhyd_excel
-		bfj_cust bfj_cust_excel
-		yusamt_c_fhyd yusamt_c_fhyd_excel
-		txamt_dqr_oyf txamt_dqr_oyf_excel
-		nctxamt_dqr_oyf_fhyd nctxamt_dqr_oyf_fhyd_excel
-		tctxamt_dqr_oyf_fhyd tctxamt_dqr_oyf_fhyd_excel
-		wlzj_ysbf wlzj_ysbf_excel
-		wlzj_yszy wlzj_yszy_excel
-		wlzj_yfbf wlzj_yfbf_excel
-		wlzj_yfzy wlzj_yfzy_excel
-		income_cfee income_cfee_excel
-		income_main_fhyd income_main_fhyd_excel
-		income_add_fhyd income_add_fhyd_excel
-		income_in income_in_excel
+		cfee_dqhf cfee_dqhf_excel
 		cost_bfee cost_bfee_excel
-		cost_fee_fhyd cost_fee_fhyd_excel
-		cost_dfss cost_dfss_excel
-		cost_ncss_fhyd cost_ncss_fhyd_excel
 		cost_bfee_zg cost_bfee_zg_excel
-		cost_tcss_fhyd cost_tcss_fhyd_excel
-		cost_dcch_fhyd cost_dcch_fhyd_excel
+		cost_dfss cost_dfss_excel
 		cost_in cost_in_excel
-		income_zhlx income_zhlx_excel
+		deposit_bfj deposit_bfj_excel
+		deposit_zyzj deposit_zyzj_excel
 		fee_jrjg fee_jrjg_excel
 		income_add income_add_excel
+		income_cfee income_cfee_excel
+		income_in income_in_excel
+		income_zhlx income_zhlx_excel
+		lfee_psp lfee_psp_excel
+		txamt_dgd txamt_dgd_excel
+		txamt_dqr_byf txamt_dqr_byf_excel
+		txamt_dqr_oyf txamt_dqr_oyf_excel
+		txamt_dqr_oys txamt_dqr_oys_excel
+		txamt_yhyf txamt_yhyf_excel
+		txamt_yhys txamt_yhys_excel
+		wlzj_yfbf wlzj_yfbf_excel
+		wlzj_yfzy wlzj_yfzy_excel
+		wlzj_ysbf wlzj_ysbf_excel
+		wlzj_yszy wlzj_yszy_excel
+
+		camt_dgd_fhyd camt_dgd_fhyd_excel
+		camt_fhyd camt_fhyd_excel
+		chamt_dgd_fhyd chamt_dgd_fhyd_excel
+		cjgj_fhyd cjgj_fhyd_excel
+		ckrsp_fhyd ckrsp_fhyd_excel
+		cost_add_fhyd cost_add_fhyd_excel
+		cost_dcch_fhyd cost_dcch_fhyd_excel
+		cost_fee_fhyd cost_fee_fhyd_excel
+		cost_ncss_fhyd cost_ncss_fhyd_excel
+		cost_tcss_fhyd cost_tcss_fhyd_excel
+		deposit_fhyd deposit_fhyd_excel
+		income_add_fhyd income_add_fhyd_excel
+		income_main_fhyd income_main_fhyd_excel
+		nctxamt_dqr_oyf_fhyd nctxamt_dqr_oyf_fhyd_excel
+		nctxamt_dqr_oys_fhyd nctxamt_dqr_oys_fhyd_excel
+		oyf_nctxamt_dqr_fhyd oyf_nctxamt_dqr_fhyd_excel
+		oyf_tctxamt_dqr_fhyd oyf_tctxamt_dqr_fhyd_excel
+		oys_nctxamt_dqr_fhyd oys_nctxamt_dqr_fhyd_excel
+		oys_tctxamt_dqr_fhyd oys_tctxamt_dqr_fhyd_excel
 		qdlc_fhyd qdlc_fhyd_excel
 		qdsc_fhyd qdsc_fhyd_excel
+		tctxamt_dqr_oyf_fhyd tctxamt_dqr_oyf_fhyd_excel
+		tctxamt_dqr_oys_fhyd tctxamt_dqr_oys_fhyd_excel
+		tkhd_fhyd tkhd_fhyd_excel
+		wlzj_fhyd wlzj_fhyd_excel
+		yfamt_ch_dgd_fhyd yfamt_ch_dgd_fhyd_excel
+		yfamt_ch_fhyd yfamt_ch_fhyd_excel
+		yfamt_ckrsp_fhyd yfamt_ckrsp_fhyd_excel
+		yfamt_dcch_fhyd yfamt_dcch_fhyd_excel
+		yfamt_m_fhyd yfamt_m_fhyd_excel
+		yfamt_qdlc_fhyd yfamt_qdlc_fhyd_excel
+		yfamt_yplc_fhyd yfamt_yplc_fhyd_excel
+		yplc_fhyd yplc_fhyd_excel
+		ypsc_fhyd ypsc_fhyd_excel
+		yp_acct_fhyd yp_acct_fhyd_excel
+		ysamt_c_dgd_fhyd ysamt_c_dgd_fhyd_excel
+		ysamt_c_fhyd ysamt_c_fhyd_excel
+		ysamt_qdsc_fhyd ysamt_qdsc_fhyd_excel
+		ysamt_ypsc_fhyd ysamt_ypsc_fhyd_excel
+		yufamt_ch_fhyd yufamt_ch_fhyd_excel
+		yufamt_yp_fhyd yufamt_yp_fhyd_excel
+		yusamt_c_fhyd yusamt_c_fhyd_excel
 		/
 	  )
 	{

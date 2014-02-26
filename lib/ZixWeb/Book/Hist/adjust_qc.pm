@@ -69,8 +69,8 @@ sub adjust_qc_excel {
 	my $sql    = "select $fields from book_adjust_qc $p->{condition}";
 	my $file   = $self->gen_file( $sql, $header );
 	my $data   = {};
+	$data->{file}    = "/var/$file";
 	$data->{success} = true;
-
 	$self->render( json => $data );
 }
 

@@ -42,7 +42,7 @@ sub wlzj_ysbf {
 	$self->render( json => $data );
 }
 
-sub wlzj_ysbfZ_excel {
+sub wlzj_ysbf_excel {
 	my $self = shift;
 
 	# Excel Header
@@ -78,6 +78,7 @@ sub wlzj_ysbfZ_excel {
 	my $file   = $self->gen_file( $sql, $header );
 	my $data   = {};
 	$data->{success} = true;
+	$data->{file}    = "/var/$file";
 
 	$self->render( json => $data );
 }
