@@ -7,9 +7,11 @@ use Encode qw/decode/;
 use Cache::Memcached;
 use JSON::XS;
 use Mojo::Log;
+
+#use Crypt::RSA;
 use ZixWeb::Utils qw/_post_url _gen_file _updateAcct _transform _updateBfjacct
   _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
-  _updateYstype _updateBi _updateP _updateUsers _updateRoutes
+  _updateYstype _updateYwtype _updateBi _updateP _updateUsers _updateRoutes
   _uf _nf _initDict _decode_ch _page_data _select _update
   _errhandle _params _updateFch/;
 
@@ -25,6 +27,16 @@ sub startup {
 		'debug'              => 0,
 		'compress_threshold' => 10_000,
 	};
+
+	#	my $rsa = new Crypt::RSA;
+	#	my ( $public, $private ) = $rsa->keygen(
+	#		Identity  => 'Lord Macbeth <macbeth@glamis.com>',
+	#		Size      => 1024,
+	#		Password  => 'A day so foul & fair',
+	#		Verbosity => 1,
+	#	  )
+	#	  or warn $rsa->errstr()
+	#	  or kill( INT, $$ );
 
 # 设置session签名的验证码（随机生成，每次重启后台的时候，session失效）
 	my $secret = '';
@@ -88,32 +100,33 @@ sub startup {
 	$self->helper( updateFypacct  => sub { $self->_updateFypacct; } );
 	$self->helper( updateFhydacct => sub { $self->_updateFhydacct; } );
 	$self->helper( updateFhwtype  => sub { $self->_updateFhwtype; } );
-	$self->helper( updateFch      => sub { $self->_updateFch; } );
-	$self->helper( routes         => sub { $self->memd->get('routes'); } );
-	$self->helper( users          => sub { $self->memd->get('users'); } );
-	$self->helper( usernames      => sub { $self->memd->get('usernames'); } );
-	$self->helper( uids           => sub { $self->memd->get('uids'); } );
-	$self->helper( p              => sub { $self->memd->get('p'); } );
-	$self->helper( p_id           => sub { $self->memd->get('p_id'); } );
-	$self->helper( zjbd_type      => sub { $self->memd->get('zjbd_type'); } );
-	$self->helper( zjbd_id        => sub { $self->memd->get('zjbd_id'); } );
-	$self->helper( bi             => sub { $self->memd->get('bi'); } );
-	$self->helper( bi_id          => sub { $self->memd->get('bi_id'); } );
-	$self->helper( ys_type        => sub { $self->memd->get('ys_type'); } );
-	$self->helper( bfj_acct       => sub { $self->memd->get('bfj_acct'); } );
-	$self->helper( bfj_id         => sub { $self->memd->get('bfj_id'); } );
-	$self->helper( zyzj_acct      => sub { $self->memd->get('zyzj_acct'); } );
-	$self->helper( zyzj_id        => sub { $self->memd->get('zyzj_id'); } );
-	$self->helper( acct           => sub { $self->memd->get('acct'); } );
-	$self->helper( acct_id        => sub { $self->memd->get('acct_id'); } );
-	$self->helper( fyp_acct       => sub { $self->memd->get('fyp_acct'); } );
-	$self->helper( fyp_id         => sub { $self->memd->get('fyp_id'); } );
-	$self->helper( fhyd_acct      => sub { $self->memd->get('fhyd_acct'); } );
-	$self->helper( fhyd_id        => sub { $self->memd->get('fhyd_id'); } );
-	$self->helper( fhw_type       => sub { $self->memd->get('fhw_type'); } );
-	$self->helper( fhw_id         => sub { $self->memd->get('fhw_id'); } );
-	$self->helper( fch            => sub { $self->memd->get('fch'); } );
-	$self->helper( fch_id         => sub { $self->memd->get('fch_id'); } );
+	$self->helper( updateYwtype   => sub { $self->_updateYwtype; } );
+
+	#	$self->helper( updateFch      => sub { $self->_updateFch; } );
+	$self->helper( routes    => sub { $self->memd->get('routes'); } );
+	$self->helper( users     => sub { $self->memd->get('users'); } );
+	$self->helper( usernames => sub { $self->memd->get('usernames'); } );
+	$self->helper( uids      => sub { $self->memd->get('uids'); } );
+	$self->helper( p         => sub { $self->memd->get('p'); } );
+	$self->helper( p_id      => sub { $self->memd->get('p_id'); } );
+	$self->helper( zjbd_type => sub { $self->memd->get('zjbd_type'); } );
+	$self->helper( zjbd_id   => sub { $self->memd->get('zjbd_id'); } );
+	$self->helper( bi        => sub { $self->memd->get('bi'); } );
+	$self->helper( bi_id     => sub { $self->memd->get('bi_id'); } );
+	$self->helper( ys_type   => sub { $self->memd->get('ys_type'); } );
+	$self->helper( bfj_acct  => sub { $self->memd->get('bfj_acct'); } );
+	$self->helper( bfj_id    => sub { $self->memd->get('bfj_id'); } );
+	$self->helper( zyzj_acct => sub { $self->memd->get('zyzj_acct'); } );
+	$self->helper( zyzj_id   => sub { $self->memd->get('zyzj_id'); } );
+	$self->helper( acct      => sub { $self->memd->get('acct'); } );
+	$self->helper( acct_id   => sub { $self->memd->get('acct_id'); } );
+	$self->helper( fyp_acct  => sub { $self->memd->get('fyp_acct'); } );
+	$self->helper( fyp_id    => sub { $self->memd->get('fyp_id'); } );
+	$self->helper( fhyd_acct => sub { $self->memd->get('fhyd_acct'); } );
+	$self->helper( fhyd_id   => sub { $self->memd->get('fhyd_id'); } );
+	$self->helper( fhw_type  => sub { $self->memd->get('fhw_type'); } );
+	$self->helper( fhw_id    => sub { $self->memd->get('fhw_id'); } );
+	$self->helper( ywtype    => sub { $self->memd->get('yw_type'); } );
 
 	# hook
 	$self->hook( before_dispatch => \&_before_dispatch );
@@ -227,7 +240,7 @@ sub set_route {
 		books zjbdtype wlzjtype fhwtype fch_c
 		fywtype fypacct fhydacct bi_dict
 		c fp cust_proto excel book_headers
-		book_dim table_headers
+		book_dim table_headers dimbyid yspz_fields yw_type
 		/
 	  );
 
@@ -389,19 +402,23 @@ sub set_route {
 	{
 
 		if (/excel$/) {
-			my $pm = join '_', ( grep !/^excel$/, ( split '_', $_ ) );
-			$r->any("/book/detail/$_")->to(
-				namespace => "ZixWeb::Book::Detail::$pm",
-				action    => $_
+
+			#			my $pm = join '_', ( grep !/^excel$/, ( split '_', $_ ) );
+			$r->any("/book/sum/$_")->to(
+				namespace => 'ZixWeb::Book::index',
+				action    => 'sum_excel'
 			);
-			$r->any("/book/hist/$_")
-			  ->to( namespace => "ZixWeb::Book::Hist::$pm", action => $_ );
-			next;
+			$r->any("/book/detail/$_")->to(
+				namespace => 'ZixWeb::Book::index',
+				action    => 'detail_excel'
+			);
 		}
-		$r->any("/book/hist/$_")
-		  ->to( namespace => "ZixWeb::Book::Hist::$_", action => $_ );
-		$r->any("/book/detail/$_")
-		  ->to( namespace => "ZixWeb::Book::Detail::$_", action => $_ );
+		else {
+			$r->any("/book/detail/$_")
+			  ->to( namespace => "ZixWeb::Book::index", action => 'detail' );
+			$r->any("/book/sum/$_")
+			  ->to( namespace => "ZixWeb::Book::index", action => 'sum' );
+		}
 	}
 
 	# 原始凭证查询
@@ -448,8 +465,13 @@ sub set_route {
 		detail/
 	  )
 	{
-		$r->any("/yspzq/$_")
-		  ->to( namespace => "ZixWeb::Yspzq::\u$_", action => $_ );
+		$r->any("/yspzq/$_")->to(
+			namespace => "ZixWeb::Yspzq::Yspz",
+			action    => 'list',
+			ys_id     => substr( $_, 1 )
+		);
+
+		#		  ->to( namespace => "ZixWeb::Yspzq::\u$_", action => $_ );
 	}
 
 	# 凭证撤销

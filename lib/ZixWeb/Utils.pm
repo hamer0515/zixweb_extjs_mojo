@@ -7,7 +7,7 @@ use Spreadsheet::WriteExcel;
 
 our @EXPORT = qw(_post_url _gen_file _updateAcct _transform _updateBfjacct
   _updateFypacct _updateFhydacct _updateFhwtype  _updateZyzjacct
-  _updateYstype _updateBi _updateP _updateUsers _updateRoutes
+  _updateYstype _updateYwtype _updateBi _updateP _updateUsers _updateRoutes
   _uf _nf _initDict _decode_ch _page_data _select _update _errhandle
   _params _updateFch);
 
@@ -54,24 +54,28 @@ sub _initDict {
 	my $self = shift;
 	my $dict = $self->dict;
 	my $data = $self->select(
-		"select id, code, value, name, class, set from dict_book order by code"
+"select id, code, value, name, class, set, entity from dict_book order by code"
 	);
 	for my $row (@$data) {
 		$dict->{book}{ $row->{id} } = [
 			$row->{value}, $row->{name}, $row->{code},
-			$row->{class}, $row->{set}
+			$row->{class}, $row->{set},  $row->{entity}
 		];
-		$dict->{types}{book}{ $row->{value} } = $row->{name};
+		$dict->{value2id}{book}{ $row->{value} } = $row->{id};
+		$dict->{types}{book}{ $row->{value} }    = $row->{name};
 		$dict->{bookcode}{ $row->{id} } = $row->{code} . "-" . $row->{name};
 	}
-	$data = $self->select("select dim, name from dict_dim");
+	$data = $self->select("select dim, name, dtype from dict_dim");
 	for my $row (@$data) {
-		$dict->{dim}{ $row->{dim} } = $row->{name};
+		$dict->{dim}{ $row->{dim} }     = $row->{name};
+		$dict->{dimtype}{ $row->{dim} } = $row->{dtype};
 	}
 	$data = $self->select(
-		"select class, key, val from dict where class like 'yspz%'");
+		"select class, key, val, display from dict where class like 'yspz%'");
 	for my $row (@$data) {
 		$dict->{types}{ $row->{class} }{ $row->{key} } = $row->{val};
+		$dict->{types}{yspz}{ $row->{class} }{ $row->{key} } =
+		  [ $row->{val}, $row->{display} ];
 	}
 	$dict->{types}{status} = {
 		0 => '未处理',
@@ -141,6 +145,12 @@ sub _initDict {
 		$dict->{types}{wlzjtypes_id}{ $row->{name} } = $row->{id};
 	}
 
+	$data = $self->select("select id, name from dim_yw_type");
+	for my $row (@$data) {
+		$dict->{types}{yw_type}{ $row->{id} }      = $row->{name};
+		$dict->{types}{ywtypes_id}{ $row->{name} } = $row->{id};
+	}
+
 	#业务类型
 	$data = $self->select("select id, name from dim_fyw_type");
 	for my $row (@$data) {
@@ -179,7 +189,9 @@ sub _initDict {
 	$self->updateFypacct;
 	$self->updateFhydacct;
 	$self->updateFhwtype;
-	$self->updateFch;
+	$self->updateYwtype;
+
+	#	$self->updateFch;
 }
 
 # 更新角色路由信息
@@ -202,18 +214,18 @@ sub _updateRoutes {
 }
 
 # 更新富汇易达渠道方客户编号字典信息
-sub _updateFch {
-	my $self   = shift;
-	my $fch    = {};
-	my $fch_id = {};
-	my $data   = $self->select("select id, name from dim_fch");
-	for my $row (@$data) {
-		$fch->{ $row->{id} }      = $row->{name};
-		$fch_id->{ $row->{name} } = $row->{id};
-	}
-	$self->memd->set( 'fch',    $fch );
-	$self->memd->set( 'fch_id', $fch_id );
-}
+#sub _updateFch {
+#	my $self   = shift;
+#	my $fch    = {};
+#	my $fch_id = {};
+#	my $data   = $self->select("select id, name from dim_fch");
+#	for my $row (@$data) {
+#		$fch->{ $row->{id} }      = $row->{name};
+#		$fch_id->{ $row->{name} } = $row->{id};
+#	}
+#	$self->memd->set( 'fch',    $fch );
+#	$self->memd->set( 'fch_id', $fch_id );
+#}
 
 # 更新用户角色信息
 sub _updateUsers {
@@ -351,6 +363,20 @@ sub _updateFypacct {
 	}
 	$self->memd->set( 'fyp_acct', $fyp_acct );
 	$self->memd->set( 'fyp_id',   $fyp_id );
+}
+
+# 更新业物类型字典信息
+sub _updateYwtype {
+	my $self    = shift;
+	my $yw_type = {};
+	my $yw_id   = {};
+	my $data    = $self->select("select id, name from dim_yw_type");
+	for my $row (@$data) {
+		$yw_type->{ $row->{id} } = $row->{name};
+		$yw_id->{ $row->{name} } = $row->{id};
+	}
+	$self->memd->set( 'fhw_type', $yw_type );
+	$self->memd->set( 'fhw_id',   $yw_id );
 }
 
 # 更新货物类型字典信息

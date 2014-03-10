@@ -240,6 +240,16 @@ sub bi_dict {
 	$self->render( json => $result );
 }
 
+sub yw_type {
+	my $self    = shift;
+	my $result  = [];
+	my $yw_type = $self->ywtype;
+	for my $key ( sort { $yw_type->{$a} cmp $yw_type->{$b} } keys %$yw_type ) {
+		push @$result, { id => $key, name => $yw_type->{$key} };
+	}
+	$self->render( json => $result );
+}
+
 sub ystype {
 	my $self    = shift;
 	my $entity  = $self->param('entity') || 0;
@@ -269,10 +279,9 @@ sub c {
 	my $c      = $self->param('name');
 	my @arr    = split( '\.', $c );
 	my $cid    = $arr[0];
-	my $c_sql  = "select * from dict_dept where id= $cid";
+	my $c_sql  = "select * from dict_dept where id = $cid";
 	my $count  = $self->select($c_sql);
 	$result = true if $count;
-	sleep 30;
 	return $self->render( json => { success => $result } );
 }
 
@@ -361,6 +370,18 @@ sub table_headers {
 		push @$data, $item;
 	}
 	return $self->render( json => $data );
+}
+
+sub dimbyid {
+	my $self = shift;
+	my $id   = $self->param('id');
+	return $self->render( json => $self->configure->{headers}{$id} );
+}
+
+sub yspz_fields {
+	my $self = shift;
+	my $id   = $self->param('id');
+	return $self->render( json => $self->dict->{types}{yspz}{$id} );
 }
 
 1;
