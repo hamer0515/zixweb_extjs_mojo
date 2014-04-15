@@ -462,7 +462,7 @@ sub set_route {
 		yF0032 yF0033 yF0034 yF0035 yF0036
 		yF0037 yF0038 yF0039 yF0040 yF0041
 		yF0042 yF0043 yF0044 yF0045 yF0047
-		detail/
+		/
 	  )
 	{
 		$r->any("/yspzq/$_")->to(
@@ -473,6 +473,10 @@ sub set_route {
 
 		#		  ->to( namespace => "ZixWeb::Yspzq::\u$_", action => $_ );
 	}
+
+	# 凭证详细
+	$r->any("/yspzq/detail")
+	  ->to( namespace => "ZixWeb::Yspzq::Detail", action => 'detail' );
 
 	# 凭证撤销
 	$r->any("/yspz/revoke")

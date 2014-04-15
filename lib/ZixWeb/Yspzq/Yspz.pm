@@ -63,7 +63,7 @@ sub list {
 		$data->{ts_revoke} = [ 0, $from, $to ];
 	}
 	my $p = $self->params($data);
-	$fields = join ', ', keys $fields;
+	$fields = join ', ', keys %$fields;
 	my $sql =
 "select id, flag, crt_id, period, $fields, rownumber() over(order by id desc) as rowid from yspz_$ys_id $p->{condition}";
 	my $pager = $self->page_data( $sql, $page, $limit );

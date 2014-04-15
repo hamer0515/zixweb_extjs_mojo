@@ -375,8 +375,8 @@ sub _updateYwtype {
 		$yw_type->{ $row->{id} } = $row->{name};
 		$yw_id->{ $row->{name} } = $row->{id};
 	}
-	$self->memd->set( 'fhw_type', $yw_type );
-	$self->memd->set( 'fhw_id',   $yw_id );
+	$self->memd->set( 'yw_type', $yw_type );
+	$self->memd->set( 'yw_id',   $yw_id );
 }
 
 # 更新货物类型字典信息
